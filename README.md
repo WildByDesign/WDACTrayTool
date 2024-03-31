@@ -1,6 +1,10 @@
 # WDACTrayTool
 System Tray Tool for WDAC
 
+### Screenshot:
+![WDACTrayTool](https://github.com/WildByDesign/WDACTrayTool/assets/26308319/e189baf5-8bd4-4e40-b59a-bc16906e792a)
+
+
 ### Directory Structure:
 ```batch
  WDACTrayTool.exe
