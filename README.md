@@ -8,7 +8,7 @@ The tray tool itself might not be great (due to using AutoIT), but the concept i
 
 ### Policy Type:
 
-At the moment, this tray tool only supports Multiple Policy Format since that is what I have always used since inception. Although at some point it could be extended to support Multiple Policy Format as well.
+At the moment, this tray tool only supports Multiple Policy Format since that is what I have always used since inception. Although at some point it could be extended to support Single Policy Format as well.
 
 ### Concept & Methods Used:
 
