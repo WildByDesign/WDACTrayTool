@@ -1,5 +1,5 @@
 # WDACTrayTool
-System Tray Tool for WDAC
+I created this WDAC System Tray Tool to facilitate the rapid changing of WDAC policies. Specifically, I wanted a way to quickly switch between Enforced Mode and Audit Mode so that I could review logs and change rules in the policies as necessary. Since this has really helped benefit my application allowlisting journey, I wanted to share it so that others could also benefit. The tray tool itself might not be great, but the concept itself could be replicated in a tray tool in a better programming language.
 
 ### Screenshot:
 ![WDACTrayTool](https://github.com/WildByDesign/WDACTrayTool/assets/26308319/e189baf5-8bd4-4e40-b59a-bc16906e792a)
