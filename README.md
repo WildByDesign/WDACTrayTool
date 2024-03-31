@@ -28,3 +28,6 @@ System Tray Tool for WDAC
             RefreshPolicy.exe
 ```
 
+### Compiling:
+
+To compile the script, you need to use SciTE4AutoIt3 which is available here: https://www.autoitscript.com/site/autoit-script-editor/downloads/
