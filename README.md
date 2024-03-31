@@ -6,6 +6,13 @@ The tray tool itself might not be great (due to using AutoIT), but the concept i
 ### Screenshot:
 ![WDACTrayTool](https://github.com/WildByDesign/WDACTrayTool/assets/26308319/e189baf5-8bd4-4e40-b59a-bc16906e792a)
 
+### Policy Type:
+
+At the moment, this tray tool only supports Multiple Policy Format since that is what I have always used since inception. Although at some point it could be extended to support Multiple Policy Format as well.
+
+### Concept & Methods Used:
+
+
 
 ### Directory Structure:
 ```batch
