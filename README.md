@@ -1,6 +1,6 @@
 # WDACTrayTool
 System Tray Tool for WDAC
-{C0ECA62D-F88F-48E4-9DBD-7923DA0DA774}
+
 ### Directory Structure:
 ```batch
  WDACTrayTool.exe
