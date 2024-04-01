@@ -1,5 +1,4 @@
-﻿#RequireAdmin
-#NoTrayIcon
+﻿#NoTrayIcon
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=WDAC.ico
 #AutoIt3Wrapper_UseX64=y
@@ -54,22 +53,22 @@ Func Msinfo32()
     Run("C:\Windows\System32\msinfo32.exe", "", @SW_SHOWMAXIMIZED)    
 EndFunc
 Func CiTool()
-    Run(@ComSpec & " /c " & 'C:\Windows\System32\CiTool.exe --list-policies', "")
+    Run(@ComSpec & " /c " & 'CiToolStatus.bat', ".\scripts", @SW_HIDE)
 EndFunc
 Func AllowAll()
-    Run(@ComSpec & " /c " & 'copy /y *.cip C:\Windows\System32\CodeIntegrity\CiPolicies\Active\', ".\policies\AllowAllMode", @SW_HIDE)
+    RunWait(@ComSpec & " /c " & 'AllowAllMode.bat', ".\scripts", @SW_HIDE)
     Sleep(2000)
-    Run(@ComSpec & " /c " & 'RefreshPolicy.exe', ".\policies\RefreshPolicy", @SW_HIDE)
+    Run(@ComSpec & " /c " & '.\scripts\RefreshPolicy.exe', "", @SW_HIDE)
 EndFunc
 Func Audit()
-    Run(@ComSpec & " /c " & 'copy /y *.cip C:\Windows\System32\CodeIntegrity\CiPolicies\Active\', ".\policies\AuditMode", @SW_HIDE)
+    RunWait(@ComSpec & " /c " & 'AuditMode.bat', ".\scripts", @SW_HIDE)
     Sleep(2000)
-    Run(@ComSpec & " /c " & 'RefreshPolicy.exe', ".\policies\RefreshPolicy", @SW_HIDE)
+    Run(@ComSpec & " /c " & '.\scripts\RefreshPolicy.exe', "", @SW_HIDE)
 EndFunc
 Func Enforce()
-    Run(@ComSpec & " /c " & 'copy /y *.cip C:\Windows\System32\CodeIntegrity\CiPolicies\Active\', ".\policies\EnforcedMode", @SW_HIDE)
+    RunWait(@ComSpec & " /c " & 'EnforcedMode.bat', ".\scripts", @SW_HIDE)
     Sleep(2000)
-    Run(@ComSpec & " /c " & 'RefreshPolicy.exe', ".\policies\RefreshPolicy", @SW_HIDE)
+    Run(@ComSpec & " /c " & '.\scripts\RefreshPolicy.exe', "", @SW_HIDE)
 EndFunc
 
 TraySetToolTip($softName)
