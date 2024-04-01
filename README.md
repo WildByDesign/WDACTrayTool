@@ -12,7 +12,24 @@ At the moment, this tray tool only supports Multiple Policy Format since that is
 
 ### Concept & Methods Used:
 
+The concept (at the present time) is really quite simple. You need to have 3 policies; AllowAllMode, AuditMode and EnforcedMode.
 
+I did not want to carelessly delete all existing policies from users' machines. That is why I created it so that all policies
+have the same filename (therefore, sharing the same PolicyID in the XML files prior to conversion to binary).
+
+For example, each base policy XML file shares the same PolicyID and BasePolicyID as follows:
+
+```xml
+  <PolicyID>{BD0E4FC3-D24E-43E2-BEA9-8F4C4B7165EE}</PolicyID>
+  <BasePolicyID>{BD0E4FC3-D24E-43E2-BEA9-8F4C4B7165EE}</BasePolicyID>
+```
+
+The tray tool simply copies the converted policy binary files (*.cip) to `C:\Windows\System32\CodeIntegrity\CiPolicies\Active\`, overwriting policy
+files of the same filename and refreshing the policy.
+
+The overall concept here is really quite simplistic. Yet the results of using the tray tool itself is incredibly useful once set up.
+
+Obviously, this concept can be improved upon in many, many ways to allow for more customization around policy switching.
 
 ### Directory Structure:
 ```batch
