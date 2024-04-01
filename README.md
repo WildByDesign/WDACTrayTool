@@ -52,13 +52,10 @@ Obviously, this concept can be improved upon in many, many ways to allow for mor
     │       {BD0E4FC3-D24E-43E2-BEA9-8F4C4B7165EE}.cip
     │       {C0ECA62D-F88F-48E4-9DBD-7923DA0DA774}.cip
     │
-    ├───EnforcedMode
-    │       WDAC-Enforced.xml
-    │       {BD0E4FC3-D24E-43E2-BEA9-8F4C4B7165EE}.cip
-    │       {C0ECA62D-F88F-48E4-9DBD-7923DA0DA774}.cip
-    │
-    └───RefreshPolicy
-            RefreshPolicy.exe
+    └───EnforcedMode
+            WDAC-Enforced.xml
+            {BD0E4FC3-D24E-43E2-BEA9-8F4C4B7165EE}.cip
+            {C0ECA62D-F88F-48E4-9DBD-7923DA0DA774}.cip
 ```
 
 ### Policy Refresh:
