@@ -24,6 +24,13 @@ For example, each base policy XML file shares the same PolicyID and BasePolicyID
   <BasePolicyID>{BD0E4FC3-D24E-43E2-BEA9-8F4C4B7165EE}</BasePolicyID>
 ```
 
+Your policy binary files need to be placed in the corresponding policy directories:
+```batch
+.\policies\AllowAllMode
+.\policies\AuditMode
+.\policies\EnforcedMode
+```
+
 The tray tool simply copies the converted policy binary files (*.cip) to `C:\Windows\System32\CodeIntegrity\CiPolicies\Active\`, overwriting policy
 files of the same filename and refreshing the policy.
 
