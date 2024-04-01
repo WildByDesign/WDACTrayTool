@@ -49,3 +49,10 @@ Originally, I was using `CiTool.exe --refresh` to accomplish to policy refresh. 
 ### Compiling:
 
 To compile the script, you need to use SciTE4AutoIt3 which is available here: https://www.autoitscript.com/site/autoit-script-editor/downloads/
+
+
+### Testing:
+
+The example policies included in this are just for testing purposes and should not be used other than for testing.
+The policies basically allow for everything to run. There is one Deny rule for the purpose of testing this tray tool
+which is `*\test\speedyfox.exe` so that you can test the tray tool going from Audit Mode to Enforced Mode and vice versa.
