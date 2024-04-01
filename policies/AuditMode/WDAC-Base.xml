@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SiPolicy xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PolicyType="Base Policy" xmlns="urn:schemas-microsoft-com:sipolicy">
+  <VersionEx>10.0.4.1</VersionEx>
+  <PlatformID>{2E07F7E4-194C-4D20-B7C9-6F44A6C5A234}</PlatformID>
+  <PolicyID>{BD0E4FC3-D24E-43E2-BEA9-8F4C4B7165EE}</PolicyID>
+  <BasePolicyID>{BD0E4FC3-D24E-43E2-BEA9-8F4C4B7165EE}</BasePolicyID>
+  <Rules>
+    <Rule>
+      <Option>Enabled:Unsigned System Integrity Policy</Option>
+    </Rule>
+    <Rule>
+      <Option>Enabled:Advanced Boot Options Menu</Option>
+    </Rule>
+    <Rule>
+      <Option>Enabled:UMCI</Option>
+    </Rule>
+    <Rule>
+      <Option>Enabled:Inherit Default Policy</Option>
+    </Rule>
+    <Rule>
+      <Option>Enabled:Update Policy No Reboot</Option>
+    </Rule>
+    <Rule>
+      <Option>Enabled:Allow Supplemental Policies</Option>
+    </Rule>
+    <Rule>
+      <Option>Enabled:Audit Mode</Option>
+    </Rule>
+    <Rule>
+      <Option>Disabled:Script Enforcement</Option>
+    </Rule>
+    <Rule>
+      <Option>Disabled:Runtime FilePath Rule Protection</Option>
+    </Rule>
+  </Rules>
+  <EKUs>
+    <EKU ID="ID_EKU_STORE" Value="010A2B0601040182374C0301" FriendlyName="Windows Store EKU - 1.3.6.1.4.1.311.76.3.1 Windows Store" />
+  </EKUs>
+  <FileRules>
+    <FileAttrib ID="ID_FILEATTRIB_REFRESH_POLICY_0_0" FriendlyName="RefreshPolicy.exe FileAttribute" FileName="RefreshPolicy.exe" MinimumFileVersion="10.0.19042.0" />
+    <Deny ID="ID_DENY_PATH_0_0_1" FriendlyName="Deny by path: *\test\speedyfox.exe" FilePath="*\test\speedyfox.exe" />
+  </FileRules>
+  <Signers>
+    <Signer Name="MincryptKnownRootMicrosoftProductRoot1997" ID="ID_SIGNER_MICROSOFT_PRODUCT_1997_0_0">
+      <CertRoot Type="Wellknown" Value="04" />
+    </Signer>
+    <Signer Name="MincryptKnownRootMicrosoftProductRoot2001" ID="ID_SIGNER_MICROSOFT_PRODUCT_2001_0_0">
+      <CertRoot Type="Wellknown" Value="05" />
+    </Signer>
+    <Signer Name="MincryptKnownRootMicrosoftProductRoot2010" ID="ID_SIGNER_MICROSOFT_PRODUCT_2010_0_0">
+      <CertRoot Type="Wellknown" Value="06" />
+    </Signer>
+    <Signer Name="MincryptKnownRootMicrosoftStandardRoot2011" ID="ID_SIGNER_MICROSOFT_STANDARD_2011_0_0">
+      <CertRoot Type="Wellknown" Value="07" />
+    </Signer>
+    <Signer Name="MincryptKnownRootMicrosoftCodeVerificationRoot2006" ID="ID_SIGNER_MICROSOFT_CODEVERIFICATION_2006_0_0">
+      <CertRoot Type="Wellknown" Value="08" />
+    </Signer>
+    <Signer Name="MincryptKnownRootMicrosoftDMDRoot2005" ID="ID_SIGNER_DRM_0_0">
+      <CertRoot Type="Wellknown" Value="0C" />
+    </Signer>
+    <Signer Name="MincryptKnownRootMicrosoftFlightRoot2014" ID="ID_SIGNER_MICROSOFT_FLIGHT_2014_0_0">
+      <CertRoot Type="Wellknown" Value="0E" />
+    </Signer>
+    <Signer Name="MincryptKnownRootMicrosoftTestRoot2010" ID="ID_SIGNER_TEST2010_0_0">
+      <CertRoot Type="Wellknown" Value="0A" />
+    </Signer>
+    <Signer Name="MincryptKnownRootMicrosoftProductRoot1997" ID="ID_SIGNER_MICROSOFT_PRODUCT_1997_UMCI_0_0">
+      <CertRoot Type="Wellknown" Value="04" />
+    </Signer>
+    <Signer Name="MincryptKnownRootMicrosoftProductRoot2001" ID="ID_SIGNER_MICROSOFT_PRODUCT_2001_UMCI_0_0">
+      <CertRoot Type="Wellknown" Value="05" />
+    </Signer>
+    <Signer Name="MincryptKnownRootMicrosoftProductRoot2010" ID="ID_SIGNER_MICROSOFT_PRODUCT_2010_UMCI_0_0">
+      <CertRoot Type="Wellknown" Value="06" />
+    </Signer>
+    <Signer Name="MincryptKnownRootMicrosoftStandardRoot2011" ID="ID_SIGNER_MICROSOFT_STANDARD_2011_UMCI_0_0">
+      <CertRoot Type="Wellknown" Value="07" />
+    </Signer>
+    <Signer Name="MincryptKnownRootMicrosoftCodeVerificationRoot2006" ID="ID_SIGNER_MICROSOFT_CODEVERIFICATION_2006_UMCI_0_0">
+      <CertRoot Type="Wellknown" Value="08" />
+    </Signer>
+    <Signer Name="MincryptKnownRootMicrosoftDMDRoot2005" ID="ID_SIGNER_DRM_UMCI_0_0">
+      <CertRoot Type="Wellknown" Value="0C" />
+    </Signer>
+    <Signer Name="MincryptKnownRootMicrosoftFlightRoot2014" ID="ID_SIGNER_MICROSOFT_FLIGHT_2014_UMCI_0_0">
+      <CertRoot Type="Wellknown" Value="0E" />
+    </Signer>
+    <Signer Name="Microsoft MarketPlace PCA 2011" ID="ID_SIGNER_STORE_0_0">
+      <CertRoot Type="TBS" Value="FC9EDE3DCCA09186B2D3BF9B738A2050CB1A554DA2DCADB55F3F72EE17721378" />
+      <CertEKU ID="ID_EKU_STORE" />
+    </Signer>
+    <Signer Name="Microsoft Code Signing PCA 2011" ID="ID_SIGNER_MICROSOFT_REFRESH_POLICY_0_0">
+      <CertRoot Type="TBS" Value="F6F717A43AD9ABDDC8CEFDDE1C505462535E7D1307E630F9544A2D14FE8BF26E" />
+      <CertPublisher Value="Microsoft Corporation" />
+      <FileAttribRef RuleID="ID_FILEATTRIB_REFRESH_POLICY_0_0" />
+    </Signer>
+    <Signer Name="MincryptKnownRootMicrosoftTestRoot2010" ID="ID_SIGNER_TEST2010_UMCI_0_0">
+      <CertRoot Type="Wellknown" Value="0A" />
+    </Signer>
+  </Signers>
+  <SigningScenarios>
+    <SigningScenario ID="ID_SIGNINGSCENARIO_DRIVERS_1" FriendlyName="Auto generated policy on 04-01-2024" Value="131">
+      <ProductSigners>
+        <AllowedSigners>
+          <AllowedSigner SignerId="ID_SIGNER_MICROSOFT_PRODUCT_1997_0_0" />
+          <AllowedSigner SignerId="ID_SIGNER_MICROSOFT_PRODUCT_2001_0_0" />
+          <AllowedSigner SignerId="ID_SIGNER_MICROSOFT_PRODUCT_2010_0_0" />
+          <AllowedSigner SignerId="ID_SIGNER_MICROSOFT_STANDARD_2011_0_0" />
+          <AllowedSigner SignerId="ID_SIGNER_MICROSOFT_CODEVERIFICATION_2006_0_0" />
+          <AllowedSigner SignerId="ID_SIGNER_DRM_0_0" />
+          <AllowedSigner SignerId="ID_SIGNER_MICROSOFT_FLIGHT_2014_0_0" />
+          <AllowedSigner SignerId="ID_SIGNER_TEST2010_0_0" />
+        </AllowedSigners>
+      </ProductSigners>
+    </SigningScenario>
+    <SigningScenario ID="ID_SIGNINGSCENARIO_WINDOWS" FriendlyName="Auto generated policy on 04-01-2024" Value="12">
+      <ProductSigners>
+        <AllowedSigners>
+          <AllowedSigner SignerId="ID_SIGNER_MICROSOFT_PRODUCT_1997_UMCI_0_0" />
+          <AllowedSigner SignerId="ID_SIGNER_MICROSOFT_PRODUCT_2001_UMCI_0_0" />
+          <AllowedSigner SignerId="ID_SIGNER_MICROSOFT_PRODUCT_2010_UMCI_0_0" />
+          <AllowedSigner SignerId="ID_SIGNER_MICROSOFT_STANDARD_2011_UMCI_0_0" />
+          <AllowedSigner SignerId="ID_SIGNER_MICROSOFT_CODEVERIFICATION_2006_UMCI_0_0" />
+          <AllowedSigner SignerId="ID_SIGNER_DRM_UMCI_0_0" />
+          <AllowedSigner SignerId="ID_SIGNER_MICROSOFT_FLIGHT_2014_UMCI_0_0" />
+          <AllowedSigner SignerId="ID_SIGNER_STORE_0_0" />
+          <AllowedSigner SignerId="ID_SIGNER_MICROSOFT_REFRESH_POLICY_0_0" />
+          <AllowedSigner SignerId="ID_SIGNER_TEST2010_UMCI_0_0" />
+        </AllowedSigners>
+        <FileRulesRef>
+          <FileRuleRef RuleID="ID_DENY_PATH_0_0_1" />
+        </FileRulesRef>
+      </ProductSigners>
+    </SigningScenario>
+  </SigningScenarios>
+  <UpdatePolicySigners />
+  <CiSigners>
+    <CiSigner SignerId="ID_SIGNER_STORE_0_0" />
+    <CiSigner SignerId="ID_SIGNER_MICROSOFT_REFRESH_POLICY_0_0" />
+  </CiSigners>
+  <HvciOptions>0</HvciOptions>
+  <Settings>
+    <Setting Provider="PolicyInfo" Key="Information" ValueName="Name">
+      <Value>
+        <String>WDAC-Base</String>
+      </Value>
+    </Setting>
+    <Setting Provider="PolicyInfo" Key="Information" ValueName="Id">
+      <Value>
+        <String>2024-04-01</String>
+      </Value>
+    </Setting>
+    <Setting Provider="AllHostIds" Key="AllKeys" ValueName="EnterpriseDefinedClsId">
+      <Value>
+        <Boolean>true</Boolean>
+      </Value>
+    </Setting>
+  </Settings>
+</SiPolicy>
