@@ -3,8 +3,8 @@
 #AutoIt3Wrapper_Icon=WDAC.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=WDAC Tray Tool
-#AutoIt3Wrapper_Res_Fileversion=1.0.0.0
-#AutoIt3Wrapper_Res_ProductVersion=1.0.0
+#AutoIt3Wrapper_Res_Fileversion=1.1.0.0
+#AutoIt3Wrapper_Res_ProductVersion=1.1.0
 #AutoIt3Wrapper_Res_ProductName=WDACTrayTool
 #AutoIt3Wrapper_Res_LegalCopyright=@ 2024 WildByDesign
 #AutoIt3Wrapper_Res_Language=1033
@@ -31,10 +31,23 @@ Opt("TrayAutoPause", 0)
 Global $softName = "WDAC Tray Tool"
 Global $trayIcon = "WDAC.ico"
 
+; Create Directory for binaries
+Local $CreateDir = True
+If $CreateDir Then DirCreate(@ScriptDir & ".\bin")
+
+; Use FileInstall to bundle binaries
+Local $sudoFileInstall = True
+Local $RefreshPolicyFileInstall = True
+
+; Use FileInstall to extract binaries
+If $sudoFileInstall Then FileInstall(".\embed\sudo.exe", @ScriptDir & ".\bin\sudo.exe")
+If $RefreshPolicyFileInstall Then FileInstall(".\embed\RefreshPolicy.exe", @ScriptDir & ".\bin\RefreshPolicy.exe")
+
 ; Menu
 Local $idWDACWizard = TrayCreateItem("WDAC Wizard")
 Local $idMsinfo32 = TrayCreateItem("System Information")
 Local $idCiTool = TrayCreateItem("CiTool Status")
+Local $idViewLogs = TrayCreateItem("View Logs")
 TrayCreateItem("")
 Local $idStatus = TrayCreateMenu("Change Policy")
 Local $idAllowAll = TrayCreateItem("Allow All", $idStatus)
@@ -53,22 +66,25 @@ Func Msinfo32()
     Run("C:\Windows\System32\msinfo32.exe", "", @SW_SHOWMAXIMIZED)    
 EndFunc
 Func CiTool()
-    Run(@ComSpec & " /c " & 'CiToolStatus.bat', ".\scripts", @SW_HIDE)
+    Run(@ComSpec & " /c " & '.\sudo.exe run --new-window C:\Windows\System32\CiTool.exe --list-policies', ".\bin", @SW_HIDE)
+EndFunc
+Func ViewLogs()
+    Run(@ComSpec & " /c " & '.\sudo.exe run eventvwr /c:"Microsoft-Windows-CodeIntegrity/Operational"', ".\bin", @SW_HIDE)
 EndFunc
 Func AllowAll()
-    RunWait(@ComSpec & " /c " & 'AllowAllMode.bat', ".\scripts", @SW_HIDE)
-    Sleep(2000)
-    Run(@ComSpec & " /c " & '.\scripts\RefreshPolicy.exe', "", @SW_HIDE)
+    RunWait(@ComSpec & " /c " & '.\sudo.exe run --chdir ..\policies\AllowAllMode copy /y *.cip C:\Windows\System32\CodeIntegrity\CiPolicies\Active\', ".\bin", @SW_HIDE)
+    Sleep(500)
+    Run(@ComSpec & " /c " & '.\RefreshPolicy.exe', ".\bin", @SW_HIDE)
 EndFunc
 Func Audit()
-    RunWait(@ComSpec & " /c " & 'AuditMode.bat', ".\scripts", @SW_HIDE)
-    Sleep(2000)
-    Run(@ComSpec & " /c " & '.\scripts\RefreshPolicy.exe', "", @SW_HIDE)
+    RunWait(@ComSpec & " /c " & '.\sudo.exe run --chdir ..\policies\AuditMode copy /y *.cip C:\Windows\System32\CodeIntegrity\CiPolicies\Active\', ".\bin", @SW_HIDE)
+    Sleep(500)
+    Run(@ComSpec & " /c " & '.\RefreshPolicy.exe', ".\bin", @SW_HIDE)
 EndFunc
 Func Enforce()
-    RunWait(@ComSpec & " /c " & 'EnforcedMode.bat', ".\scripts", @SW_HIDE)
-    Sleep(2000)
-    Run(@ComSpec & " /c " & '.\scripts\RefreshPolicy.exe', "", @SW_HIDE)
+    RunWait(@ComSpec & " /c " & '.\sudo.exe run --chdir ..\policies\EnforcedMode copy /y *.cip C:\Windows\System32\CodeIntegrity\CiPolicies\Active\', ".\bin", @SW_HIDE)
+    Sleep(500)
+    Run(@ComSpec & " /c " & '.\RefreshPolicy.exe', ".\bin", @SW_HIDE)
 EndFunc
 
 TraySetToolTip($softName)
@@ -81,6 +97,8 @@ While 1
             Msinfo32()
         Case $idCiTool
             CiTool()
+        Case $idViewLogs
+            ViewLogs()
         Case $idAllowAll
             AllowAll()
         Case $idAudit
