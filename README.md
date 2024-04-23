@@ -56,3 +56,21 @@ To compile the script, you need to use SciTE4AutoIt3 which is available here: ht
 The example policies included in this are just for testing purposes and should not be used other than for testing.
 The policies basically allow for everything to run. There is one Deny rule for the purpose of testing this tray tool
 which is `*\test\speedyfox.exe` so that you can test the tray tool going from Audit Mode to Enforced Mode and vice versa.
+
+
+### Sudo:
+
+This tray tool uses Microsoft's built-in `sudo` now instead of the scripts used in the first release. If `sudo` is failing to
+elevate functions in the tray tool, it means that it needs to be configured first.
+
+You can configure `sudo` from and Admin command prompt:
+
+`reg add HKLM\Software\Microsoft\Windows\CurrentVersion\Sudo /v Enabled /t REG_DWORD /d 3`
+
+or
+
+`reg add HKLM\Software\Microsoft\Windows\CurrentVersion\Sudo /v Enabled /t REG_DWORD /d 1`
+
+Option 1 is forceNewWindow mode which is more secure. It may show a split-second flash in a command prompt window when elevating functions in the tray tool.
+
+Option 3 is Inline mode which is less secure. However, Inline mode is hidden with the elevations in the tray tool and will not show any flashing of cmd.
