@@ -6,6 +6,11 @@ The tray tool itself might not be great (due to using AutoIT), but the concept i
 ### Screenshot:
 ![WDACTrayTool](https://github.com/WildByDesign/WDACTrayTool/assets/26308319/e73ae198-f546-4646-920f-869c6fdd7345)
 
+![WDACTrayTool-blocked](https://github.com/WildByDesign/WDACTrayTool/assets/26308319/0d1b71c9-8dc0-495b-a4cb-cb7bbf48b2b5)
+
+![WDACTrayTool-refresh](https://github.com/WildByDesign/WDACTrayTool/assets/26308319/6ae7dfb9-8832-4fa4-b0aa-4d478609800a)
+
+
 
 ### Policy Type:
 
@@ -75,3 +80,12 @@ or
 Option 1 is forceNewWindow mode which is more secure. It may show a split-second flash in a command prompt window when elevating functions in the tray tool.
 
 Option 3 is Inline mode which is less secure. However, Inline mode is hidden with the elevations in the tray tool and will not show any flashing of cmd.
+
+
+### Toast Notifications:
+
+I still need to finish this section on registering the scheduled tasks.
+
+Essentially:
+
+Toasts require running `toasts\Install-Tasks.ps1` to register scheduled tasks _(tasks based upon current working directory)_
