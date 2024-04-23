@@ -4,7 +4,8 @@ I created this WDAC System Tray Tool to facilitate the rapid changing of WDAC po
 The tray tool itself might not be great (due to using AutoIT), but the concept itself could be replicated in a tray tool in a better programming language. If somebody could recreate this concept in another programming language and even add toast notifications via `Microsoft-Windows-CodeIntegrity` provider, that would be absolutely phenomenal. 
 
 ### Screenshot:
-![WDACTrayTool](https://github.com/WildByDesign/WDACTrayTool/assets/26308319/e189baf5-8bd4-4e40-b59a-bc16906e792a)
+![WDACTrayTool](https://github.com/WildByDesign/WDACTrayTool/assets/26308319/e73ae198-f546-4646-920f-869c6fdd7345)
+
 
 ### Policy Type:
 
