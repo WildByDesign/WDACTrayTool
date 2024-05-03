@@ -3,12 +3,12 @@
 #AutoIt3Wrapper_Icon=WDAC.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=WDAC Tray Tool
-#AutoIt3Wrapper_Res_Fileversion=1.1.0.0
-#AutoIt3Wrapper_Res_ProductVersion=1.1.0
+#AutoIt3Wrapper_Res_Fileversion=1.5.0.0
+#AutoIt3Wrapper_Res_ProductVersion=1.5.0
 #AutoIt3Wrapper_Res_ProductName=WDACTrayTool
 #AutoIt3Wrapper_Res_LegalCopyright=@ 2024 WildByDesign
 #AutoIt3Wrapper_Res_Language=1033
-#AutoIt3Wrapper_Res_HiDpi=Y
+#AutoIt3Wrapper_Res_HiDpi=P
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 
 #include <APIRegConstants.au3>
@@ -30,6 +30,8 @@ Opt("TrayAutoPause", 0)
 
 Global $softName = "WDAC Tray Tool"
 Global $trayIcon = "WDAC.ico"
+Global $idRegTitleKey = "WDAC Tray Tool"
+Global $createdBy = "WildByDesign"
 
 ; Create Directory for binaries
 Local $CreateDir = True
@@ -54,6 +56,12 @@ Local $idAllowAll = TrayCreateItem("Allow All", $idStatus)
 Local $idAudit = TrayCreateItem("Audit Mode", $idStatus)
 Local $idEnforce = TrayCreateItem("Enforced Mode", $idStatus)
 TrayCreateItem("")
+Local $idStartItem = TrayCreateItem("Start at Logon")
+$idRegRead = RegRead ("HKCU\Software\Microsoft\Windows\CurrentVersion\Run", $idRegTitleKey)
+If $idRegRead <> '' Then TrayItemSetState ($idStartItem, $TRAY_CHECKED)
+TrayItemSetOnEvent ($idStartItem, "StartWithWindows")
+TrayCreateItem("")
+Local $idAbout = TrayCreateItem("About")
 Local $idExit = TrayCreateItem("Exit")
 
 ; Tray Icon
@@ -86,6 +94,18 @@ Func Enforce()
     Sleep(500)
     Run(@ComSpec & " /c " & '.\RefreshPolicy.exe', ".\bin", @SW_HIDE)
 EndFunc
+Func StartWithWindows()
+    If @Compiled Then
+        $_ItemGetState = TrayItemGetState ($idStartItem)
+        If $_ItemGetState = 64+1 Then
+            RegDelete("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run", $idRegTitleKey)
+            TrayItemSetState ($idStartItem, $TRAY_UNCHECKED)
+        Else
+            RegWrite("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run", $idRegTitleKey,"REG_SZ",@ScriptFullPath)
+            TrayItemSetState ($idStartItem, $TRAY_CHECKED)
+        EndIf
+    EndIf
+EndFunc
 
 TraySetToolTip($softName)
 
@@ -105,8 +125,14 @@ While 1
             Audit()
         Case $idEnforce
             Enforce()
+        Case $idStartItem
+            StartWithWindows()
+        Case $idAbout
+            MsgBox($MB_SYSTEMMODAL, "About WDAC Tray Tool", "Version: " & 1.5 & @CRLF & _
+                            "Created by: " & $createdBy & @CRLF & @CRLF & _
+                            "This program is free and open source.")
         Case $idExit
-            ExitLoop
+        ExitLoop
     EndSwitch
 
 WEnd
