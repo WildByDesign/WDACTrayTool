@@ -33,6 +33,10 @@ Global $trayIcon = "WDAC.ico"
 Global $idRegTitleKey = "WDAC Tray Tool"
 Global $createdBy = "WildByDesign"
 
+; Set Current Working Directory
+Local $setCWD = True
+If $setCWD Then FileChangeDir(@ScriptDir)
+    
 ; Create Directory for binaries
 Local $CreateDir = True
 If $CreateDir Then DirCreate(@ScriptDir & ".\bin")
