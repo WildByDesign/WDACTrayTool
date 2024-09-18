@@ -6,6 +6,7 @@ The tray tool itself might not be great (due to using AutoIT), but the concept i
 ### Screenshot:
 ![WDACTrayTool-2 0](https://github.com/user-attachments/assets/240aca6e-c1c1-467b-898e-e16325f6a632)
 
+![msgbox](https://github.com/user-attachments/assets/fce767fb-dcca-408a-8057-9a5a67de2acc)
 
 ![WDACTrayTool-blocked](https://github.com/WildByDesign/WDACTrayTool/assets/26308319/0d1b71c9-8dc0-495b-a4cb-cb7bbf48b2b5)
 
