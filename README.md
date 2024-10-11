@@ -1,16 +1,20 @@
-# WDAC Tray Tool
+# App Control Tray Tool
 I created this WDAC System Tray Tool to facilitate the rapid changing of WDAC policies. Specifically, I wanted a way to quickly switch between Enforced Mode and Audit Mode so that I could review logs and change rules in the policies as necessary. Since this has really helped benefit my application allowlisting journey, I wanted to share it so that others could also benefit. 
 
 The tray tool itself might not be great (due to using AutoIT), but the concept itself could be replicated in a tray tool in a better programming language. If somebody could recreate this concept in another programming language and even add toast notifications via `Microsoft-Windows-CodeIntegrity` provider, that would be absolutely phenomenal. 
 
 ### Screenshot:
-![WDACTrayTool-2 0](https://github.com/user-attachments/assets/240aca6e-c1c1-467b-898e-e16325f6a632)
+![wdactray3](https://github.com/user-attachments/assets/0a722837-16fc-4cb8-a964-6205a91a4da0)
 
 ![msgbox](https://github.com/user-attachments/assets/fce767fb-dcca-408a-8057-9a5a67de2acc)
 
-![WDACTrayTool-blocked](https://github.com/WildByDesign/WDACTrayTool/assets/26308319/0d1b71c9-8dc0-495b-a4cb-cb7bbf48b2b5)
+![wdactray3-blocked](https://github.com/user-attachments/assets/ce6f04dd-0dc9-443b-8a92-2ad825670b64)
 
-![WDACTrayTool-refresh](https://github.com/WildByDesign/WDACTrayTool/assets/26308319/6ae7dfb9-8832-4fa4-b0aa-4d478609800a)
+![wdactray3-audit](https://github.com/user-attachments/assets/55cf14b9-707c-40b0-94c8-b0f95d01c71d)
+
+![wdactray3-refresh](https://github.com/user-attachments/assets/2690a8bf-2a20-4a75-bbb3-bec39526443e)
+
+
 
 
 
@@ -61,8 +65,4 @@ which is `*\test\speedyfox.exe` so that you can test the tray tool going from Au
 
 ### Toast Notifications:
 
-I still need to finish this section on registering the scheduled tasks.
-
-Essentially:
-
-Toasts require running `toasts\Install-Tasks.ps1` to register scheduled tasks _(tasks based upon current working directory)_
+This is implemented now with the simple Enable Notifications option now on the system tray menu to enable/disable toast notifications.
