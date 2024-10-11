@@ -1,16 +1,16 @@
-#Region ; *** Dynamically added Include files ***
-#include <MsgBoxConstants.au3>                               ; added:08/18/24 07:36:26
-#include <TrayConstants.au3>                                 ; added:08/18/24 07:36:26
-#EndRegion ; *** Dynamically added Include files ***
-#include <ExtMsgBox.au3>
-
-#include <GuiCtrls_HiDpi.au3>
-#include <GUIDarkMode_v0.02mod.au3>
-
-#include <TaskScheduler.au3>
+#Region
+#include <MsgBoxConstants.au3>
+#include <TrayConstants.au3>
 #include <Array.au3>
-
 #include <Misc.au3>
+#EndRegion
+
+#include "includes\ExtMsgBox.au3"
+
+#include "includes\GuiCtrls_HiDpi.au3"
+#include "includes\GUIDarkMode_v0.02mod.au3"
+
+#include "includes\TaskScheduler.au3"
 
 #NoTrayIcon
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****

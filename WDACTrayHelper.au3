@@ -1,10 +1,12 @@
-#Region ; *** Dynamically added Include files ***
-#include <AutoItConstants.au3>                               ; added:08/18/24 07:37:14
-#include <File.au3>                                          ; added:08/18/24 07:37:14
-#include <MsgBoxConstants.au3>                               ; added:08/18/24 07:37:14
-#include <XML.au3>                                           ; added:08/18/24 07:37:14
-#EndRegion ; *** Dynamically added Include files ***
-#include <ExtMsgBox.au3>
+#Region
+#include <AutoItConstants.au3>
+#include <File.au3>
+#include <MsgBoxConstants.au3>
+#EndRegion
+
+#include "includes\ExtMsgBox.au3"
+#include "includes\XML.au3"
+
 #NoTrayIcon
 #RequireAdmin
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****

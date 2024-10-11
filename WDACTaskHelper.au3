@@ -1,3 +1,6 @@
+#Region
+#include <MsgBoxConstants.au3>
+#EndRegion
 
 #NoTrayIcon
 
