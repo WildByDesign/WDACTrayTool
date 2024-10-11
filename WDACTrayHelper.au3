@@ -8,18 +8,40 @@
 #NoTrayIcon
 #RequireAdmin
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
-#AutoIt3Wrapper_Icon=WDAC.ico
+#AutoIt3Wrapper_Icon=WDAC-color.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=WDAC Tray Tool
-#AutoIt3Wrapper_Res_Fileversion=2.5.0.0
+#AutoIt3Wrapper_Res_Fileversion=3.0.0.0
+#AutoIt3Wrapper_Res_ProductVersion=3.0.0
 #AutoIt3Wrapper_Res_ProductName=WDACTrayTool
-#AutoIt3Wrapper_Res_ProductVersion=2.5.0
 #AutoIt3Wrapper_Res_LegalCopyright=@ 2024 WildByDesign
 #AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_Res_HiDpi=P
-#AutoIt3Wrapper_Res_Icon_Add=WDAC.ico
+#AutoIt3Wrapper_Res_Icon_Add=WDAC-color.ico
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 $sTitle = "WDACTrayHelper"
+
+Global $isDarkMode = is_app_dark_theme()
+
+If $isDarkMode = True Then
+	_ExtMsgBoxSet(Default)
+	;_ExtMsgBoxSet(1, 5, -1, -1, -1, "Consolas", 800, 800)
+	_ExtMsgBoxSet(1, 5, 0x202020, 0xFFFFFF, -1, "Consolas", 800)
+Else
+	_ExtMsgBoxSet(Default)
+	;_ExtMsgBoxSet(1, 5, -1, -1, -1, "Consolas", 800, 800)
+	_ExtMsgBoxSet(1, 5, -1, -1, -1, "Consolas", 800)
+EndIf
+
+#cs ----------------------------------------------------------------------------
+ Function    : is_app_dark_theme()
+ Description : returns if the user has enabled the dark theme for applications in the Windows settings (0 on / 1 off)
+               if OS too old (key does not exist) the key returns nothing, so function returns False
+#ce ----------------------------------------------------------------------------
+func is_app_dark_theme()
+    return(regread('HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize', 'AppsUseLightTheme') == 0) ? True : False
+endfunc
+
 If $CmdLine[0] = 0 Then Exit MsgBox(16, $sTitle, "No parameters passed!")
 If $CmdLine[1] = "/CiTool" Then
 Run('C:\Windows\System32\CiTool.exe --list-policies', "")
@@ -41,7 +63,7 @@ If $CmdLine[1] = "/status" Then
 	Local $testopen = @TempDir & '\CiPolicy.txt'
 	Local $testread = FileRead($testopen)
 	;MsgBox($MB_SYSTEMMODAL, "Title", $testread)
-	_ExtMsgBoxSet(1, 5, -1, -1, -1, "Consolas", 800, 800)
+	;_ExtMsgBoxSet(1, 5, -1, -1, -1, "Consolas", 800, 800)
 	$iRetValue = _ExtMsgBox (0 & ";" & @ScriptDir & "\WDACTrayTool.exe", 0, "App Control Policy Status", $testread)
 	FileDelete(@TempDir & '\CiPolicy.txt')
 	FileDelete(@TempDir & '\CiPolicy1.txt')
