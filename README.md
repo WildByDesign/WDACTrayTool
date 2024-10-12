@@ -1,8 +1,6 @@
 # App Control Tray Tool
 I created this WDAC System Tray Tool to facilitate the rapid changing of WDAC policies. Specifically, I wanted a way to quickly switch between Enforced Mode and Audit Mode so that I could review logs and change rules in the policies as necessary. Since this has really helped benefit my application allowlisting journey, I wanted to share it so that others could also benefit. 
 
-The tray tool itself might not be great (due to using AutoIT), but the concept itself could be replicated in a tray tool in a better programming language. If somebody could recreate this concept in another programming language and even add toast notifications via `Microsoft-Windows-CodeIntegrity` provider, that would be absolutely phenomenal. 
-
 ### Screenshot:
 ![wdactray3](https://github.com/user-attachments/assets/0a722837-16fc-4cb8-a964-6205a91a4da0)
 
