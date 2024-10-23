@@ -6,7 +6,7 @@ I created this App Control System Tray Tool to facilitate more efficient changin
 
 ![WDAC3screen](https://github.com/user-attachments/assets/474bf0c3-f8e0-4b05-aee5-c3179d613dcc)
 
-![AppControlStatus](https://github.com/user-attachments/assets/947ed5e2-1f07-4e17-a6d7-bd3e9724d8a4)
+![AppControlStatus](https://github.com/user-attachments/assets/3a68d2b6-45a7-42ef-a334-64ad5c5d7544)
 
 ![wdactray3-blocked](https://github.com/user-attachments/assets/ce6f04dd-0dc9-443b-8a92-2ad825670b64)
 
