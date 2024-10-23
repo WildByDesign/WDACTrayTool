@@ -1,10 +1,12 @@
 # App Control Tray Tool
-I created this WDAC System Tray Tool to facilitate the rapid changing of WDAC policies. Specifically, I wanted a way to quickly switch between Enforced Mode and Audit Mode so that I could review logs and change rules in the policies as necessary. Since this has really helped benefit my application allowlisting journey, I wanted to share it so that others could also benefit. 
 
-### Screenshot:
-![wdactray3](https://github.com/user-attachments/assets/0a722837-16fc-4cb8-a964-6205a91a4da0)
+I created this App Control System Tray Tool to facilitate more efficient changing of App Control policies. Specifically, I wanted a way to quickly switch between Enforced Mode and Audit Mode so that I could review logs and change rules in the policies as necessary. Since this has really helped benefit my application allowlisting journey, I wanted to share it so that others could also benefit. 
 
-![msgbox](https://github.com/user-attachments/assets/fce767fb-dcca-408a-8057-9a5a67de2acc)
+### Screenshots:
+
+![WDAC3screen](https://github.com/user-attachments/assets/474bf0c3-f8e0-4b05-aee5-c3179d613dcc)
+
+![AppControlStatus](https://github.com/user-attachments/assets/719a92aa-9ca5-42bd-854c-a2d7537b6147)
 
 ![wdactray3-blocked](https://github.com/user-attachments/assets/ce6f04dd-0dc9-443b-8a92-2ad825670b64)
 
