@@ -15,7 +15,7 @@ $trigger.Enabled = $true
 $trigger.Subscription = "<QueryList><Query Id='0' Path='Microsoft-Windows-CodeIntegrity/Operational'><Select Path='Microsoft-Windows-CodeIntegrity/Operational'>*[System[(EventID=3077)]]</Select></Query></QueryList>"
 
 $ActionParameters = @{
-    Execute  = 'WDACTaskHelper.exe'
+    Execute  = 'AppControlTask.exe'
     Argument = 'blocked'
     WorkingDirectory = $CurrentDirectory
 }
@@ -24,9 +24,9 @@ $Action = New-ScheduledTaskAction @ActionParameters
 $Settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
 
 $RegSchTaskParameters = @{
-    TaskName    = 'WDAC-ToastBlocked'
-    Description = 'Task that triggers a toast notification on WDAC block events.'
-    TaskPath    = '\WDACTrayTool\'
+    TaskName    = 'AppControlTray-ToastBlocked'
+    Description = 'Task that triggers a toast notification on App Control block events.'
+    TaskPath    = '\AppControlTray\'
     Action      = $Action
     Settings    = $Settings
     Trigger     = $Trigger
@@ -43,7 +43,7 @@ $trigger2.Enabled = $true
 $trigger2.Subscription = "<QueryList><Query Id='0' Path='Microsoft-Windows-CodeIntegrity/Operational'><Select Path='Microsoft-Windows-CodeIntegrity/Operational'>*[System[(EventID=3102)]]</Select></Query></QueryList>"
 
 $ActionParameters2 = @{
-    Execute  = 'WDACTaskHelper.exe'
+    Execute  = 'AppControlTask.exe'
     Argument = 'refresh'
     WorkingDirectory = $CurrentDirectory
 }
@@ -52,9 +52,9 @@ $Action2 = New-ScheduledTaskAction @ActionParameters2
 $Settings2 = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
 
 $RegSchTaskParameters2 = @{
-    TaskName    = 'WDAC-PolicyRefresh'
-    Description = 'Task that triggers a toast notification on WDAC policy refresh events.'
-    TaskPath    = '\WDACTrayTool\'
+    TaskName    = 'AppControlTray-PolicyRefresh'
+    Description = 'Task that triggers a toast notification on App Control policy refresh events.'
+    TaskPath    = '\AppControlTray\'
     Action      = $Action2
     Settings    = $Settings2
     Trigger     = $Trigger2
@@ -71,7 +71,7 @@ $trigger3.Enabled = $true
 $trigger3.Subscription = "<QueryList><Query Id='0' Path='Microsoft-Windows-CodeIntegrity/Operational'><Select Path='Microsoft-Windows-CodeIntegrity/Operational'>*[System[(EventID=3076)]]</Select></Query></QueryList>"
 
 $ActionParameters3 = @{
-    Execute  = 'WDACTaskHelper.exe'
+    Execute  = 'AppControlTask.exe'
     Argument = 'audit'
     WorkingDirectory = $CurrentDirectory
 }
@@ -80,9 +80,9 @@ $Action3 = New-ScheduledTaskAction @ActionParameters3
 $Settings3 = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
 
 $RegSchTaskParameters3 = @{
-    TaskName    = 'WDAC-ToastAudit'
-    Description = 'Task that triggers a toast notification on WDAC audit events.'
-    TaskPath    = '\WDACTrayTool\'
+    TaskName    = 'AppControlTray-ToastAudit'
+    Description = 'Task that triggers a toast notification on App Control audit events.'
+    TaskPath    = '\AppControlTray\'
     Action      = $Action3
     Settings    = $Settings3
     Trigger     = $Trigger3
