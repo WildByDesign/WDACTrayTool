@@ -34,6 +34,9 @@ $content1 -replace $string1, $string3 -replace $string2, $string4 -replace $stri
 Add-Content -Path $CiPolicy1 -value ""
 Add-Content -Path $CiPolicy1 -value ""
 Add-Content -Path $CiPolicy1 -value "Currently Active Policies:"
+Add-Content -Path $CiPolicy1 -value ""
+Add-Content -Path $CiPolicy1 -value "Policy ID                              Policy Name"
+Add-Content -Path $CiPolicy1 -value "---------                              -----------"
 
 # Read the file as a single string
 $FileContent1 = Get-Content $CiPolicy1 -Raw
@@ -46,7 +49,7 @@ $FileContent1 | Set-Content $CiPolicy1 -NoNewLine
 
 # Obtain list of Active Policies and save to CiPolicy2.txt
 #
-(CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.IsEnforced -eq "True"} | Select-Object -Property PolicyID,FriendlyName | Sort-Object -Property FriendlyName | Format-List | Out-File -FilePath $CiPolicy2
+(CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.IsEnforced -eq "True"} | Select-Object -Property PolicyID,FriendlyName | Sort-Object -Property FriendlyName | Out-File -FilePath $CiPolicy2
 
 # Read the file as a single string
 $FileContent2 = Get-Content $CiPolicy2 -Raw
@@ -57,17 +60,15 @@ $FileContent2 = $FileContent2.TrimEnd()
 # Write the content back out
 $FileContent2 | Set-Content $CiPolicy2 -NoNewLine
 
-# Remove blank line 1
-#(Get-Content $CiPolicy2 | Select-Object -Skip 1) | Set-Content $CiPolicy2
+# Remove first 3 lines
+(Get-Content $CiPolicy2 | Select-Object -Skip 3) | Set-Content $CiPolicy2
 
 # String replacements in the CiPolicy2.txt file
 #
-$string20 = 'FriendlyName '
-$string21 = 'PolicyName  '
-$string22 = 'PolicyID '
-$string23 = 'PolicyID'
+$string24 = ' '
+$string25 = '   '
 $content2 = Get-Content $CiPolicy2
-$content2 -replace $string20, $string21 -replace $string22, $string23 | Set-Content $CiPolicy2
+$content2 -replace $string24, $string25 | Set-Content $CiPolicy2
 
 # Merge CiPolicy1.txt and CiPolicy2.txt together and save as CiPolicy.txt
 # CiPolicy.txt is later read by tray tool and viewed in a msgbox
