@@ -55,13 +55,13 @@ Func initial_set_theme()
 	Local $isDarkMode = _WinAPI_ShouldAppsUseDarkMode()
 If $isDarkMode = True Then
 	_ExtMsgBoxSet(Default)
-	_ExtMsgBoxSet(1, 4, 0x202020, 0xFFFFFF, 10, "Consolas", 800)
+	_ExtMsgBoxSet(1, 4, 0x202020, 0xFFFFFF, 10, "Cascadia Mono", 800)
 	$LastTheme = "Dark"
 	Local $hGUI = _HiDpi_GUICreate("Tray Tool", 100, 100)
     GuiDarkmodeApply($hGUI)
 Else
 	_ExtMsgBoxSet(Default)
-	_ExtMsgBoxSet(1, 4, -1, -1, 10, "Consolas", 800)
+	_ExtMsgBoxSet(1, 4, -1, -1, 10, "Cascadia Mono", 800)
 	$LastTheme = "Light"
 	Local $hGUI = _HiDpi_GUICreate("Tray Tool", 100, 100)
 	Local $bEnableDarkTheme = False

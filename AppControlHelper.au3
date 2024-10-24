@@ -31,11 +31,11 @@ Global $isDarkMode = is_app_dark_theme()
 If $isDarkMode = True Then
 	_ExtMsgBoxSet(Default)
 	;_ExtMsgBoxSet(1, 5, -1, -1, -1, "Consolas", 800, 800)
-	_ExtMsgBoxSet(1, 4, 0x202020, 0xFFFFFF, 10, "Consolas", 800)
+	_ExtMsgBoxSet(1, 4, 0x202020, 0xFFFFFF, 10, "Cascadia Mono", 1000)
 Else
 	_ExtMsgBoxSet(Default)
 	;_ExtMsgBoxSet(1, 5, -1, -1, -1, "Consolas", 800, 800)
-	_ExtMsgBoxSet(1, 4, -1, -1, 10, "Consolas", 800)
+	_ExtMsgBoxSet(1, 4, -1, -1, 10, "Cascadia Mono", 1000)
 EndIf
 
 #cs ----------------------------------------------------------------------------
@@ -69,7 +69,7 @@ If $CmdLine[1] = "/status" Then
 	Local $testread = FileRead($testopen)
 	;MsgBox($MB_SYSTEMMODAL, "Title", $testread)
 	;_ExtMsgBoxSet(1, 5, -1, -1, -1, "Consolas", 800, 800)
-	$iRetValue = _ExtMsgBox (0 & ";" & @ScriptDir & "\WDACTrayTool.exe", 0, "App Control Policy Status", $testread)
+	$iRetValue = _ExtMsgBox (0 & ";" & @ScriptDir & "\AppControlTray.exe", 0, "App Control Policy Status", $testread)
 	FileDelete(@TempDir & '\CiPolicy.txt')
 	FileDelete(@TempDir & '\CiPolicy1.txt')
 	FileDelete(@TempDir & '\CiPolicy2.txt')
@@ -115,7 +115,7 @@ If $CmdLine[1] = "/AddPolicies" Then
 
 Local $spFile
 
-$mFile = FileOpenDialog("Select Policy File(s)", @ScriptDir & "\policies\", "Policy Files (*.cip)", 1 + 4 )
+$mFile = FileOpenDialog("Select Policy File(s) to Add or Update", @ScriptDir & "\policies\", "Policy Files (*.cip)", 1 + 4 )
 If @error Then
     ConsoleWrite("error")
 Else
@@ -150,7 +150,7 @@ If $CmdLine[1] = "/RemovePolicies" Then
 
 Local $spFile
 
-$mFile = FileOpenDialog("Select Policy File(s)", "C:\Windows\System32\CodeIntegrity\CIPolicies\Active\", "Policy Files (*.cip)", 1 + 4 )
+$mFile = FileOpenDialog("Select Policy File(s) for Removal", "C:\Windows\System32\CodeIntegrity\CIPolicies\Active\", "Policy Files (*.cip)", 1 + 4 )
 If @error Then
     ConsoleWrite("error")
 Else

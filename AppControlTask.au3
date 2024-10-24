@@ -39,6 +39,6 @@ Run(@ScriptDir & "\toasts\snoretoast.exe" & $cmdAudit, @ScriptDir & "\toasts", @
 EndIf
 
 If $CmdLine[1] = "refresh" Then
-$cmdRefresh = ' -t "Your WDAC policies have been refreshed." -m "Code Integrity policy refresh finished successfully." -appID "App Control Tray Tool" -p toast-refresh.png -silent -d short -b Dismiss'
+$cmdRefresh = ' -t "Your App Control policies have been refreshed." -m "Code Integrity policy refresh finished successfully." -appID "App Control Tray Tool" -p toast-refresh.png -silent -d short -b Dismiss'
 Run(@ScriptDir & "\toasts\snoretoast.exe" & $cmdRefresh, @ScriptDir & "\toasts", @SW_HIDE)
 EndIf
