@@ -22,33 +22,13 @@ I created this App Control System Tray Tool to facilitate more efficient changin
 
 At the moment, this tray tool only supports Multiple Policy Format since that is what I have always used since inception. Although at some point it could be extended to support Single Policy Format as well.
 
-### Concept & Methods Used:
+### Usage:
 
-The concept (at the present time) is really quite simple. You need to have 3 policies; AllowAllMode, AuditMode and EnforcedMode.
+This tray tool makes use of compiled policy binaries (*.cip) that you would ideally already have. There are some included just for simple testing purposes.
 
-I did not want to carelessly delete all existing policies from users' machines. That is why I created it so that all policies
-have the same filename (therefore, sharing the same PolicyID in the XML files prior to conversion to binary).
+To add new policies or update existing policies, simply select the tray menu option `Add or Update Policies (*.cip)`. This will bring up a standard file selection dialog which you can use to select any number of policy files. The selection will be parsed and those policies will be applied immediately via `CiTool -up` for each policy selected.
 
-For example, each base policy XML file shares the same PolicyID and BasePolicyID as follows:
-
-```xml
-  <PolicyID>{BD0E4FC3-D24E-43E2-BEA9-8F4C4B7165EE}</PolicyID>
-  <BasePolicyID>{BD0E4FC3-D24E-43E2-BEA9-8F4C4B7165EE}</BasePolicyID>
-```
-
-Your policy binary files need to be placed in the corresponding policy directories:
-```batch
-.\policies\AllowAllMode
-.\policies\AuditMode
-.\policies\EnforcedMode
-```
-
-The tray tool simply copies the converted policy binary files (*.cip) to `C:\Windows\System32\CodeIntegrity\CiPolicies\Active\`, overwriting policy
-files of the same filename and refreshing the policy.
-
-The overall concept here is really quite simplistic. Yet the results of using the tray tool itself is incredibly useful once set up.
-
-Obviously, this concept can be improved upon in many, many ways to allow for more customization around policy switching.
+To remove policies, select the tray menu option `Remove Policies (*.cip)`. You can select as many policies for removal as you want. Those selections will be parsed and the policies will be removed immediately via `CiTool -rp` for each policy selected.
 
 
 ### Compiling:
@@ -66,3 +46,6 @@ which is `*\test\speedyfox.exe` so that you can test the tray tool going from Au
 ### Toast Notifications:
 
 This is implemented now with the simple Enable Notifications option now on the system tray menu to enable/disable toast notifications.
+
+Toast notifications are implemented using KDE's Snoretoast app:
+https://invent.kde.org/libraries/snoretoast
