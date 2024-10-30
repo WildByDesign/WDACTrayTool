@@ -3,6 +3,10 @@
 #include <TrayConstants.au3>
 #include <Array.au3>
 #include <Misc.au3>
+#include <FileConstants.au3>
+#include <File.au3>
+#include <String.au3>
+#include <StringConstants.au3>
 #EndRegion
 
 #include "includes\ExtMsgBox.au3"
@@ -18,8 +22,8 @@
 #AutoIt3Wrapper_Res_Icon_Add=AppControl.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Tray Tool
-#AutoIt3Wrapper_Res_Fileversion=3.1.0.0
-#AutoIt3Wrapper_Res_ProductVersion=3.1.0
+#AutoIt3Wrapper_Res_Fileversion=3.2.0.0
+#AutoIt3Wrapper_Res_ProductVersion=3.2.0
 #AutoIt3Wrapper_Res_ProductName=AppControlTrayTool
 #AutoIt3Wrapper_Res_LegalCopyright=@ 2024 WildByDesign
 #AutoIt3Wrapper_Res_Language=1033
@@ -33,7 +37,7 @@ Global $softName = "App Control Tray Tool"
 Global $trayIcon = "AppControl.ico"
 Global $idRegTitleKey = "App Control Tray Tool"
 Global $createdBy = "WildByDesign"
-Global $programVersion = "3.1"
+Global $programVersion = "3.2"
 
 Global $LastTheme = ""
 Global $tasksExist = ""
@@ -154,8 +158,10 @@ Local $idLogsCI = TrayCreateItem("Code Integrity", $idViewLogs)
 Local $idLogsScript = TrayCreateItem("MSI and Script", $idViewLogs)
 TrayCreateItem("")
 Local $idAddRemove = TrayCreateMenu("Change Policies")
-Local $idAddPol = TrayCreateItem("Add or Update Policies (*.cip)", $idAddRemove)
-Local $idRemovePol = TrayCreateItem("Remove Policies (*.cip)", $idAddRemove)
+Local $idAddPol = TrayCreateItem("Add or Update Policies", $idAddRemove)
+Local $idRemovePol = TrayCreateItem("Remove Policies", $idAddRemove)
+TrayCreateItem("")
+Local $idConvertPol = TrayCreateItem("Convert (xml to binary)")
 TrayCreateItem("")
 Local $idToasts = TrayCreateItem("Enable Notifications")
 ;$idRegRead2 = RegRead ("HKCU\Software\Microsoft\Windows\CurrentVersion\Run", $idRegTitleKey)
@@ -198,6 +204,9 @@ Func AddPolicies()
 EndFunc
 Func RemovePolicies()
     Run(@ScriptDir & "\AppControlHelper.exe /RemovePolicies")
+EndFunc
+Func ConvertPolicy()
+	Run(@ScriptDir & "\AppControlTask.exe convert")
 EndFunc
 Func Notifications()
     If @Compiled Then
@@ -252,7 +261,9 @@ While 1
             AddPolicies()
 		Case $idRemovePol
             RemovePolicies()
-        Case $idPStest
+        Case $idConvertPol
+            ConvertPolicy()
+		Case $idPStest
             PStest()
 		Case $idStartItem
             StartWithWindows()

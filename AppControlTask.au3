@@ -1,5 +1,11 @@
 #Region
 #include <MsgBoxConstants.au3>
+#include <String.au3>
+#include <Array.au3>
+#include <File.au3>
+#include <FileConstants.au3>
+#include <MsgBoxConstants.au3>
+#include <StringConstants.au3>
 #EndRegion
 
 #NoTrayIcon
@@ -8,8 +14,8 @@
 #AutoIt3Wrapper_Icon=AppControl.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Tray Tool
-#AutoIt3Wrapper_Res_Fileversion=3.1.0.0
-#AutoIt3Wrapper_Res_ProductVersion=3.1.0
+#AutoIt3Wrapper_Res_Fileversion=3.2.0.0
+#AutoIt3Wrapper_Res_ProductVersion=3.2.0
 #AutoIt3Wrapper_Res_ProductName=AppControlTrayTool
 #AutoIt3Wrapper_Res_LegalCopyright=@ 2024 WildByDesign
 #AutoIt3Wrapper_Res_Language=1033
@@ -41,4 +47,50 @@ EndIf
 If $CmdLine[1] = "refresh" Then
 $cmdRefresh = ' -t "Your App Control policies have been refreshed." -m "Code Integrity policy refresh finished successfully." -appID "App Control Tray Tool" -p toast-refresh.png -silent -d short -b Dismiss'
 Run(@ScriptDir & "\toasts\snoretoast.exe" & $cmdRefresh, @ScriptDir & "\toasts", @SW_HIDE)
+EndIf
+
+If $CmdLine[1] = "convert" Then
+	$mFile = FileOpenDialog("Select XML Policy File for Conversion", @ScriptDir & "\policies\", "Policy Files (*.xml)", 1)
+	If @error Then
+		Exit
+	Else
+
+	Local $sFileRead = FileRead($mFile)
+	$aExtract = _StringBetween($sFileRead, "<PolicyID>", "</PolicyID>")
+
+	Local $sDrive = "", $sDir = "", $sFileName = "", $sExtension = ""
+	Local $aPathSplit = _PathSplit($mFile, $sDrive, $sDir, $sFileName, $sExtension)
+
+	Local $xmlfiledir = $sDrive & $sDir
+	Local $binarysave = $sFileName & '.cip'
+	Local $binaryname = $xmlfiledir & $sFileName & '.cip'
+	Local $binarynameGUIDsave = $aExtract[0] & '.cip'
+	Local $binarynameGUID = $xmlfiledir & $aExtract[0] & '.cip'
+
+	EndIf
+
+	Local Const $sMessage = "Choose a filename for saving your policy binary"
+	Local $sFileSaveDialog = FileSaveDialog($sMessage, "::{450D8FBA-AD25-11D0-98A8-0800361B1103}", "Policy Files (*.cip)", $FD_PATHMUSTEXIST+$FD_PROMPTOVERWRITE, $binarynameGUIDsave)
+	If @error Then
+	Else
+		Local $sFileName = StringTrimLeft($sFileSaveDialog, StringInStr($sFileSaveDialog, "\", $STR_NOCASESENSEBASIC, -1))
+
+		Local $iExtension = StringInStr($sFileName, ".", $STR_NOCASESENSEBASIC)
+
+		If $iExtension Then
+			If Not (StringTrimLeft($sFileName, $iExtension - 1) = ".cip") Then $sFileSaveDialog &= ".cip"
+		Else
+			$sFileSaveDialog &= ".cip"
+		EndIf
+	EndIf
+
+	Local $binarynamechosen = $sFileSaveDialog
+
+	Local $quote = "'"
+	Local $cmd1 = ' ConvertFrom-CIPolicy -XmlFilePath '
+	Local $cmd2 = $mFile
+	Local $cmd3 = ' -BinaryFilePath '
+	Local $cmd4 = $binarynamechosen
+	Local $o_powershell = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
+	Local $o_Pid = Run($o_powershell & $cmd1 & $quote & $cmd2 & $quote & $cmd3 & $quote & $cmd4 & $quote, @ScriptDir & '\scripts', @SW_Hide)
 EndIf

@@ -16,8 +16,8 @@
 #AutoIt3Wrapper_Icon=AppControl.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Tray Tool
-#AutoIt3Wrapper_Res_Fileversion=3.1.0.0
-#AutoIt3Wrapper_Res_ProductVersion=3.1.0
+#AutoIt3Wrapper_Res_Fileversion=3.2.0.0
+#AutoIt3Wrapper_Res_ProductVersion=3.2.0
 #AutoIt3Wrapper_Res_ProductName=AppControlTrayTool
 #AutoIt3Wrapper_Res_LegalCopyright=@ 2024 WildByDesign
 #AutoIt3Wrapper_Res_Language=1033
@@ -123,13 +123,15 @@ Else
      If UBound($spFile) = 2 Then
 		$path = $spFile[1]
         _ArrayDelete($spFile, 0)
-		$aExtract = _StringBetween($spFile[0], "{", "}")
+		Local $sDrive = "", $sDir = "", $sFileName = "", $sExtension = ""
+		Local $aPathSplit = _PathSplit($spFile[0], $sDrive, $sDir, $sFileName, $sExtension)
 		Local $cmd1 = ' (citool.exe -up '
-		Local $cmd2 = '"{'
-		Local $cmd3 = $aExtract[0]
-		Local $cmd4 = '}.cip"'
-		Local $cmd5 = ' -json)'
-		Run(@ComSpec & " /c " & $cmd1 & $cmd2 & $cmd3 & $cmd4 & $cmd5, "", @SW_HIDE)
+		Local $cmd2 = '"'
+		Local $cmd3 = $aPathSplit[3]
+		Local $cmd4 = $aPathSplit[4]
+		Local $cmd5 = '"'
+		Local $cmd6 = ' -json)'
+		Run(@ComSpec & " /c " & $cmd1 & $cmd2 & $cmd3 & $cmd4 & $cmd5 & $cmd6, "", @SW_HIDE)
      Else
 		$path = $spFile[1]
         _ArrayDelete($spFile, 0)
