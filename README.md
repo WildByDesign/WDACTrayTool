@@ -19,9 +19,9 @@ I created this App Control System Tray Tool to facilitate more efficient changin
 
 `AppControlTray.exe` - System tray tool which run **unelevated** at all times.
 
-`AppControlHelper.exe` - Command line-only tool which runs only specific **elevated** commands from `AppControlTray.exe` related to CiTool commands and Event Viewer.
+`AppControlHelper.exe` - Command line-only tool which runs only specific **elevated** commands from AppControlTray related to CiTool commands and Event Viewer.
 
-`AppControlTask.exe` - Command line-only tool which runs only specific **unelevated** commands from `AppControlTray.exe` related to Scheduled Tasks, Toast Notifications and policy conversion.
+`AppControlTask.exe` - Command line-only tool which runs only specific **unelevated** commands from AppControlTray related to Scheduled Tasks, Toast Notifications and policy conversion.
 
 ### Policy Type:
 
