@@ -31,9 +31,9 @@ At the moment, this tray tool only supports Multiple Policy Format since that is
 
 This tray tool makes use of compiled policy binaries (*.cip) that you would ideally already have. There are some included just for simple testing purposes.
 
-To add new policies or update existing policies, simply select the tray menu option `Add or Update Policies (*.cip)`. This will bring up a standard file selection dialog which you can use to select any number of policy files. The selection will be parsed and those policies will be applied immediately via `CiTool -up` for each policy selected.
+To add new policies or update existing policies, simply select the tray menu option `Add or Update Policies`. This will bring up a standard file selection dialog which you can use to select any number of policy files. The selection will be parsed and those policies will be applied immediately via `CiTool -up` for each policy selected.
 
-To remove policies, select the tray menu option `Remove Policies (*.cip)`. You can select as many policies for removal as you want. Those selections will be parsed and the policies will be removed immediately via `CiTool -rp` for each policy selected.
+To remove policies, select the tray menu option `Remove Policies`. You can select as many policies for removal as you want. Those selections will be parsed and the policies will be removed immediately via `CiTool -rp` for each policy selected.
 
 
 ### Compiling:
