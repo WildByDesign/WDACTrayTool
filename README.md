@@ -4,7 +4,7 @@ I created this App Control System Tray Tool to facilitate more efficient changin
 
 ### Screenshots:
 
-![WDAC3screen](https://github.com/user-attachments/assets/474bf0c3-f8e0-4b05-aee5-c3179d613dcc)
+![WDAC3screen](https://github.com/user-attachments/assets/e3294dd1-3eb1-4b38-8899-7c935303b7b9)
 
 ![TrayStatus](https://github.com/user-attachments/assets/2ddac0cc-cfb0-4c5c-a30b-23f0be3e7d14)
 
@@ -15,8 +15,13 @@ I created this App Control System Tray Tool to facilitate more efficient changin
 ![wdactray3-refresh](https://github.com/user-attachments/assets/2690a8bf-2a20-4a75-bbb3-bec39526443e)
 
 
+### Main Files:
 
+`AppControlTray.exe` - System tray tool which run **unelevated** at all times.
 
+`AppControlHelper.exe` - Command line-only tool which runs only specific **elevated** commands from `AppControlTray.exe` related to CiTool commands and Event Viewer.
+
+`AppControlTask.exe` - Command line-only tool which runs only specific **unelevated** commands from `AppControlTray.exe` related to Scheduled Tasks, Toast Notifications and policy conversion.
 
 ### Policy Type:
 
