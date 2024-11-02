@@ -14,8 +14,8 @@
 #AutoIt3Wrapper_Icon=AppControl.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Tray Tool
-#AutoIt3Wrapper_Res_Fileversion=3.2.0.0
-#AutoIt3Wrapper_Res_ProductVersion=3.2.0
+#AutoIt3Wrapper_Res_Fileversion=3.3.0.0
+#AutoIt3Wrapper_Res_ProductVersion=3.3.0
 #AutoIt3Wrapper_Res_ProductName=AppControlTrayTool
 #AutoIt3Wrapper_Res_LegalCopyright=@ 2024 WildByDesign
 #AutoIt3Wrapper_Res_Language=1033
@@ -62,6 +62,11 @@ If $CmdLine[1] = "convert" Then
 	Local $aPathSplit = _PathSplit($mFile, $sDrive, $sDir, $sFileName, $sExtension)
 
 	Local $xmlfiledir = $sDrive & $sDir
+	Local $xmlfilenew = $sFileName
+	Local $xmlfilename2 = StringInStr($xmlfilenew, "-v")
+	Local $aDays = StringSplit($xmlfilenew, "-v", 1)
+	Local $xmlfilename3 = $aDays[1]
+	;MsgBox($MB_SYSTEMMODAL, "Title", $aDays[1])
 	Local $binarysave = $sFileName & '.cip'
 	Local $binaryname = $xmlfiledir & $sFileName & '.cip'
 	Local $binarynameGUIDsave = $aExtract[0] & '.cip'
@@ -84,13 +89,23 @@ If $CmdLine[1] = "convert" Then
 		EndIf
 	EndIf
 
-	Local $binarynamechosen = $sFileSaveDialog
+	Local $bDrive = "", $bDir = "", $bFileName = "", $bExtension = ""
+	Local $bPathSplit = _PathSplit($sFileSaveDialog, $bDrive, $bDir, $bFileName, $bExtension)
+	Local $binarynameonly = $bFileName & $bExtension
 
+	Local $binarynamechosen = $sFileSaveDialog
+	; .\Convert-Policy.ps1 -XmlPolicyFile $mFile -BinaryDir $xmlfiledir -XmlOutName $xmlfilenew -BinaryFile $binarynameonly
 	Local $quote = "'"
-	Local $cmd1 = ' ConvertFrom-CIPolicy -XmlFilePath '
-	Local $cmd2 = $mFile
-	Local $cmd3 = ' -BinaryFilePath '
-	Local $cmd4 = $binarynamechosen
+	Local $cmd1 = ' ./Convert-Policy.ps1 '
+	Local $cmd2 = '-XmlPolicyFile '
+	Local $cmd3 = $mFile
+	Local $cmd4 = ' -BinaryDir '
+	Local $cmd5 = $xmlfiledir
+	Local $cmd6 = ' -XmlOutName '
+	Local $cmd7 = $xmlfilename3
+	Local $cmd8 = ' -BinaryFile '
+	Local $cmd9 = $binarynameonly
 	Local $o_powershell = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
-	Local $o_Pid = Run($o_powershell & $cmd1 & $quote & $cmd2 & $quote & $cmd3 & $quote & $cmd4 & $quote, @ScriptDir & '\scripts', @SW_Hide)
+	Local $o_Pid = Run($o_powershell & $cmd1 & $cmd2 & $quote & $cmd3 & $quote & $cmd4 & $quote & $cmd5 & $quote & $cmd6 & $quote & $cmd7 & $quote & $cmd8 & $quote & $cmd9 & $quote, @ScriptDir & '\scripts', @SW_Hide)
+	;MsgBox($MB_SYSTEMMODAL, "Title", $o_powershell & $cmd1 & $cmd2 & $quote & $cmd3 & $quote & $cmd4 & $quote & $cmd5 & $quote & $cmd6 & $quote & $cmd7 & $quote & $cmd8 & $quote & $cmd9 & $quote)
 EndIf
