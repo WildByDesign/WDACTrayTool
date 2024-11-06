@@ -5,6 +5,7 @@
 #include <Array.au3>
 #include <FileConstants.au3>
 #include <String.au3>
+#include <StringConstants.au3>
 #EndRegion
 
 #include "includes\ExtMsgBox.au3"
@@ -16,8 +17,8 @@
 #AutoIt3Wrapper_Icon=AppControl.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Tray Tool
-#AutoIt3Wrapper_Res_Fileversion=3.3.0.0
-#AutoIt3Wrapper_Res_ProductVersion=3.3.0
+#AutoIt3Wrapper_Res_Fileversion=3.5.0.0
+#AutoIt3Wrapper_Res_ProductVersion=3.5.0
 #AutoIt3Wrapper_Res_ProductName=AppControlTrayTool
 #AutoIt3Wrapper_Res_LegalCopyright=@ 2024 WildByDesign
 #AutoIt3Wrapper_Res_Language=1033
@@ -52,27 +53,60 @@ If $CmdLine[1] = "/CiTool" Then
 Run('C:\Windows\System32\CiTool.exe --list-policies', "")
 EndIf
 If $CmdLine[1] = "/status" Then
-        Local $iFileExists = FileExists(@ProgramFilesDir & '\PowerShell\7\pwsh.exe')
-        If $iFileExists Then
-                Local $o_powershell = @ProgramFilesDir & '\PowerShell\7\pwsh.exe'
-        Else
-                Local $o_powershell = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
-        EndIf
-
-	Local $o_CmdString1 = ' ./Get-CiPolicy.ps1'
-	;Local $o_powershell = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
-	;Local $o_powershell = "pwsh.exe"
-    Local $o_Pid = Run($o_powershell & $o_CmdString1 , @ScriptDir & '\scripts', @SW_Hide)
-    ProcessWaitClose($o_Pid)
-
-	Local $testopen = @TempDir & '\CiPolicy.txt'
-	Local $testread = FileRead($testopen)
-	;MsgBox($MB_SYSTEMMODAL, "Title", $testread)
-	;_ExtMsgBoxSet(1, 5, -1, -1, -1, "Consolas", 800, 800)
-	$iRetValue = _ExtMsgBox (0 & ";" & @ScriptDir & "\AppControlTray.exe", 0, "App Control Policy Status", $testread)
-	FileDelete(@TempDir & '\CiPolicy.txt')
-	FileDelete(@TempDir & '\CiPolicy1.txt')
-	FileDelete(@TempDir & '\CiPolicy2.txt')
+	Local $iFileExists = FileExists(@ProgramFilesDir & '\PowerShell\7\pwsh.exe')
+	If $iFileExists Then
+		Local $o_CmdString1 = " Get-CimInstance -ClassName Win32_DeviceGuard -Namespace root\Microsoft\Windows\DeviceGuard | FL *codeintegrity*; Write-Output 'test output'; Write-Output 'Currently Active Policies:'; (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.IsEnforced -eq 'True'} | Select-Object -Property PolicyID,FriendlyName | Sort-Object -Property FriendlyName; Write-Output 'test output'"
+		Local $o_powershell = @ProgramFilesDir & '\PowerShell\7\pwsh.exe -NoProfile -Command'
+		Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
+		ProcessWaitClose($o_Pid)
+		$out = StdoutRead($o_Pid)
+		$test = stringsplit($out , @CR , 2)
+		$test2 = _ArrayToString($test)
+		Local $out2 = StringReplace($test2, "[32;1m", "")
+		Local $out3 = StringReplace($out2, "[0m", "")
+		Local $dString = StringStripWS($out3, $STR_STRIPSPACES)
+		Local $dString1 = StringReplace($dString, " |", "")
+		Local $dString2 = StringReplace($dString1, "|", "")
+		Local $dString3 = StringStripWS($dString2, $STR_STRIPLEADING + $STR_STRIPTRAILING)
+		Local $dString4 = StringReplace($dString3, " ", "  ")
+		Local $dString5 = StringReplace($dString4, "test  output", "")
+		Local $dString6 = StringReplace($dString5, "Currently  Active  Policies:", "Currently Active Policies:")
+		Local $dString7 = StringReplace($dString6, "PolicyID  FriendlyName", "Policy ID                             Policy Name")
+		Local $dString8 = StringReplace($dString7, "--------  ------------", "---------                             -----------")
+		Local $dString9 = StringReplace($dString8, "UsermodeCodeIntegrityPolicyEnforcementStatus  :  0", "App Control user mode policy    : Not Configured")
+		Local $dString10 = StringReplace($dString9, "UsermodeCodeIntegrityPolicyEnforcementStatus  :  1", "App Control user mode policy    : Audit Mode")
+		Local $dString11 = StringReplace($dString10, "UsermodeCodeIntegrityPolicyEnforcementStatus  :  2", "App Control user mode policy    : Enforced Mode")
+		Local $dString12 = StringReplace($dString11, "CodeIntegrityPolicyEnforcementStatus  :  0", "App Control policy              : Not Configured")
+		Local $dString13 = StringReplace($dString12, "CodeIntegrityPolicyEnforcementStatus  :  1", "App Control policy              : Audit Mode")
+		Local $dString14 = StringReplace($dString13, "CodeIntegrityPolicyEnforcementStatus  :  2", "App Control policy              : Enforced Mode")
+		_ExtMsgBox (0 & ";" & @ScriptDir & "\AppControlTray.exe", 0, "App Control Policy Status", $dString14)
+	Else
+		Local $o_CmdString1 = " Get-CimInstance -ClassName Win32_DeviceGuard -Namespace root\Microsoft\Windows\DeviceGuard | FL *codeintegrity*; Write-Output 'test output'; Write-Output 'Currently Active Policies:'; (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.IsEnforced -eq 'True'} | Select-Object -Property PolicyID,FriendlyName | Sort-Object -Property FriendlyName; Write-Output 'test output'"
+		Local $o_powershell = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -Command"
+		Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
+		ProcessWaitClose($o_Pid)
+		$out = StdoutRead($o_Pid)
+		$test = stringsplit($out , @CR , 2)
+		_ArrayDelete($test, 4)
+		_ArrayDelete($test, 4)
+		$test2 = _ArrayToString($test)
+		Local $dString = StringStripWS($test2, $STR_STRIPSPACES)
+		Local $dString1 = StringReplace($dString, " |", "")
+		Local $dString2 = StringReplace($dString1, "|", "")
+		Local $dString3 = StringStripWS($dString2, $STR_STRIPLEADING + $STR_STRIPTRAILING)
+		Local $dString4 = StringReplace($dString3, " ", "  ")
+		Local $dString5 = StringReplace($dString4, "test  output", "")
+		Local $dString6 = StringReplace($dString5, "Currently  Active  Policies:", "Currently Active Policies:")
+		Local $dString7 = StringReplace($dString6, "PolicyID  FriendlyName", "Policy ID                             Policy Name")
+		Local $dString8 = StringReplace($dString7, "--------  ------------", "---------                             -----------")
+		Local $dString9 = StringReplace($dString8, "UsermodeCodeIntegrityPolicyEnforcementStatus  :  0", "App Control user mode policy    : Not Configured")
+		Local $dString10 = StringReplace($dString9, "UsermodeCodeIntegrityPolicyEnforcementStatus  :  1", "App Control user mode policy    : Audit Mode")
+		Local $dString11 = StringReplace($dString10, "UsermodeCodeIntegrityPolicyEnforcementStatus  :  2", "App Control user mode policy    : Enforced Mode")
+		Local $dString12 = StringReplace($dString11, "CodeIntegrityPolicyEnforcementStatus  :  0", "App Control policy              : Not Configured")
+		Local $dString13 = StringReplace($dString12, "CodeIntegrityPolicyEnforcementStatus  :  1", "App Control policy              : Audit Mode")
+		Local $dString14 = StringReplace($dString13, "CodeIntegrityPolicyEnforcementStatus  :  2", "App Control policy              : Enforced Mode")
+		_ExtMsgBox (0 & ";" & @ScriptDir & "\AppControlTray.exe", 0, "App Control Policy Status", $dString14)
+	EndIf
 EndIf
 If $CmdLine[1] = "/LogsCI" Then
 	$oXML=ObjCreate("Microsoft.XMLDOM")

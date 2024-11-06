@@ -22,8 +22,8 @@
 #AutoIt3Wrapper_Res_Icon_Add=AppControl.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Tray Tool
-#AutoIt3Wrapper_Res_Fileversion=3.3.0.0
-#AutoIt3Wrapper_Res_ProductVersion=3.3.0
+#AutoIt3Wrapper_Res_Fileversion=3.5.0.0
+#AutoIt3Wrapper_Res_ProductVersion=3.5.0
 #AutoIt3Wrapper_Res_ProductName=AppControlTrayTool
 #AutoIt3Wrapper_Res_LegalCopyright=@ 2024 WildByDesign
 #AutoIt3Wrapper_Res_Language=1033
@@ -33,11 +33,11 @@
 Opt("TrayMenuMode", 3)
 Opt("TrayAutoPause", 0)
 
+Global $programVersion = "3.5"
 Global $softName = "App Control Tray Tool"
 Global $trayIcon = "AppControl.ico"
 Global $idRegTitleKey = "App Control Tray Tool"
 Global $createdBy = "WildByDesign"
-Global $programVersion = "3.3"
 
 Global $LastTheme = ""
 Global $tasksExist = ""
@@ -215,13 +215,21 @@ Func Notifications()
             ;Local $o_CmdString1 = ' ./Remove-Tasks.ps1'
 			;Local $o_powershell = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
 			;Local $o_Pid = Run($o_powershell & $o_CmdString1 , @ScriptDir & '\scripts', @SW_Hide)
-			Run("C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe ./Remove-Tasks.ps1", @ScriptDir & '\scripts', @SW_Hide)
+			;Run("C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe ./Remove-Tasks.ps1", @ScriptDir & '\scripts', @SW_Hide)
+			RunWait("AppControlTask.exe task-delete-blocked", @ScriptDir, @SW_Hide)
+			RunWait("AppControlTask.exe task-delete-audit", @ScriptDir, @SW_Hide)
+			RunWait("AppControlTask.exe task-delete-refresh", @ScriptDir, @SW_Hide)
+			RunWait("AppControlTask.exe task-delete-folder", @ScriptDir, @SW_Hide)
             TrayItemSetState ($idToasts, $TRAY_UNCHECKED)
         Else
             ;Local $o_CmdString2 = ' ./Install-Tasks.ps1'
 			;Local $o_powershell2 = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
 			;Local $o_Pid2 = Run($o_powershell2 & $o_CmdString2 , @ScriptDir & '\scripts', @SW_Hide)
-			Run("C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe ./Install-Tasks.ps1", @ScriptDir & '\scripts', @SW_Hide)
+			;Run("C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe ./Install-Tasks.ps1", @ScriptDir & '\scripts', @SW_Hide)
+			RunWait("AppControlTask.exe task-create-folder", @ScriptDir, @SW_Hide)
+			RunWait("AppControlTask.exe task-create-blocked", @ScriptDir, @SW_Hide)
+			RunWait("AppControlTask.exe task-create-audit", @ScriptDir, @SW_Hide)
+			RunWait("AppControlTask.exe task-create-refresh", @ScriptDir, @SW_Hide)
             TrayItemSetState ($idToasts, $TRAY_CHECKED)
         EndIf
     EndIf
