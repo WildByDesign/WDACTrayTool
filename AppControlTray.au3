@@ -212,24 +212,10 @@ Func Notifications()
     If @Compiled Then
         $_ItemGetState = TrayItemGetState ($idToasts)
         If $_ItemGetState = 64+1 Then
-            ;Local $o_CmdString1 = ' ./Remove-Tasks.ps1'
-			;Local $o_powershell = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
-			;Local $o_Pid = Run($o_powershell & $o_CmdString1 , @ScriptDir & '\scripts', @SW_Hide)
-			;Run("C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe ./Remove-Tasks.ps1", @ScriptDir & '\scripts', @SW_Hide)
-			RunWait("AppControlTask.exe task-delete-blocked", @ScriptDir, @SW_Hide)
-			RunWait("AppControlTask.exe task-delete-audit", @ScriptDir, @SW_Hide)
-			RunWait("AppControlTask.exe task-delete-refresh", @ScriptDir, @SW_Hide)
-			RunWait("AppControlTask.exe task-delete-folder", @ScriptDir, @SW_Hide)
+			Run("AppControlTask.exe removetasks", @ScriptDir, @SW_Hide)
             TrayItemSetState ($idToasts, $TRAY_UNCHECKED)
         Else
-            ;Local $o_CmdString2 = ' ./Install-Tasks.ps1'
-			;Local $o_powershell2 = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
-			;Local $o_Pid2 = Run($o_powershell2 & $o_CmdString2 , @ScriptDir & '\scripts', @SW_Hide)
-			;Run("C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe ./Install-Tasks.ps1", @ScriptDir & '\scripts', @SW_Hide)
-			RunWait("AppControlTask.exe task-create-folder", @ScriptDir, @SW_Hide)
-			RunWait("AppControlTask.exe task-create-blocked", @ScriptDir, @SW_Hide)
-			RunWait("AppControlTask.exe task-create-audit", @ScriptDir, @SW_Hide)
-			RunWait("AppControlTask.exe task-create-refresh", @ScriptDir, @SW_Hide)
+			Run("AppControlTask.exe installtasks", @ScriptDir, @SW_Hide)
             TrayItemSetState ($idToasts, $TRAY_CHECKED)
         EndIf
     EndIf

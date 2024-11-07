@@ -27,6 +27,330 @@
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 $sTitle = "AppControlTaskHelper"
 
+Func task_create_folder()
+	Global $oService = _TS_Open()
+	If @error <> 0 Then Exit MsgBox($MB_ICONERROR, "Task Scheduler UDF", "Error connecting to the Task Scheduler Service. @error = " & @error & ", @extended = " & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+	Global $sFolder = "\AppControlTray"
+	Global $aTaskProperties = _TS_FolderCreate($oService, $sFolder)
+	_TS_Close($oService)
+Endfunc
+
+Func task_create_blocked()
+	Global $sFolder = "\AppControlTray"    ; Folder where to create the task
+	Global $sName = "ToastBlocked"  ; Name of the task to create
+	; *****************************************************************************
+	; Prepare start and end date of the trigger. Format must be YYYY-MM-DDTHH:MM:SS
+	; *****************************************************************************
+	Global $sStartDateTime = _DateAdd("n", 2, _NowCalc())
+	$sStartDateTime = StringReplace($sStartDateTime, "/", "-")
+	$sStartDateTime = StringReplace($sStartDateTime, " ", "T")
+	Global $sEndDateTime = _DateAdd("M", 4, _NowCalc())
+	$sEndDateTime = StringReplace($sEndDateTime, "/", "-")
+	$sEndDateTime = StringReplace($sEndDateTime, " ", "T")
+
+	; *****************************************************************************
+	; Connect to the Task Scheduler Service
+	; *****************************************************************************
+	Global $oService = _TS_Open()
+	If @error <> 0 Then Exit MsgBox($MB_ICONERROR, "Task Scheduler UDF", "Error connecting to the Task Scheduler Service. @error = " & @error & ", @extended = " & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+
+	; *****************************************************************************
+	; Delete a task in the same folder with the same name
+	; *****************************************************************************
+	_TS_TaskDelete($oService, $sFolder & "\" & $sName)
+	; If @error <> 0 And @error <> 2 Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskDelete returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+
+	; *****************************************************************************
+	; Create a new task
+	; *****************************************************************************
+	; Create the Task Definition object
+	Global $oTaskDefinition = _TS_TaskCreate($oService)
+	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskCreate returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+
+	; Set all task properties
+	Global $aProperties[] = [ _
+			"ACTIONS|Path|AppControlTask.exe", _
+			"SETTINGS|DisallowStartIfOnBatteries|False", _
+			"SETTINGS|StopIfGoingOnBatteries|False", _
+			"SETTINGS|Compatibility|4", _
+			"SETTINGS|ExecutionTimeLimit|PT0S", _
+			"REGISTRATIONINFO|Author|" & @ComputerName & "\" & @UserName, _
+			"REGISTRATIONINFO|Description|Task that triggers a toast notification on App Control block events.", _
+			"ACTIONS|WorkingDirectory|" & @ScriptDir, _
+			"ACTIONS|Arguments|blocked", _
+			"TRIGGERS|Enabled|True", _
+			"TRIGGERS|Type|" & $TASK_TRIGGER_EVENT, _
+			"TRIGGERS|Subscription|<QueryList><Query Id='0' Path='Microsoft-Windows-CodeIntegrity/Operational'><Select Path='Microsoft-Windows-CodeIntegrity/Operational'>*[System[(EventID=3077)]]</Select></Query></QueryList>" _
+			]
+	_TS_TaskPropertiesSet($oTaskDefinition, $aProperties)
+	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskPropertiesSet for the TaskDefinition returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+
+	; Create an Event trigger
+	Global $oTrigger = _TS_TriggerCreate($oTaskDefinition, $TASK_TRIGGER_EVENT)
+	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "Creating the Trigger returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+	_TS_TaskPropertiesSet($oTrigger, $aProperties)
+	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskPropertiesSet for the Trigger returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+
+	; Create an Action
+	Global $oAction = _TS_ActionCreate($oTaskDefinition, $TASK_ACTION_EXEC)
+	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "Creating the Action returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+	_TS_TaskPropertiesSet($oAction, $aProperties)
+	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskPropertiesSet for the Action returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+
+	; List properties of the Task Definition
+	Global $aTaskProperties = _TS_TaskPropertiesGet($oService, $oTaskDefinition,1 , True)
+	If Not @error Then
+		;_ArrayDisplay($aTaskProperties, "Properties of the task to be created")
+	Else
+		MsgBox($MB_ICONERROR, "_TS_TaskPropertiesGet", "Returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+	EndIf
+
+	; Register the task
+	Global $oTask = _TS_TaskRegister($oService, $sFolder, $sName, $oTaskDefinition)
+	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskRegister returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+	;MsgBox($MB_ICONINFORMATION, "_TS_TaskCreate", "Task " & $sName & " has been created!")
+
+	_TS_Close($oService)
+Endfunc
+
+Func task_create_audit()
+	Global $sFolder = "\AppControlTray"    ; Folder where to create the task
+	Global $sName = "ToastAudit"  ; Name of the task to create
+	; *****************************************************************************
+	; Prepare start and end date of the trigger. Format must be YYYY-MM-DDTHH:MM:SS
+	; *****************************************************************************
+	Global $sStartDateTime = _DateAdd("n", 2, _NowCalc())
+	$sStartDateTime = StringReplace($sStartDateTime, "/", "-")
+	$sStartDateTime = StringReplace($sStartDateTime, " ", "T")
+	Global $sEndDateTime = _DateAdd("M", 4, _NowCalc())
+	$sEndDateTime = StringReplace($sEndDateTime, "/", "-")
+	$sEndDateTime = StringReplace($sEndDateTime, " ", "T")
+
+	; *****************************************************************************
+	; Connect to the Task Scheduler Service
+	; *****************************************************************************
+	Global $oService = _TS_Open()
+	If @error <> 0 Then Exit MsgBox($MB_ICONERROR, "Task Scheduler UDF", "Error connecting to the Task Scheduler Service. @error = " & @error & ", @extended = " & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+
+	; *****************************************************************************
+	; Delete a task in the same folder with the same name
+	; *****************************************************************************
+	_TS_TaskDelete($oService, $sFolder & "\" & $sName)
+	; If @error <> 0 And @error <> 2 Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskDelete returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+
+	; *****************************************************************************
+	; Create a new task
+	; *****************************************************************************
+	; Create the Task Definition object
+	Global $oTaskDefinition = _TS_TaskCreate($oService)
+	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskCreate returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+
+	; Set all task properties
+	Global $aProperties[] = [ _
+			"ACTIONS|Path|AppControlTask.exe", _
+			"SETTINGS|DisallowStartIfOnBatteries|False", _
+			"SETTINGS|StopIfGoingOnBatteries|False", _
+			"SETTINGS|Compatibility|4", _
+			"SETTINGS|ExecutionTimeLimit|PT0S", _
+			"REGISTRATIONINFO|Author|" & @ComputerName & "\" & @UserName, _
+			"REGISTRATIONINFO|Description|Task that triggers a toast notification on App Control audit events.", _
+			"ACTIONS|WorkingDirectory|" & @ScriptDir, _
+			"ACTIONS|Arguments|audit", _
+			"TRIGGERS|Enabled|True", _
+			"TRIGGERS|Type|" & $TASK_TRIGGER_EVENT, _
+			"TRIGGERS|Subscription|<QueryList><Query Id='0' Path='Microsoft-Windows-CodeIntegrity/Operational'><Select Path='Microsoft-Windows-CodeIntegrity/Operational'>*[System[(EventID=3076)]]</Select></Query></QueryList>" _
+			]
+	_TS_TaskPropertiesSet($oTaskDefinition, $aProperties)
+	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskPropertiesSet for the TaskDefinition returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+
+	; Create an Event trigger
+	Global $oTrigger = _TS_TriggerCreate($oTaskDefinition, $TASK_TRIGGER_EVENT)
+	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "Creating the Trigger returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+	_TS_TaskPropertiesSet($oTrigger, $aProperties)
+	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskPropertiesSet for the Trigger returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+
+	; Create an Action
+	Global $oAction = _TS_ActionCreate($oTaskDefinition, $TASK_ACTION_EXEC)
+	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "Creating the Action returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+	_TS_TaskPropertiesSet($oAction, $aProperties)
+	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskPropertiesSet for the Action returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+
+	; List properties of the Task Definition
+	Global $aTaskProperties = _TS_TaskPropertiesGet($oService, $oTaskDefinition,1 , True)
+	If Not @error Then
+		;_ArrayDisplay($aTaskProperties, "Properties of the task to be created")
+	Else
+		MsgBox($MB_ICONERROR, "_TS_TaskPropertiesGet", "Returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+	EndIf
+
+	; Register the task
+	Global $oTask = _TS_TaskRegister($oService, $sFolder, $sName, $oTaskDefinition)
+	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskRegister returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+	;MsgBox($MB_ICONINFORMATION, "_TS_TaskCreate", "Task " & $sName & " has been created!")
+
+	_TS_Close($oService)
+Endfunc
+
+Func task_create_refresh()
+	Global $sFolder = "\AppControlTray"    ; Folder where to create the task
+	Global $sName = "PolicyRefresh"  ; Name of the task to create
+	; *****************************************************************************
+	; Prepare start and end date of the trigger. Format must be YYYY-MM-DDTHH:MM:SS
+	; *****************************************************************************
+	Global $sStartDateTime = _DateAdd("n", 2, _NowCalc())
+	$sStartDateTime = StringReplace($sStartDateTime, "/", "-")
+	$sStartDateTime = StringReplace($sStartDateTime, " ", "T")
+	Global $sEndDateTime = _DateAdd("M", 4, _NowCalc())
+	$sEndDateTime = StringReplace($sEndDateTime, "/", "-")
+	$sEndDateTime = StringReplace($sEndDateTime, " ", "T")
+
+	; *****************************************************************************
+	; Connect to the Task Scheduler Service
+	; *****************************************************************************
+	Global $oService = _TS_Open()
+	If @error <> 0 Then Exit MsgBox($MB_ICONERROR, "Task Scheduler UDF", "Error connecting to the Task Scheduler Service. @error = " & @error & ", @extended = " & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+
+	; *****************************************************************************
+	; Delete a task in the same folder with the same name
+	; *****************************************************************************
+	_TS_TaskDelete($oService, $sFolder & "\" & $sName)
+	; If @error <> 0 And @error <> 2 Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskDelete returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+
+	; *****************************************************************************
+	; Create a new task
+	; *****************************************************************************
+	; Create the Task Definition object
+	Global $oTaskDefinition = _TS_TaskCreate($oService)
+	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskCreate returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+
+	; Set all task properties
+	Global $aProperties[] = [ _
+			"ACTIONS|Path|AppControlTask.exe", _
+			"SETTINGS|DisallowStartIfOnBatteries|False", _
+			"SETTINGS|StopIfGoingOnBatteries|False", _
+			"SETTINGS|Compatibility|4", _
+			"SETTINGS|ExecutionTimeLimit|PT0S", _
+			"REGISTRATIONINFO|Author|" & @ComputerName & "\" & @UserName, _
+			"REGISTRATIONINFO|Description|Task that triggers a toast notification on App Control policy refresh events.", _
+			"ACTIONS|WorkingDirectory|" & @ScriptDir, _
+			"ACTIONS|Arguments|refresh", _
+			"TRIGGERS|Enabled|True", _
+			"TRIGGERS|Type|" & $TASK_TRIGGER_EVENT, _
+			"TRIGGERS|Subscription|<QueryList><Query Id='0' Path='Microsoft-Windows-CodeIntegrity/Operational'><Select Path='Microsoft-Windows-CodeIntegrity/Operational'>*[System[(EventID=3102)]]</Select></Query></QueryList>" _
+			]
+	_TS_TaskPropertiesSet($oTaskDefinition, $aProperties)
+	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskPropertiesSet for the TaskDefinition returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+
+	; Create an Event trigger
+	Global $oTrigger = _TS_TriggerCreate($oTaskDefinition, $TASK_TRIGGER_EVENT)
+	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "Creating the Trigger returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+	_TS_TaskPropertiesSet($oTrigger, $aProperties)
+	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskPropertiesSet for the Trigger returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+
+	; Create an Action
+	Global $oAction = _TS_ActionCreate($oTaskDefinition, $TASK_ACTION_EXEC)
+	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "Creating the Action returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+	_TS_TaskPropertiesSet($oAction, $aProperties)
+	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskPropertiesSet for the Action returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+
+	; List properties of the Task Definition
+	Global $aTaskProperties = _TS_TaskPropertiesGet($oService, $oTaskDefinition,1 , True)
+	If Not @error Then
+		;_ArrayDisplay($aTaskProperties, "Properties of the task to be created")
+	Else
+		MsgBox($MB_ICONERROR, "_TS_TaskPropertiesGet", "Returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+	EndIf
+
+	; Register the task
+	Global $oTask = _TS_TaskRegister($oService, $sFolder, $sName, $oTaskDefinition)
+	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskRegister returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+	;MsgBox($MB_ICONINFORMATION, "_TS_TaskCreate", "Task " & $sName & " has been created!")
+
+	_TS_Close($oService)
+Endfunc
+
+Func task_delete_blocked()
+	; *****************************************************************************
+	; Connect to the Task Scheduler Service
+	; *****************************************************************************
+	Global $oService = _TS_Open()
+	If @error <> 0 Then Exit MsgBox($MB_ICONERROR, "Task Scheduler UDF", "Error connecting to the Task Scheduler Service. @error = " & @error & ", @extended = " & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+
+	; *****************************************************************************
+	; Delete task "Test-Task" from folder "\Test"
+	; *****************************************************************************
+	Global $sTaskPath = "\AppControlTray\ToastBlocked"    ; Folder and name of the task to be deleted
+	_TS_TaskDelete($oService, $sTaskPath)
+	If Not @error Then
+		;MsgBox($MB_ICONINFORMATION, "_TS_TaskDelete", "Task '" & $sTaskPath & "' successfully deleted!")
+	Else
+		MsgBox($MB_ICONERROR, "_TS_TaskDelete", "Returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+	EndIf
+	_TS_Close($oService)
+Endfunc
+
+Func task_delete_audit()
+	; *****************************************************************************
+	; Connect to the Task Scheduler Service
+	; *****************************************************************************
+	Global $oService = _TS_Open()
+	If @error <> 0 Then Exit MsgBox($MB_ICONERROR, "Task Scheduler UDF", "Error connecting to the Task Scheduler Service. @error = " & @error & ", @extended = " & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+
+	; *****************************************************************************
+	; Delete task "Test-Task" from folder "\Test"
+	; *****************************************************************************
+	Global $sTaskPath = "\AppControlTray\ToastAudit"    ; Folder and name of the task to be deleted
+	_TS_TaskDelete($oService, $sTaskPath)
+	If Not @error Then
+		;MsgBox($MB_ICONINFORMATION, "_TS_TaskDelete", "Task '" & $sTaskPath & "' successfully deleted!")
+	Else
+		MsgBox($MB_ICONERROR, "_TS_TaskDelete", "Returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+	EndIf
+	_TS_Close($oService)
+Endfunc
+
+Func task_delete_refresh()
+	; *****************************************************************************
+	; Connect to the Task Scheduler Service
+	; *****************************************************************************
+	Global $oService = _TS_Open()
+	If @error <> 0 Then Exit MsgBox($MB_ICONERROR, "Task Scheduler UDF", "Error connecting to the Task Scheduler Service. @error = " & @error & ", @extended = " & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+
+	; *****************************************************************************
+	; Delete task "Test-Task" from folder "\Test"
+	; *****************************************************************************
+	Global $sTaskPath = "\AppControlTray\PolicyRefresh"    ; Folder and name of the task to be deleted
+	_TS_TaskDelete($oService, $sTaskPath)
+	If Not @error Then
+		;MsgBox($MB_ICONINFORMATION, "_TS_TaskDelete", "Task '" & $sTaskPath & "' successfully deleted!")
+	Else
+		MsgBox($MB_ICONERROR, "_TS_TaskDelete", "Returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+	EndIf
+	_TS_Close($oService)
+Endfunc
+
+Func task_delete_folder()
+	; *****************************************************************************
+	; Connect to the Task Scheduler Service
+	; *****************************************************************************
+	Global $oService = _TS_Open()
+	If @error <> 0 Then Exit MsgBox($MB_ICONERROR, "Task Scheduler UDF", "Error connecting to the Task Scheduler Service. @error = " & @error & ", @extended = " & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+
+	; *****************************************************************************
+	; Delete a folder
+	; $sFolder has always to start at the root folder (means you have to
+	; specify all the folders from the root down even when they already exist)
+	; *****************************************************************************
+	Global $sFolder = "\AppControlTray"
+	_TS_FolderDelete($oService, $sFolder)
+	If Not @error Then
+		;MsgBox($MB_ICONINFORMATION, "_TS_FolderDelete", "Folder: " & $sFolder & " successfully deleted!")
+	Else
+		MsgBox($MB_ICONERROR, "_TS_FolderDelete", "Returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+	EndIf
+	_TS_Close($oService)
+Endfunc
+
 If $CmdLine[0] = 0 Then Exit MsgBox(16, $sTitle, "No parameters passed!")
 
 If $CmdLine[1] = "install" Then
@@ -125,326 +449,18 @@ If $CmdLine[1] = "convert" Then
 	;MsgBox($MB_SYSTEMMODAL, "Title", $o_powershell & $cmd2)
 EndIf
 
-If $CmdLine[1] = "task-create-folder" Then
-	Global $oService = _TS_Open()
-	If @error <> 0 Then Exit MsgBox($MB_ICONERROR, "Task Scheduler UDF", "Error connecting to the Task Scheduler Service. @error = " & @error & ", @extended = " & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-	Global $sFolder = "\AppControlTray"
-	Global $aTaskProperties = _TS_FolderCreate($oService, $sFolder)
-	_TS_Close($oService)
+If $CmdLine[1] = "installtasks" Then
+	task_create_folder()
+	Sleep(1000)
+	task_create_blocked()
+	task_create_audit()
+	task_create_refresh()
 EndIf
 
-If $CmdLine[1] = "task-create-blocked" Then
-	Global $sFolder = "\AppControlTray"    ; Folder where to create the task
-	Global $sName = "ToastBlocked"  ; Name of the task to create
-	; *****************************************************************************
-	; Prepare start and end date of the trigger. Format must be YYYY-MM-DDTHH:MM:SS
-	; *****************************************************************************
-	Global $sStartDateTime = _DateAdd("n", 2, _NowCalc())
-	$sStartDateTime = StringReplace($sStartDateTime, "/", "-")
-	$sStartDateTime = StringReplace($sStartDateTime, " ", "T")
-	Global $sEndDateTime = _DateAdd("M", 4, _NowCalc())
-	$sEndDateTime = StringReplace($sEndDateTime, "/", "-")
-	$sEndDateTime = StringReplace($sEndDateTime, " ", "T")
-
-	; *****************************************************************************
-	; Connect to the Task Scheduler Service
-	; *****************************************************************************
-	Global $oService = _TS_Open()
-	If @error <> 0 Then Exit MsgBox($MB_ICONERROR, "Task Scheduler UDF", "Error connecting to the Task Scheduler Service. @error = " & @error & ", @extended = " & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-
-	; *****************************************************************************
-	; Delete a task in the same folder with the same name
-	; *****************************************************************************
-	_TS_TaskDelete($oService, $sFolder & "\" & $sName)
-	; If @error <> 0 And @error <> 2 Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskDelete returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-
-	; *****************************************************************************
-	; Create a new task
-	; *****************************************************************************
-	; Create the Task Definition object
-	Global $oTaskDefinition = _TS_TaskCreate($oService)
-	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskCreate returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-
-	; Set all task properties
-	Global $aProperties[] = [ _
-			"ACTIONS|Path|AppControlTask.exe", _
-			"SETTINGS|DisallowStartIfOnBatteries|False", _
-			"SETTINGS|StopIfGoingOnBatteries|False", _
-			"SETTINGS|Compatibility|4", _
-			"SETTINGS|ExecutionTimeLimit|PT0S", _
-			"REGISTRATIONINFO|Author|" & @ComputerName & "\" & @UserName, _
-			"REGISTRATIONINFO|Description|Task that triggers a toast notification on App Control block events.", _
-			"ACTIONS|WorkingDirectory|" & @ScriptDir, _
-			"ACTIONS|Arguments|blocked", _
-			"TRIGGERS|Enabled|True", _
-			"TRIGGERS|Type|" & $TASK_TRIGGER_EVENT, _
-			"TRIGGERS|Subscription|<QueryList><Query Id='0' Path='Microsoft-Windows-CodeIntegrity/Operational'><Select Path='Microsoft-Windows-CodeIntegrity/Operational'>*[System[(EventID=3077)]]</Select></Query></QueryList>" _
-			]
-	_TS_TaskPropertiesSet($oTaskDefinition, $aProperties)
-	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskPropertiesSet for the TaskDefinition returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-
-	; Create an Event trigger
-	Global $oTrigger = _TS_TriggerCreate($oTaskDefinition, $TASK_TRIGGER_EVENT)
-	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "Creating the Trigger returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-	_TS_TaskPropertiesSet($oTrigger, $aProperties)
-	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskPropertiesSet for the Trigger returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-
-	; Create an Action
-	Global $oAction = _TS_ActionCreate($oTaskDefinition, $TASK_ACTION_EXEC)
-	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "Creating the Action returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-	_TS_TaskPropertiesSet($oAction, $aProperties)
-	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskPropertiesSet for the Action returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-
-	; List properties of the Task Definition
-	Global $aTaskProperties = _TS_TaskPropertiesGet($oService, $oTaskDefinition,1 , True)
-	If Not @error Then
-		;_ArrayDisplay($aTaskProperties, "Properties of the task to be created")
-	Else
-		MsgBox($MB_ICONERROR, "_TS_TaskPropertiesGet", "Returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-	EndIf
-
-	; Register the task
-	Global $oTask = _TS_TaskRegister($oService, $sFolder, $sName, $oTaskDefinition)
-	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskRegister returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-	;MsgBox($MB_ICONINFORMATION, "_TS_TaskCreate", "Task " & $sName & " has been created!")
-
-	_TS_Close($oService)
-EndIf
-
-If $CmdLine[1] = "task-create-audit" Then
-	Global $sFolder = "\AppControlTray"    ; Folder where to create the task
-	Global $sName = "ToastAudit"  ; Name of the task to create
-	; *****************************************************************************
-	; Prepare start and end date of the trigger. Format must be YYYY-MM-DDTHH:MM:SS
-	; *****************************************************************************
-	Global $sStartDateTime = _DateAdd("n", 2, _NowCalc())
-	$sStartDateTime = StringReplace($sStartDateTime, "/", "-")
-	$sStartDateTime = StringReplace($sStartDateTime, " ", "T")
-	Global $sEndDateTime = _DateAdd("M", 4, _NowCalc())
-	$sEndDateTime = StringReplace($sEndDateTime, "/", "-")
-	$sEndDateTime = StringReplace($sEndDateTime, " ", "T")
-
-	; *****************************************************************************
-	; Connect to the Task Scheduler Service
-	; *****************************************************************************
-	Global $oService = _TS_Open()
-	If @error <> 0 Then Exit MsgBox($MB_ICONERROR, "Task Scheduler UDF", "Error connecting to the Task Scheduler Service. @error = " & @error & ", @extended = " & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-
-	; *****************************************************************************
-	; Delete a task in the same folder with the same name
-	; *****************************************************************************
-	_TS_TaskDelete($oService, $sFolder & "\" & $sName)
-	; If @error <> 0 And @error <> 2 Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskDelete returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-
-	; *****************************************************************************
-	; Create a new task
-	; *****************************************************************************
-	; Create the Task Definition object
-	Global $oTaskDefinition = _TS_TaskCreate($oService)
-	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskCreate returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-
-	; Set all task properties
-	Global $aProperties[] = [ _
-			"ACTIONS|Path|AppControlTask.exe", _
-			"SETTINGS|DisallowStartIfOnBatteries|False", _
-			"SETTINGS|StopIfGoingOnBatteries|False", _
-			"SETTINGS|Compatibility|4", _
-			"SETTINGS|ExecutionTimeLimit|PT0S", _
-			"REGISTRATIONINFO|Author|" & @ComputerName & "\" & @UserName, _
-			"REGISTRATIONINFO|Description|Task that triggers a toast notification on App Control audit events.", _
-			"ACTIONS|WorkingDirectory|" & @ScriptDir, _
-			"ACTIONS|Arguments|audit", _
-			"TRIGGERS|Enabled|True", _
-			"TRIGGERS|Type|" & $TASK_TRIGGER_EVENT, _
-			"TRIGGERS|Subscription|<QueryList><Query Id='0' Path='Microsoft-Windows-CodeIntegrity/Operational'><Select Path='Microsoft-Windows-CodeIntegrity/Operational'>*[System[(EventID=3076)]]</Select></Query></QueryList>" _
-			]
-	_TS_TaskPropertiesSet($oTaskDefinition, $aProperties)
-	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskPropertiesSet for the TaskDefinition returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-
-	; Create an Event trigger
-	Global $oTrigger = _TS_TriggerCreate($oTaskDefinition, $TASK_TRIGGER_EVENT)
-	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "Creating the Trigger returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-	_TS_TaskPropertiesSet($oTrigger, $aProperties)
-	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskPropertiesSet for the Trigger returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-
-	; Create an Action
-	Global $oAction = _TS_ActionCreate($oTaskDefinition, $TASK_ACTION_EXEC)
-	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "Creating the Action returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-	_TS_TaskPropertiesSet($oAction, $aProperties)
-	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskPropertiesSet for the Action returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-
-	; List properties of the Task Definition
-	Global $aTaskProperties = _TS_TaskPropertiesGet($oService, $oTaskDefinition,1 , True)
-	If Not @error Then
-		;_ArrayDisplay($aTaskProperties, "Properties of the task to be created")
-	Else
-		MsgBox($MB_ICONERROR, "_TS_TaskPropertiesGet", "Returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-	EndIf
-
-	; Register the task
-	Global $oTask = _TS_TaskRegister($oService, $sFolder, $sName, $oTaskDefinition)
-	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskRegister returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-	;MsgBox($MB_ICONINFORMATION, "_TS_TaskCreate", "Task " & $sName & " has been created!")
-
-	_TS_Close($oService)
-EndIf
-
-If $CmdLine[1] = "task-create-refresh" Then
-	Global $sFolder = "\AppControlTray"    ; Folder where to create the task
-	Global $sName = "PolicyRefresh"  ; Name of the task to create
-	; *****************************************************************************
-	; Prepare start and end date of the trigger. Format must be YYYY-MM-DDTHH:MM:SS
-	; *****************************************************************************
-	Global $sStartDateTime = _DateAdd("n", 2, _NowCalc())
-	$sStartDateTime = StringReplace($sStartDateTime, "/", "-")
-	$sStartDateTime = StringReplace($sStartDateTime, " ", "T")
-	Global $sEndDateTime = _DateAdd("M", 4, _NowCalc())
-	$sEndDateTime = StringReplace($sEndDateTime, "/", "-")
-	$sEndDateTime = StringReplace($sEndDateTime, " ", "T")
-
-	; *****************************************************************************
-	; Connect to the Task Scheduler Service
-	; *****************************************************************************
-	Global $oService = _TS_Open()
-	If @error <> 0 Then Exit MsgBox($MB_ICONERROR, "Task Scheduler UDF", "Error connecting to the Task Scheduler Service. @error = " & @error & ", @extended = " & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-
-	; *****************************************************************************
-	; Delete a task in the same folder with the same name
-	; *****************************************************************************
-	_TS_TaskDelete($oService, $sFolder & "\" & $sName)
-	; If @error <> 0 And @error <> 2 Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskDelete returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-
-	; *****************************************************************************
-	; Create a new task
-	; *****************************************************************************
-	; Create the Task Definition object
-	Global $oTaskDefinition = _TS_TaskCreate($oService)
-	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskCreate returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-
-	; Set all task properties
-	Global $aProperties[] = [ _
-			"ACTIONS|Path|AppControlTask.exe", _
-			"SETTINGS|DisallowStartIfOnBatteries|False", _
-			"SETTINGS|StopIfGoingOnBatteries|False", _
-			"SETTINGS|Compatibility|4", _
-			"SETTINGS|ExecutionTimeLimit|PT0S", _
-			"REGISTRATIONINFO|Author|" & @ComputerName & "\" & @UserName, _
-			"REGISTRATIONINFO|Description|Task that triggers a toast notification on App Control policy refresh events.", _
-			"ACTIONS|WorkingDirectory|" & @ScriptDir, _
-			"ACTIONS|Arguments|refresh", _
-			"TRIGGERS|Enabled|True", _
-			"TRIGGERS|Type|" & $TASK_TRIGGER_EVENT, _
-			"TRIGGERS|Subscription|<QueryList><Query Id='0' Path='Microsoft-Windows-CodeIntegrity/Operational'><Select Path='Microsoft-Windows-CodeIntegrity/Operational'>*[System[(EventID=3102)]]</Select></Query></QueryList>" _
-			]
-	_TS_TaskPropertiesSet($oTaskDefinition, $aProperties)
-	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskPropertiesSet for the TaskDefinition returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-
-	; Create an Event trigger
-	Global $oTrigger = _TS_TriggerCreate($oTaskDefinition, $TASK_TRIGGER_EVENT)
-	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "Creating the Trigger returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-	_TS_TaskPropertiesSet($oTrigger, $aProperties)
-	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskPropertiesSet for the Trigger returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-
-	; Create an Action
-	Global $oAction = _TS_ActionCreate($oTaskDefinition, $TASK_ACTION_EXEC)
-	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "Creating the Action returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-	_TS_TaskPropertiesSet($oAction, $aProperties)
-	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskPropertiesSet for the Action returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-
-	; List properties of the Task Definition
-	Global $aTaskProperties = _TS_TaskPropertiesGet($oService, $oTaskDefinition,1 , True)
-	If Not @error Then
-		;_ArrayDisplay($aTaskProperties, "Properties of the task to be created")
-	Else
-		MsgBox($MB_ICONERROR, "_TS_TaskPropertiesGet", "Returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-	EndIf
-
-	; Register the task
-	Global $oTask = _TS_TaskRegister($oService, $sFolder, $sName, $oTaskDefinition)
-	If @error Then Exit MsgBox($MB_ICONERROR, "_TS_TaskCreate", "_TS_TaskRegister returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-	;MsgBox($MB_ICONINFORMATION, "_TS_TaskCreate", "Task " & $sName & " has been created!")
-
-	_TS_Close($oService)
-EndIf
-
-If $CmdLine[1] = "task-delete-blocked" Then
-	; *****************************************************************************
-	; Connect to the Task Scheduler Service
-	; *****************************************************************************
-	Global $oService = _TS_Open()
-	If @error <> 0 Then Exit MsgBox($MB_ICONERROR, "Task Scheduler UDF", "Error connecting to the Task Scheduler Service. @error = " & @error & ", @extended = " & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-
-	; *****************************************************************************
-	; Delete task "Test-Task" from folder "\Test"
-	; *****************************************************************************
-	Global $sTaskPath = "\AppControlTray\ToastBlocked"    ; Folder and name of the task to be deleted
-	_TS_TaskDelete($oService, $sTaskPath)
-	If Not @error Then
-		;MsgBox($MB_ICONINFORMATION, "_TS_TaskDelete", "Task '" & $sTaskPath & "' successfully deleted!")
-	Else
-		MsgBox($MB_ICONERROR, "_TS_TaskDelete", "Returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-	EndIf
-	_TS_Close($oService)
-EndIf
-
-If $CmdLine[1] = "task-delete-audit" Then
-	; *****************************************************************************
-	; Connect to the Task Scheduler Service
-	; *****************************************************************************
-	Global $oService = _TS_Open()
-	If @error <> 0 Then Exit MsgBox($MB_ICONERROR, "Task Scheduler UDF", "Error connecting to the Task Scheduler Service. @error = " & @error & ", @extended = " & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-
-	; *****************************************************************************
-	; Delete task "Test-Task" from folder "\Test"
-	; *****************************************************************************
-	Global $sTaskPath = "\AppControlTray\ToastAudit"    ; Folder and name of the task to be deleted
-	_TS_TaskDelete($oService, $sTaskPath)
-	If Not @error Then
-		;MsgBox($MB_ICONINFORMATION, "_TS_TaskDelete", "Task '" & $sTaskPath & "' successfully deleted!")
-	Else
-		MsgBox($MB_ICONERROR, "_TS_TaskDelete", "Returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-	EndIf
-	_TS_Close($oService)
-EndIf
-
-If $CmdLine[1] = "task-delete-refresh" Then
-	; *****************************************************************************
-	; Connect to the Task Scheduler Service
-	; *****************************************************************************
-	Global $oService = _TS_Open()
-	If @error <> 0 Then Exit MsgBox($MB_ICONERROR, "Task Scheduler UDF", "Error connecting to the Task Scheduler Service. @error = " & @error & ", @extended = " & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-
-	; *****************************************************************************
-	; Delete task "Test-Task" from folder "\Test"
-	; *****************************************************************************
-	Global $sTaskPath = "\AppControlTray\PolicyRefresh"    ; Folder and name of the task to be deleted
-	_TS_TaskDelete($oService, $sTaskPath)
-	If Not @error Then
-		;MsgBox($MB_ICONINFORMATION, "_TS_TaskDelete", "Task '" & $sTaskPath & "' successfully deleted!")
-	Else
-		MsgBox($MB_ICONERROR, "_TS_TaskDelete", "Returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-	EndIf
-	_TS_Close($oService)
-EndIf
-
-If $CmdLine[1] = "task-delete-folder" Then
-	; *****************************************************************************
-	; Connect to the Task Scheduler Service
-	; *****************************************************************************
-	Global $oService = _TS_Open()
-	If @error <> 0 Then Exit MsgBox($MB_ICONERROR, "Task Scheduler UDF", "Error connecting to the Task Scheduler Service. @error = " & @error & ", @extended = " & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-
-	; *****************************************************************************
-	; Delete a folder
-	; $sFolder has always to start at the root folder (means you have to
-	; specify all the folders from the root down even when they already exist)
-	; *****************************************************************************
-	Global $sFolder = "\AppControlTray"
-	_TS_FolderDelete($oService, $sFolder)
-	If Not @error Then
-		;MsgBox($MB_ICONINFORMATION, "_TS_FolderDelete", "Folder: " & $sFolder & " successfully deleted!")
-	Else
-		MsgBox($MB_ICONERROR, "_TS_FolderDelete", "Returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-	EndIf
-	_TS_Close($oService)
+If $CmdLine[1] = "removetasks" Then
+	task_delete_blocked()
+	task_delete_audit()
+	task_delete_refresh()
+	Sleep(1000)
+	task_delete_folder()
 EndIf
