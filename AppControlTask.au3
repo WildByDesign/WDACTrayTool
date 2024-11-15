@@ -17,8 +17,8 @@
 #AutoIt3Wrapper_Icon=AppControl.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Tray Tool
-#AutoIt3Wrapper_Res_Fileversion=3.5.0.0
-#AutoIt3Wrapper_Res_ProductVersion=3.5.0
+#AutoIt3Wrapper_Res_Fileversion=4.0.0.0
+#AutoIt3Wrapper_Res_ProductVersion=4.0.0
 #AutoIt3Wrapper_Res_ProductName=AppControlTrayTool
 #AutoIt3Wrapper_Res_LegalCopyright=@ 2024 WildByDesign
 #AutoIt3Wrapper_Res_Language=1033
@@ -440,13 +440,9 @@ If $CmdLine[1] = "convert" Then
 
 	Local $quote = "'"
 	Local $quote2 = '"'
-	Local $cmd1 = ' -NoProfile -Command ' & $quote2 & 'Set-CIPolicyVersion -FilePath ' & $quote & $xmlupdatedname & $quote & ' -Version ' & $quote & $versionincreased & $quote & $quote2
-	Local $cmd2 = ' -NoProfile -Command ' & $quote2 & 'ConvertFrom-CIPolicy -XmlFilePath ' & $quote & $xmlupdatedname & $quote & ' -BinaryFilePath ' & $quote & $binarynamechosen & $quote & $quote2
+	Local $cmd1 = ' -NoProfile -Command ' & $quote2 & '$CurrentDate = Get-Date -UFormat "%Y-%m-%d"; Set-CIPolicyIdInfo -FilePath ' & $quote & $xmlupdatedname & $quote & ' -PolicyId $CurrentDate; Set-CIPolicyVersion -FilePath ' & $quote & $xmlupdatedname & $quote & ' -Version ' & $quote & $versionincreased & $quote & '; ConvertFrom-CIPolicy -XmlFilePath ' & $quote & $xmlupdatedname & $quote & ' -BinaryFilePath ' & $quote & $binarynamechosen & $quote & $quote2
 	Local $o_powershell = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
-	Local $o_Pid1 = RunWait($o_powershell & $cmd1, @ScriptDir, @SW_Hide)
-	Local $o_Pid2 = RunWait($o_powershell & $cmd2, @ScriptDir, @SW_Hide)
-	;MsgBox($MB_SYSTEMMODAL, "Title", $o_powershell & $cmd1)
-	;MsgBox($MB_SYSTEMMODAL, "Title", $o_powershell & $cmd2)
+	Local $o_Pid1 = Run($o_powershell & $cmd1, @ScriptDir, @SW_Hide)
 EndIf
 
 If $CmdLine[1] = "installtasks" Then
