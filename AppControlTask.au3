@@ -16,10 +16,10 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=AppControl.ico
 #AutoIt3Wrapper_UseX64=y
-#AutoIt3Wrapper_Res_Description=App Control Tray Tool
-#AutoIt3Wrapper_Res_Fileversion=4.0.0.0
-#AutoIt3Wrapper_Res_ProductVersion=4.0.0
-#AutoIt3Wrapper_Res_ProductName=AppControlTrayTool
+#AutoIt3Wrapper_Res_Description=App Control Task Manager
+#AutoIt3Wrapper_Res_Fileversion=4.5.0.0
+#AutoIt3Wrapper_Res_ProductVersion=4.5.0
+#AutoIt3Wrapper_Res_ProductName=AppControlTaskManager
 #AutoIt3Wrapper_Res_LegalCopyright=@ 2024 WildByDesign
 #AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_Res_HiDpi=P
@@ -377,7 +377,7 @@ Run(@ScriptDir & "\toasts\snoretoast.exe" & $cmdRefresh, @ScriptDir & "\toasts",
 EndIf
 
 If $CmdLine[1] = "convert" Then
-	$mFile = FileOpenDialog("Select XML Policy File for Conversion", @ScriptDir & "\policies\", "Policy Files (*.xml)", 1)
+	$mFile = FileOpenDialog("Select XML Policy File for Conversion", @ScriptDir, "Policy Files (*.xml)", 1)
 	If @error Then
 		Exit
 	Else

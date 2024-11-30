@@ -1,3 +1,18 @@
+#NoTrayIcon
+#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
+#AutoIt3Wrapper_Icon=AppControl.ico
+#AutoIt3Wrapper_UseX64=y
+#AutoIt3Wrapper_Res_Description=App Control Tray Tool
+#AutoIt3Wrapper_Res_Fileversion=4.5.0.0
+#AutoIt3Wrapper_Res_ProductVersion=4.5.0
+#AutoIt3Wrapper_Res_ProductName=AppControlTrayTool
+#AutoIt3Wrapper_Res_LegalCopyright=@ 2024 WildByDesign
+#AutoIt3Wrapper_Res_Language=1033
+#AutoIt3Wrapper_Res_HiDpi=P
+#AutoIt3Wrapper_Res_Icon_Add=AppControl.ico
+#AutoIt3Wrapper_Res_Icon_Add=AppControl-Audit.ico
+#AutoIt3Wrapper_Res_Icon_Add=AppControl-Disabled.ico
+#EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #Region
 #include <MsgBoxConstants.au3>
 #include <TrayConstants.au3>
@@ -16,26 +31,10 @@
 
 #include "includes\TaskScheduler.au3"
 
-#NoTrayIcon
-#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
-#AutoIt3Wrapper_Icon=AppControl.ico
-#AutoIt3Wrapper_Res_Icon_Add=AppControl.ico
-#AutoIt3Wrapper_Res_Icon_Add=AppControl-Audit.ico
-#AutoIt3Wrapper_Res_Icon_Add=AppControl-Disabled.ico
-#AutoIt3Wrapper_UseX64=y
-#AutoIt3Wrapper_Res_Description=App Control Tray Tool
-#AutoIt3Wrapper_Res_Fileversion=4.0.0.0
-#AutoIt3Wrapper_Res_ProductVersion=4.0.0
-#AutoIt3Wrapper_Res_ProductName=AppControlTrayTool
-#AutoIt3Wrapper_Res_LegalCopyright=@ 2024 WildByDesign
-#AutoIt3Wrapper_Res_Language=1033
-#AutoIt3Wrapper_Res_HiDpi=P
-#EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
-
 Opt("TrayMenuMode", 3)
 Opt("TrayAutoPause", 0)
 
-Global $programVersion = "4.0"
+Global $programVersion = "4.5"
 ;Global $softName = "App Control Tray Tool"
 Global $trayIcon = "AppControl.ico"
 Global $idRegTitleKey = "App Control Tray Tool"
@@ -210,7 +209,7 @@ If $setCWD Then FileChangeDir(@ScriptDir)
 
 ; Menu
 ;Local $idPStest = TrayCreateItem("App Control Policy Status")
-Local $idPStest = TrayCreateItem("Active Policy List and Status")
+Local $idPStest = TrayCreateItem("App Control Policy Manager")
 Local $idCiTool = TrayCreateItem("CiTool Status (-lp)")
 TrayCreateItem("")
 Local $idWDACWizard = TrayCreateItem("App Control Wizard")
@@ -311,7 +310,7 @@ Func StartWithWindows()
     EndIf
 EndFunc
 Func PStest()
-	Run(@ScriptDir & "\AppControlHelper.exe /status")
+	Run(@ScriptDir & "\AppControlManager.exe")
 EndFunc
 
 TraySetToolTip($tipTitle & $dString14)
