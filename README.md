@@ -4,7 +4,7 @@ I created this App Control System Tray Tool to facilitate more efficient changin
 
 ### Screenshots:
 
-![AppControlPolicyManager](https://github.com/user-attachments/assets/b3a3ec3e-3950-4579-9188-b2f47784abce)
+![AppControlPolicyManager](https://github.com/user-attachments/assets/7d5b3b1b-c914-4635-a16e-7f52bfb59333)
 
 ![WDAC3screen](https://github.com/user-attachments/assets/e3294dd1-3eb1-4b38-8899-7c935303b7b9)
 
