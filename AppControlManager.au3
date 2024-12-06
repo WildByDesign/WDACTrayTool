@@ -1,21 +1,16 @@
-#Region ; *** Dynamically added Include files ***
-#include <WinAPIFiles.au3>                                   ; added:12/02/24 09:27:54
-#EndRegion ; *** Dynamically added Include files ***
 #NoTrayIcon
 #RequireAdmin
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=AppControl.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Policy Manager
-#AutoIt3Wrapper_Res_Fileversion=4.6.0.0
-#AutoIt3Wrapper_Res_ProductVersion=4.6.0
+#AutoIt3Wrapper_Res_Fileversion=4.7.0.0
+#AutoIt3Wrapper_Res_ProductVersion=4.7.0
 #AutoIt3Wrapper_Res_ProductName=AppControlPolicyManager
 #AutoIt3Wrapper_Res_LegalCopyright=@ 2024 WildByDesign
 #AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_Res_HiDpi=P
 #AutoIt3Wrapper_Res_Icon_Add=AppControl.ico
-#AutoIt3Wrapper_Res_Icon_Add=AppControl-Audit.ico
-#AutoIt3Wrapper_Res_Icon_Add=AppControl-Disabled.ico
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #Region
 #include <AutoItConstants.au3>
@@ -34,6 +29,8 @@
 #include <FontConstants.au3>
 #include <Constants.au3>
 #include <ListViewConstants.au3>
+#include <WinAPIFiles.au3>
+#include <Constants.au3>
 #EndRegion
 
 #include "includes\ExtMsgBox.au3"
@@ -42,7 +39,7 @@
 #include "includes\GUIListViewEx.au3"
 #include "includes\XML.au3"
 
-Global $programversion = "4.6"
+Global $programversion = "4.7"
 
 ;Opt('MustDeclareVars', 1)
 
@@ -74,6 +71,18 @@ For $i = 0 To UBound($aCol)-1
     $aCol[$i][1] = _BGR2RGB($aCol[$i][1])
 Next
 
+; Fake older build for testing
+;Global $WinBuild = "22621"
+
+Global $WinBuild = @OSBuild
+If $WinBuild >= 26100 Then
+	Global $is24H2 = True
+	;MsgBox($MB_SYSTEMMODAL, "Title", "This is 24H2 or newer")
+Else
+	Global $is24H2 = False
+	;MsgBox($MB_SYSTEMMODAL, "Title", "This is not 24H2")
+EndIf
+
 Global $ifPS7Exists = FileExists(@ProgramFilesDir & '\PowerShell\7\pwsh.exe')
 If $ifPS7Exists Then
 	Global $o_powershell = @ProgramFilesDir & '\PowerShell\7\pwsh.exe -NoProfile -Command'
@@ -83,31 +92,29 @@ EndIf
 
 GetPolicyInfo()
 Func GetPolicyInfo()
-Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,VersionString,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
-;Local $o_CmdString1 = " $DesktopPath = [Environment]::GetFolderPath('Desktop'); $FileSave = $DesktopPath + '\test-output.txt'; (CiTool -lp -json | ConvertFrom-Json).Policies | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,VersionString,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL | Out-File -FilePath $FileSave"
+If $is24H2 = True Then
+	Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,VersionString,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
+Else
+	Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
+	; Pre-24H2 Simulation using older CiTool
+	;Local $o_CmdString1 = " (.\CiTool\22621\CiTool.exe -lp -json | ConvertFrom-Json).Policies | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
+EndIf
+
 Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
 ProcessWaitClose($o_Pid)
 $out = StdoutRead($o_Pid)
 CreatePolicyTable($out)
 EndFunc
-
-;;;
-
-;GetPolicyInfo2()
-Func GetPolicyInfo2()
-Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,VersionString,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
-;Local $o_CmdString1 = " $DesktopPath = [Environment]::GetFolderPath('Desktop'); $FileSave = $DesktopPath + '\test-output.txt'; (CiTool -lp -json | ConvertFrom-Json).Policies | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,VersionString,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL | Out-File -FilePath $FileSave"
-Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
-ProcessWaitClose($o_Pid)
-$out = StdoutRead($o_Pid)
-CreatePolicyTable($out)
-EndFunc
-
-;;;
-
 
 Func GetPolicyEnforced()
-Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.IsEnforced -eq 'True'} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,VersionString,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
+If $is24H2 = True Then
+	Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.IsEnforced -eq 'True'} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,VersionString,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
+Else
+	Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.IsEnforced -eq 'True'} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
+	; Pre-24H2 Simulation using older CiTool
+	;Local $o_CmdString1 = " (.\CiTool\22621\CiTool.exe -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.IsEnforced -eq 'True'} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
+EndIf
+
 Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
 ProcessWaitClose($o_Pid)
 $out = StdoutRead($o_Pid)
@@ -115,7 +122,14 @@ CreatePolicyTable($out)
 EndFunc
 
 Func GetPolicyBase()
-Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.PolicyID -eq $_.BasePolicyID} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,VersionString,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property FriendlyName | FL"
+If $is24H2 = True Then
+	Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.PolicyID -eq $_.BasePolicyID} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,VersionString,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property FriendlyName | FL"
+Else
+	Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.PolicyID -eq $_.BasePolicyID} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property FriendlyName | FL"
+	; Pre-24H2 Simulation using older CiTool
+	;Local $o_CmdString1 = " (.\CiTool\22621\CiTool.exe -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.PolicyID -eq $_.BasePolicyID} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property FriendlyName | FL"
+EndIf
+
 Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
 ProcessWaitClose($o_Pid)
 $out = StdoutRead($o_Pid)
@@ -123,7 +137,14 @@ CreatePolicyTable($out)
 EndFunc
 
 Func GetPolicySupp()
-Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.PolicyID -ne $_.BasePolicyID} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,VersionString,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property FriendlyName | FL"
+If $is24H2 = True Then
+	Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.PolicyID -ne $_.BasePolicyID} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,VersionString,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property FriendlyName | FL"
+Else
+	Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.PolicyID -ne $_.BasePolicyID} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property FriendlyName | FL"
+	; Pre-24H2 Simulation using older CiTool
+	;Local $o_CmdString1 = " (.\CiTool\22621\CiTool.exe -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.PolicyID -ne $_.BasePolicyID} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property FriendlyName | FL"
+EndIf
+
 Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
 ProcessWaitClose($o_Pid)
 $out = StdoutRead($o_Pid)
@@ -131,15 +152,23 @@ CreatePolicyTable($out)
 EndFunc
 
 Func GetPolicySigned()
-Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.IsSignedPolicy -eq 'True'} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,VersionString,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
-Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
-ProcessWaitClose($o_Pid)
-$out = StdoutRead($o_Pid)
-CreatePolicyTable($out)
+	Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.IsSignedPolicy -eq 'True'} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,VersionString,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
+
+	Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
+	ProcessWaitClose($o_Pid)
+	$out = StdoutRead($o_Pid)
+	CreatePolicyTable($out)
 EndFunc
 
 Func GetPolicySystem()
-Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.IsSystemPolicy -eq 'True'} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,VersionString,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
+If $is24H2 = True Then
+	Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.IsSystemPolicy -eq 'True'} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,VersionString,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
+Else
+	Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.IsSystemPolicy -eq 'True'} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
+	; Pre-24H2 Simulation using older CiTool
+	;Local $o_CmdString1 = " (.\CiTool\22621\CiTool.exe -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.IsSystemPolicy -eq 'True'} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
+EndIf
+
 Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
 ProcessWaitClose($o_Pid)
 $out = StdoutRead($o_Pid)
@@ -147,23 +176,55 @@ CreatePolicyTable($out)
 EndFunc
 
 Func CreatePolicyTable($out_passed)
-Local $string0 = StringStripWS($out_passed, $STR_STRIPSPACES)
-Local $string1 = StringReplace($string0, "FriendlyName : ", "")
-Local $string2 = StringReplace($string1, "BasePolicyID : ", "")
-Local $string3 = StringReplace($string2, "PolicyID : ", "")
-Local $string4 = StringReplace($string3, "VersionString : ", "")
-Local $string5 = StringReplace($string4, "IsEnforced : ", "")
-Local $string6 = StringReplace($string5, "IsOnDisk : ", "")
-Local $string7 = StringReplace($string6, "IsSignedPolicy : ", "")
-Local $string8 = StringReplace($string7, "IsSystemPolicy : ", "")
-Local $string9 = StringReplace($string8, "IsAuthorized : ", "")
-Local $string10 = StringReplace($string9, "PolicyOptions : ", "")
-Local $string11 = StringReplace($string10, "[32;1m", "")
-Local $string12 = StringReplace($string11, "[0m", "")
-;Local $string13 = StringReplace($string12, "                 ", " ")
-Local $string13 = StringStripWS($string12, $STR_STRIPLEADING + $STR_STRIPTRAILING)
+
+If $is24H2 = True Then
+
+	Local $string0 = StringStripWS($out_passed, $STR_STRIPSPACES + $STR_STRIPLEADING + $STR_STRIPTRAILING)
+	Local $string1 = StringReplace($string0, "FriendlyName : ", "")
+	Local $string2 = StringReplace($string1, "BasePolicyID : ", "")
+	Local $string3 = StringReplace($string2, "PolicyID : ", "")
+	Local $string4 = StringReplace($string3, "VersionString : ", "")
+	Local $string5 = StringReplace($string4, "IsEnforced : ", "")
+	Local $string6 = StringReplace($string5, "IsOnDisk : ", "")
+	Local $string7 = StringReplace($string6, "IsSignedPolicy : ", "")
+	Local $string8 = StringReplace($string7, "IsSystemPolicy : ", "")
+	Local $string9 = StringReplace($string8, "IsAuthorized : ", "")
+	Local $string10 = StringReplace($string9, "PolicyOptions : ", "")
+	Local $string11 = StringReplace($string10, "[32;1m", "")
+	Local $string12 = StringReplace($string11, "[0m", "")
+	Local $string13 = StringReplace($string12, "{", "")
+	Local $string14 = StringReplace($string13, "}", "")
+	Local $string15 = StringReplace($string14, "Version : ", "")
+	Local $finalparse = $string15
+
+Else
+
+	;Local $string0 = StringStripWS($out_passed, $STR_STRIPSPACES + $STR_STRIPLEADING + $STR_STRIPTRAILING)
+	Local $string0 = StringStripWS($out_passed, $STR_STRIPLEADING + $STR_STRIPTRAILING)
+	Local $string1 = StringReplace($string0, "FriendlyName   : ", "")
+	Local $string2 = StringReplace($string1, "BasePolicyID   : ", "")
+	Local $string3 = StringReplace($string2, "PolicyID       : ", "")
+	Local $string4 = StringReplace($string3, "VersionString  : ", "*")
+	Local $string5 = StringReplace($string4, "IsEnforced     : ", "")
+	Local $string6 = StringReplace($string5, "IsOnDisk       : ", "")
+	Local $string7 = StringReplace($string6, "IsSignedPolicy : ", "*")
+	Local $string8 = StringReplace($string7, "IsSystemPolicy : ", "")
+	Local $string9 = StringReplace($string8, "IsAuthorized   : ", "")
+	Local $string10 = StringReplace($string9, "PolicyOptions  : ", "*")
+	Local $string11 = StringReplace($string10, "[32;1m", "")
+	Local $string12 = StringReplace($string11, "[0m", "")
+	Local $string13 = StringReplace($string12, "{", "")
+	Local $string14 = StringReplace($string13, "}", "")
+	Local $string15 = StringReplace($string14, "Version        : ", "")
+	Local $string16 = StringStripWS($string15, $STR_STRIPSPACES)
+	Local $string17 = StringReplace($string16, "PolicyOptions :", "*")
+	Local $finalparse = $string17
+
+EndIf
 
 ;;;
+
+; Testing in case of parsing issues
 
 ;Local Const $sFilePath = @DesktopDir & "\test-output.txt"
 ;Local $hFileOpen = FileOpen($sFilePath, $FO_OVERWRITE)
@@ -172,12 +233,15 @@ Local $string13 = StringStripWS($string12, $STR_STRIPLEADING + $STR_STRIPTRAILIN
 
 ;Local Const $sFilePath2 = @DesktopDir & "\test-parsed.txt"
 ;Local $hFileOpen2 = FileOpen($sFilePath2, $FO_OVERWRITE)
-;FileWrite($hFileOpen2, $string14)
+;FileWrite($hFileOpen2, $finalparse)
 ;FileClose($hFileOpen2)
 
 ;;;
 
-$arpol = stringsplit($string13, @CR , 0)
+$arpol = stringsplit($finalparse, @CR , 0)
+
+;_ArrayDisplay($arpol, "test")
+
 Global $policyoutput = UBound ($arpol, $UBOUND_ROWS)
 Global $policycorrect = $policyoutput - 1
 Global $policycount = $policycorrect / 10
@@ -819,6 +883,23 @@ EndIf
 
 ; TODO: Add more policy arrays later
 
+If $is24H2 = False Then
+
+For $i = 0 To UBound($aWords) -1
+	$iVersion = $aWords[$i][5]
+    Local $tUInt64  = DllStructCreate("uint64 value;"), _
+          $tVersion = DllStructCreate("word revision; word build; word minor; word major", DllStructGetPtr($tUInt64))
+
+    $tUInt64.value = $iVersion
+
+    Local $iVersionString = StringFormat('%i.%i.%i.%i', $tVersion.major, $tVersion.minor, $tVersion.build, $tVersion.revision)
+
+	$aWords[$i][5] = $iVersionString
+
+Next
+
+EndIf
+
 Endfunc
 
 GetPolicyStatus()
@@ -850,6 +931,7 @@ $hGUI = GUICreate("App Control Policy Manager", 1220, 594, -1, -1, 0x00CF0000)
 GUISetIcon(@ScriptFullPath, 201)
 
 Local $hToolTip2 = _GUIToolTip_Create(0)
+_GUIToolTip_SetMaxTipWidth($hToolTip2, 286)
 
 $AboutButton = GUICtrlCreateButton("About", 1085, 490, 100, 30)
 Local $hAboutButton = GUICtrlGetHandle($AboutButton)
@@ -887,6 +969,13 @@ _GUIToolTip_AddTool($hToolTip2, 0, "Supplemental", $hFilterSupp)
 
 $FilterSigned = GUICtrlCreateButton("Signed", 770, 410, 85, 30)
 Local $hFilterSigned = GUICtrlGetHandle($FilterSigned)
+
+If $is24H2 = False Then
+$FilterSignedLabel = GUICtrlCreateLabel("", 768, 408, 87, 32, $WS_CLIPSIBLINGS)
+Local $hFilterSignedLabel = GUICtrlGetHandle($FilterSignedLabel)
+GUICtrlSetState($FilterSigned,$GUI_DISABLE)
+_GUIToolTip_AddTool($hToolTip2, 0, "Policy list cannot be filtered by Signed policies on pre-24H2 builds of Windows 11.", $hFilterSignedLabel)
+EndIf
 
 $FilterSystem = GUICtrlCreateButton("System", 770, 450, 85, 30)
 Local $hFilterSystem = GUICtrlGetHandle($FilterSystem)
@@ -942,11 +1031,23 @@ Func CountEnforced()
 	;MsgBox($MB_SYSTEMMODAL, "Title", "Count = " & $CountEnforced)
 Endfunc
 
-
 $Label2 = GUICtrlCreateLabel("Current Policy Information:", 96, 370, 240, 25)
 Local $hLabel2 = GUICtrlGetHandle($Label2)
 $PolicyStatus = GUICtrlCreateLabel(" Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced & @CRLF & @CRLF & " " & $topstatus9, 35, 410, 340, 112, $WS_BORDER)
 Local $hPolicyStatus = GUICtrlGetHandle($PolicyStatus)
+
+If $is24H2 = True Then
+Else
+	$pre24H2Lablel = GUICtrlCreateLabel("* Pre-24H2 OS will show less information.", 66, 550, 340, 30)
+	Local $hpre24H2Lablel = GUICtrlGetHandle($pre24H2Lablel)
+	If $isDarkMode = True Then
+		GUICtrlSetColor($pre24H2Lablel, $COLOR_WHITE)
+		GUICtrlSetFont($pre24H2Lablel, 8.5, -1, -1, "Segoe UI")
+	Else
+		GUICtrlSetColor($pre24H2Lablel, $COLOR_BLACK)
+		GUICtrlSetFont($pre24H2Lablel, 8.5, -1, -1, "Segoe UI")
+	EndIf
+EndIf
 
 _GUICtrlListView_SetColumnWidth($hListView, 0, $LVSCW_AUTOSIZE_USEHEADER)
 _GUICtrlListView_SetColumnWidth($hListView, 1, $LVSCW_AUTOSIZE_USEHEADER)
@@ -958,7 +1059,7 @@ _GUICtrlListView_SetColumnWidth($hListView, 6, $LVSCW_AUTOSIZE_USEHEADER)
 _GUICtrlListView_SetColumnWidth($hListView, 7, $LVSCW_AUTOSIZE_USEHEADER)
 _GUICtrlListView_SetColumnWidth($hListView, 8, $LVSCW_AUTOSIZE_USEHEADER)
 _GUICtrlListView_SetColumnWidth($hListView, 9, $LVSCW_AUTOSIZE_USEHEADER)
-_GUICtrlListView_SetColumnWidth($hListView, 10, $LVSCW_AUTOSIZE)
+_GUICtrlListView_SetColumnWidth($hListView, 10, $LVSCW_AUTOSIZE_USEHEADER)
 
 If $isDarkMode = True Then
 GUICtrlSetColor($Label2, $COLOR_WHITE)
@@ -1189,6 +1290,27 @@ Func CheckIsSystem()
 		$sMsg &= " Please uncheck any system policies and try again. " & @CRLF
 		_ExtMsgBox (0 & ";" & @ScriptDir & "\AppControlManager.exe", 0, "App Control Policy Manager", $sMsg)
 	Else
+		;PolicyRemoval()
+		CheckIsSigned()
+	EndIf
+Endfunc
+
+Func CheckIsSigned()
+    Local $sReturn = ''
+    For $i = 0 To _GUICtrlListView_GetItemCount($cListView) - 1
+        ; IsSignedPolicy is column 7
+		$signedpol = _GUICtrlListView_GetItemText($cListView, $i, 7)
+		If _GUICtrlListView_GetItemChecked($cListView, $i) Then
+            $sReturn &= $signedpol & '|'
+        EndIf
+	Next
+	Local $SignedPolicyTrue = StringInStr($sReturn, "True")
+	If $SignedPolicyTrue <> 0 Then
+		$sMsg = " Signed base policies cannot be removed with this " & @CRLF
+		$sMsg &= " method but Signed supplemental policies can. " & @CRLF & @CRLF
+		_ExtMsgBox (0 & ";" & @ScriptDir & "\AppControlManager.exe", 0, "App Control Policy Manager", $sMsg)
+		PolicyRemoval()
+	Else
 		PolicyRemoval()
 	EndIf
 Endfunc
@@ -1293,6 +1415,7 @@ Func ConvertPolicy()
 
 	EndIf
 Endfunc
+
 
 While 1
     Switch GUIGetMsg()
