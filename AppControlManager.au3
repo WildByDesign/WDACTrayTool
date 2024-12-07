@@ -4,8 +4,8 @@
 #AutoIt3Wrapper_Icon=AppControl.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Policy Manager
-#AutoIt3Wrapper_Res_Fileversion=4.7.0.0
-#AutoIt3Wrapper_Res_ProductVersion=4.7.0
+#AutoIt3Wrapper_Res_Fileversion=4.8.0.0
+#AutoIt3Wrapper_Res_ProductVersion=4.8.0
 #AutoIt3Wrapper_Res_ProductName=AppControlPolicyManager
 #AutoIt3Wrapper_Res_LegalCopyright=@ 2024 WildByDesign
 #AutoIt3Wrapper_Res_Language=1033
@@ -39,7 +39,7 @@
 #include "includes\GUIListViewEx.au3"
 #include "includes\XML.au3"
 
-Global $programversion = "4.7"
+Global $programversion = "4.8"
 
 ;Opt('MustDeclareVars', 1)
 
@@ -59,6 +59,7 @@ Global $hGUI, $cListView, $hListView
 Global $out, $arpol, $arraycount, $policycount, $policyoutput, $policycorrect, $CountTotal, $ExitButton, $TestButton, $Label2, $aContent, $iLV_Index
 Global $CountEnforced = 0
 
+If $isDarkMode = True Then
 Global $iDllGDI = DllOpen("gdi32.dll")
 Global $iDllUSER32 = DllOpen("user32.dll")
 
@@ -70,6 +71,7 @@ For $i = 0 To UBound($aCol)-1
     $aCol[$i][0] = _BGR2RGB($aCol[$i][0])
     $aCol[$i][1] = _BGR2RGB($aCol[$i][1])
 Next
+EndIf
 
 ; Fake older build for testing
 ;Global $WinBuild = "22621"
@@ -195,7 +197,13 @@ If $is24H2 = True Then
 	Local $string13 = StringReplace($string12, "{", "")
 	Local $string14 = StringReplace($string13, "}", "")
 	Local $string15 = StringReplace($string14, "Version : ", "")
-	Local $finalparse = $string15
+	Local $string16 = StringReplace($string15, "...", "")
+	Local $string17 = StringReplace($string16, "Default Policy.", "Default Policy")
+	Local $string18 = StringReplace($string17, "Integrity Policy.", "Integrity Policy")
+	Local $string19 = StringReplace($string18, "Supplemental Policies.", "Supplemental Policies")
+	Local $string20 = StringReplace($string19, "Code Trust.", "Code Trust")
+	Local $string21 = StringReplace($string20, "Rule Protection.", "Rule Protection")
+	Local $finalparse = $string21
 
 Else
 
@@ -218,7 +226,13 @@ Else
 	Local $string15 = StringReplace($string14, "Version        : ", "")
 	Local $string16 = StringStripWS($string15, $STR_STRIPSPACES)
 	Local $string17 = StringReplace($string16, "PolicyOptions :", "*")
-	Local $finalparse = $string17
+	Local $string18 = StringReplace($string17, "...", "")
+	Local $string19 = StringReplace($string18, "Default Policy.", "Default Policy")
+	Local $string20 = StringReplace($string19, "Integrity Policy.", "Integrity Policy")
+	Local $string21 = StringReplace($string20, "Supplemental Policies.", "Supplemental Policies")
+	Local $string22 = StringReplace($string21, "Code Trust.", "Code Trust")
+	Local $string23 = StringReplace($string22, "Rule Protection.", "Rule Protection")
+	Local $finalparse = $string23
 
 EndIf
 
@@ -923,7 +937,7 @@ Global $topstatus9 = StringStripWS($topstatus8, $STR_STRIPLEADING + $STR_STRIPTR
 
 Endfunc
 
-Local $exStyles = BitOR($LVS_EX_FULLROWSELECT, $LVS_EX_CHECKBOXES, $LVS_EX_INFOTIP), $cListView
+Local $exStyles = BitOR($LVS_EX_FULLROWSELECT, $LVS_EX_CHECKBOXES), $cListView
 
 ;$hGUI = GUICreate("App Control Policy Manager", 1220, 560, -1, -1, 0x00CF0000)
 $hGUI = GUICreate("App Control Policy Manager", 1220, 594, -1, -1, 0x00CF0000)
@@ -1000,6 +1014,7 @@ _GUICtrlListView_SetExtendedListViewStyle($hListView, $exStyles)
 
 _GUICtrlListView_AddArray($hListView,$aWords)
 
+If $isDarkMode = True Then
 ;get handle to child SysHeader32 control of ListView
 Global $hHeader = HWnd(GUICtrlSendMsg($cListView, $LVM_GETHEADER, 0, 0))
 ;Turn off theme for header
@@ -1011,6 +1026,7 @@ Global $wProcOld = _WinAPI_SetWindowLong($hListView, $GWL_WNDPROC, DllCallbackGe
 ;Optional: Flat Header - remove header 3D button effect
 Global $iStyle = _WinAPI_GetWindowLong($hHeader, $GWL_STYLE)
 _WinAPI_SetWindowLong($hHeader, $GWL_STYLE, BitOR($iStyle, $HDS_FLAT))
+EndIf
 
 CountTotal()
 Func CountTotal()
