@@ -3,6 +3,8 @@
 #include <WindowsConstants.au3>
 #include <WinAPISysWin.au3>
 
+Global $isDarkMode = _WinAPI_ShouldAppsUseDarkMode()
+
 #Region ; APIThemeConstantsEx.au3
 ;~ #include "APIThemeConstantsEx.au3"
 ; _WinAPI_GetIsImmersiveColorUsingHighContrast($IMMERSIVE_HC_CACHE_MODE)
@@ -1015,7 +1017,11 @@ Func _GUICtrlSetDarkTheme($vCtrl, $bEnableDarkTheme = True)
 				GUICtrlSetColor(_WinAPI_GetDlgCtrlID($vCtrl), $iGUI_Ctrl_Color)
 				GUICtrlSetBkColor(_WinAPI_GetDlgCtrlID($vCtrl), $iGUI_Ctrl_BkColor)
 			Else
-				$sThemeName = 'DarkMode_Explorer'
+                If $isDarkMode = True Then
+                $sThemeName = 'DarkMode_Explorer'
+                Else
+                $sThemeName = 'Explorer'
+                EndIf
 			EndIf
 
 
@@ -1027,11 +1033,14 @@ Func _GUICtrlSetDarkTheme($vCtrl, $bEnableDarkTheme = True)
 			GUICtrlSetColor(_WinAPI_GetDlgCtrlID($vCtrl), $iGUI_Ctrl_Color)
 			GUICtrlSetBkColor(_WinAPI_GetDlgCtrlID($vCtrl), $iGUI_Ctrl_BkColor)
 		Case 'SysHeader32'
-			$sThemeName = 'DarkMode_ItemsView'
+			$sThemeName = 'ItemsView'
 			$sThemeList = 'Header'
-
 		Case 'ListBox', 'SysTreeView32', 'SysListView32', 'Edit', 'msctls_trackbar32'
-			$sThemeName = 'DarkMode_Explorer'
+			If $isDarkMode = True Then
+            $sThemeName = 'DarkMode_Explorer'
+            Else
+            $sThemeName = 'Explorer'
+            EndIf
 ;~ 			$sThemeList = 0 ; failed
 			GUICtrlSetColor(_WinAPI_GetDlgCtrlID($vCtrl), $iGUI_Ctrl_Color)
 			GUICtrlSetBkColor(_WinAPI_GetDlgCtrlID($vCtrl), $iGUI_Ctrl_BkColor)
