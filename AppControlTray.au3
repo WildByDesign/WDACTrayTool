@@ -3,8 +3,8 @@
 #AutoIt3Wrapper_Icon=AppControl.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Tray Tool
-#AutoIt3Wrapper_Res_Fileversion=4.8.0.0
-#AutoIt3Wrapper_Res_ProductVersion=4.8.0
+#AutoIt3Wrapper_Res_Fileversion=5.0.0.0
+#AutoIt3Wrapper_Res_ProductVersion=5.0.0
 #AutoIt3Wrapper_Res_ProductName=AppControlTrayTool
 #AutoIt3Wrapper_Res_LegalCopyright=@ 2024 WildByDesign
 #AutoIt3Wrapper_Res_Language=1033
@@ -34,7 +34,7 @@
 Opt("TrayMenuMode", 3)
 Opt("TrayAutoPause", 0)
 
-Global $programVersion = "4.8"
+Global $programVersion = "5.0"
 ;Global $softName = "App Control Tray Tool"
 Global $trayIcon = "AppControl.ico"
 Global $idRegTitleKey = "App Control Tray Tool"

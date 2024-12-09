@@ -1,11 +1,12 @@
+
 #NoTrayIcon
 #RequireAdmin
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=AppControl.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Policy Manager
-#AutoIt3Wrapper_Res_Fileversion=4.8.0.0
-#AutoIt3Wrapper_Res_ProductVersion=4.8.0
+#AutoIt3Wrapper_Res_Fileversion=5.0.0.0
+#AutoIt3Wrapper_Res_ProductVersion=5.0.0
 #AutoIt3Wrapper_Res_ProductName=AppControlPolicyManager
 #AutoIt3Wrapper_Res_LegalCopyright=@ 2024 WildByDesign
 #AutoIt3Wrapper_Res_Language=1033
@@ -13,6 +14,7 @@
 #AutoIt3Wrapper_Res_Icon_Add=AppControl.ico
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #Region
+
 #include <AutoItConstants.au3>
 #include <File.au3>
 #include <MsgBoxConstants.au3>
@@ -31,6 +33,11 @@
 #include <ListViewConstants.au3>
 #include <WinAPIFiles.au3>
 #include <Constants.au3>
+#include <ButtonConstants.au3>
+#include <HeaderConstants.au3>
+#include <StructureConstants.au3>
+#include <WinAPISysInternals.au3>
+#include <WinAPISysWin.au3>
 #EndRegion
 
 #include "includes\ExtMsgBox.au3"
@@ -39,11 +46,14 @@
 #include "includes\GUIListViewEx.au3"
 #include "includes\XML.au3"
 
-Global $programversion = "4.8"
+Global $programversion = "5.0"
 
 ;Opt('MustDeclareVars', 1)
 
+isDarkMode()
+Func isDarkMode()
 Global $isDarkMode = _WinAPI_ShouldAppsUseDarkMode()
+Endfunc
 
 If $isDarkMode = True Then
 	_ExtMsgBoxSet(Default)
@@ -55,9 +65,10 @@ Else
 	_ExtMsgBoxSet(1, 4, -1, -1, 9, -1, 1200)
 EndIf
 
-Global $hGUI, $cListView, $hListView
+Global $hGUI, $cListView, $hListView, $EFIarray, $hGUI2, $ExitButtonEFI, $EFIListView, $hEFIListView
 Global $out, $arpol, $arraycount, $policycount, $policyoutput, $policycorrect, $CountTotal, $ExitButton, $TestButton, $Label2, $aContent, $iLV_Index
 Global $CountEnforced = 0
+
 
 If $isDarkMode = True Then
 Global $iDllGDI = DllOpen("gdi32.dll")
@@ -916,6 +927,20 @@ EndIf
 
 Endfunc
 
+
+VulnerableDriver()
+Func VulnerableDriver()
+Local $sVulnDriver = RegRead("HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\CI\Config", "VulnerableDriverBlocklistEnable")
+If $sVulnDriver = '1' Then
+	Global $sVulnDrivermsg = " Vulnerable Driver Blocklist" & @TAB & ": Enabled"
+ElseIf $sVulnDriver = '0' Then
+	Global $sVulnDrivermsg = " Vulnerable Driver Blocklist" & @TAB & ": Disabled"
+Else
+	Global $sVulnDrivermsg = " Vulnerable Driver Blocklist" & @TAB & ": Unknown"
+EndIf
+
+Endfunc
+
 GetPolicyStatus()
 Func GetPolicyStatus()
 Local $o_CmdString1 = " Get-CimInstance -ClassName Win32_DeviceGuard -Namespace root\Microsoft\Windows\DeviceGuard | FL *codeintegrity*"
@@ -937,73 +962,283 @@ Global $topstatus9 = StringStripWS($topstatus8, $STR_STRIPLEADING + $STR_STRIPTR
 
 Endfunc
 
+
+Func GUI2()
+
+	$hGUI2 = GUICreate("App Control Policy Manager - EFI", 1220, 430, -1, -1, 0x00CF0000)
+
+	GUISetIcon(@ScriptFullPath, 201)
+
+	Local $exStyles = BitOR($LVS_EX_FULLROWSELECT, $LVS_EX_CHECKBOXES), $EFIListView
+
+	Local $hToolTip2 = _GUIToolTip_Create(0)
+	_GUIToolTip_SetMaxTipWidth($hToolTip2, 286)
+
+	$ExitButtonEFI = GUICtrlCreateButton("Close", 1048, 380, 88, 30)
+	Local $hExitButtonEFI = GUICtrlGetHandle($ExitButtonEFI)
+
+	$EFIListView = GUICtrlCreateListView("|Enforced|Policy Name|Policy ID|Base Policy ID|Version|On Disk|Signed Policy|System Policy|Authorized|Policy Options", 10, 10, 1200, 340, $LVS_EX_DOUBLEBUFFER)
+
+	$hEFIListView = GUICtrlGetHandle($EFIListView)
+
+	_GUICtrlListView_SetExtendedListViewStyle($hEFIListView, $exStyles)
+
+
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 0, $LVSCW_AUTOSIZE_USEHEADER)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 1, $LVSCW_AUTOSIZE_USEHEADER)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 2, 355)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 3, 295)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 4, 295)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 5, 95)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 6, $LVSCW_AUTOSIZE_USEHEADER)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 7, $LVSCW_AUTOSIZE_USEHEADER)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 8, $LVSCW_AUTOSIZE_USEHEADER)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 9, $LVSCW_AUTOSIZE_USEHEADER)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 10, $LVSCW_AUTOSIZE_USEHEADER)
+
+	If $isDarkMode = True Then
+	;get handle to child SysHeader32 control of ListView
+	Global $hHeader = HWnd(GUICtrlSendMsg($EFIListView, $LVM_GETHEADER, 0, 0))
+	;Turn off theme for header
+	DllCall("uxtheme.dll", "int", "SetWindowTheme", "hwnd", $hHeader, "wstr", "", "wstr", "")
+	;subclass ListView to get at NM_CUSTOMDRAW notification sent to ListView
+	Global $wProcNew = DllCallbackRegister("_LVWndProc", "ptr", "hwnd;uint;wparam;lparam")
+	Global $wProcOld = _WinAPI_SetWindowLong($hEFIListView, $GWL_WNDPROC, DllCallbackGetPtr($wProcNew))
+
+	;Optional: Flat Header - remove header 3D button effect
+	Global $iStyle = _WinAPI_GetWindowLong($hHeader, $GWL_STYLE)
+	_WinAPI_SetWindowLong($hHeader, $GWL_STYLE, BitOR($iStyle, $HDS_FLAT))
+	EndIf
+
+	GUISetState(@SW_SHOW)
+
+	If $isDarkMode = True Then
+		GuiDarkmodeApply($hGUI2)
+	Else
+		Local $bEnableDarkTheme = False
+		GuiLightmodeApply($hGUI2)
+	EndIf
+
+	; Refresh policy list
+	GetPolicyInfo()
+
+; mount EFI
+
+	Local $o_CmdString1 = " $MountPoint = $env:SystemDrive+'\EFIMount'; $EFIPartition = (Get-Partition | Where-Object IsSystem).AccessPaths[0]; if (-Not (Test-Path $MountPoint)) { New-Item -Path $MountPoint -Type Directory -Force }; mountvol $MountPoint $EFIPartition"
+	Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide)
+	ProcessWaitClose($o_Pid)
+	Local $systemdrive = EnvGet('SystemDrive')
+	;MsgBox(0, '$systemdrive', $systemdrive)
+	Local Const $sFilePath = $systemdrive & '\EFIMount\EFI\Microsoft'
+	Local $iFileExists = FileExists($sFilePath)
+	If $iFileExists Then
+		;GUICtrlSetState($RemoveEFI,$GUI_ENABLE)
+		;ListEFI()
+	EndIf
+
+
+; list EFI multi-policy
+
+	Local $o_CmdString1 = " $MountPoint = $env:SystemDrive+'\EFIMount'; $MultiPolicyDir = $MountPoint+'\EFI\Microsoft\Boot\CiPolicies\Active'; $CIPFiles = Get-ChildItem $MultiPolicyDir\*.cip -Name; $CIPFiles"
+
+	Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
+	ProcessWaitClose($o_Pid)
+	$out = StdoutRead($o_Pid)
+	;MsgBox(0, 'test', $out)
+	Local $CIPFiles1 = StringReplace($out, "[32;1m", "")
+	Local $CIPFiles2 = StringReplace($CIPFiles1, "[0m", "")
+	Local $CIPFiles3 = StringReplace($CIPFiles2, ".cip", "")
+	Local $CIPFiles4 = StringStripWS($CIPFiles3, $STR_STRIPLEADING + $STR_STRIPTRAILING + $STR_STRIPSPACES)
+	Local $finalparse = $CIPFiles4
+	;MsgBox(0, 'test', $CIPFiles4)
+	$EFIsplit = stringsplit($finalparse, @CR , 0)
+	;_ArrayDisplay($EFIsplit, "test")
+	Global $EFIarray[0][11]
+	;_ArrayDisplay($CIParray, "test")
+
+	For $i = 0 To UBound($aWords) -1
+		; column 3 is PolicyID
+		$iEFI = $aWords[$i][3]
+		;MsgBox(0, 'test', $iCIP)
+		Local $iPosition = StringInStr($finalparse , $iEFI)
+		;Local $iPosition2 = StringInStr($finalparse , "{82443e1e-8a39-4b4a-96a8-f40ddc00b9f3}")
+		;Local $iPosition3 = StringInStr($finalparse , "{CDD5CB55-DB68-4D71-AA38-3DF2B6473A52}")
+		;MsgBox(0, 'test', $iPosition)
+		Global $aExtract
+		If $iPosition <> '0' Then
+			;_ArrayAdd($CIParray, $aWords[1])
+			Local $aExtract = _ArrayExtract($aWords, $i, $i)
+			_ArrayAdd($EFIarray, $aExtract)
+			;Local $CIParray[1][11] = $aExtract
+			;$CIParray[1] = $aWords[$i]
+		EndIf
+
+	Next
+
+
+; list EFI single policy
+
+	Local $o_CmdString1 = " $MountPoint = $env:SystemDrive+'\EFIMount'; $SinglePolicyDir = $MountPoint+'\EFI\Microsoft\Boot'; $p7bFiles = Get-ChildItem $SinglePolicyDir\*.p7b -Name; $p7bFiles"
+
+	Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
+	ProcessWaitClose($o_Pid)
+	$out = StdoutRead($o_Pid)
+	;MsgBox(0, 'test', $out)
+	Local $p7bFiles1 = StringReplace($out, "[32;1m", "")
+	Local $p7bFiles2 = StringReplace($p7bFiles1, "[0m", "")
+	Local $p7bFiles3 = StringReplace($p7bFiles2, "driversipolicy.p7b", "{d2bda982-ccf6-4344-ac5b-0b44427b6816}")
+	Local $p7bFiles4 = StringReplace($p7bFiles3, "winsipolicy.p7b", "{5951a96a-e0b5-4d3d-8fb8-3e5b61030784}")
+	Local $p7bFiles5 = StringStripWS($p7bFiles4, $STR_STRIPLEADING + $STR_STRIPTRAILING + $STR_STRIPSPACES)
+	Local $finalparse = $p7bFiles5
+	;MsgBox(0, 'test', $CIPFiles4)
+	$EFIp7bsplit = stringsplit($finalparse, @CR , 0)
+	;_ArrayDisplay($EFIsplit, "test")
+	;Global $EFIarray[0][11]
+	;_ArrayDisplay($CIParray, "test")
+
+	For $i = 0 To UBound($aWords) -1
+		; column 3 is PolicyID
+		$iEFI = $aWords[$i][3]
+		;MsgBox(0, 'test', $iCIP)
+		Local $iPosition = StringInStr($finalparse , $iEFI)
+		;Local $iPosition2 = StringInStr($finalparse , "{82443e1e-8a39-4b4a-96a8-f40ddc00b9f3}")
+		;Local $iPosition3 = StringInStr($finalparse , "{CDD5CB55-DB68-4D71-AA38-3DF2B6473A52}")
+		;MsgBox(0, 'test', $iPosition)
+		Global $aExtract
+		If $iPosition <> '0' Then
+			;_ArrayAdd($CIParray, $aWords[1])
+			Local $aExtract = _ArrayExtract($aWords, $i, $i)
+			_ArrayAdd($EFIarray, $aExtract)
+			;Local $CIParray[1][11] = $aExtract
+			;$CIParray[1] = $aWords[$i]
+		EndIf
+
+	Next
+
+
+; EFI listview
+
+	_GUICtrlListView_AddArray($hEFIListView,$EFIarray)
+
+	; Read ListView content into an array
+	$aContent = _GUIListViewEx_ReadToArray($EFIListView)
+
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 0, $LVSCW_AUTOSIZE_USEHEADER)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 1, $LVSCW_AUTOSIZE_USEHEADER)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 2, 355)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 3, 295)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 4, 295)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 5, 95)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 6, $LVSCW_AUTOSIZE_USEHEADER)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 7, $LVSCW_AUTOSIZE_USEHEADER)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 8, $LVSCW_AUTOSIZE_USEHEADER)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 9, $LVSCW_AUTOSIZE_USEHEADER)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 10, $LVSCW_AUTOSIZE_USEHEADER)
+
+	If $isDarkMode = True Then
+		GuiDarkmodeApply($hGUI2)
+	Else
+		Local $bEnableDarkTheme = False
+		GuiLightmodeApply($hGUI2)
+	EndIf
+
+	; Initiate ListView
+	$iLV_Index = _GUIListViewEx_Init($EFIListView, $aContent, 0, Default, False, 1)
+
+	; Register required messages
+	_GUIListViewEx_MsgRegister()
+
+	;GUISetState(@SW_SHOW)
+
+
+Endfunc
+
 Local $exStyles = BitOR($LVS_EX_FULLROWSELECT, $LVS_EX_CHECKBOXES), $cListView
 
 ;$hGUI = GUICreate("App Control Policy Manager", 1220, 560, -1, -1, 0x00CF0000)
-$hGUI = GUICreate("App Control Policy Manager", 1220, 594, -1, -1, 0x00CF0000)
+;$hGUI = GUICreate("App Control Policy Manager", 1220, 594, -1, -1, 0x00CF0000)
+$hGUI = GUICreate("App Control Policy Manager", 1220, 634, -1, -1, 0x00CF0000)
 
 GUISetIcon(@ScriptFullPath, 201)
 
 Local $hToolTip2 = _GUIToolTip_Create(0)
 _GUIToolTip_SetMaxTipWidth($hToolTip2, 286)
 
-$AboutButton = GUICtrlCreateButton("About", 1085, 490, 100, 30)
+$AboutButton = GUICtrlCreateButton("About", 1048, 490, 88, 30)
 Local $hAboutButton = GUICtrlGetHandle($AboutButton)
 
-$ExitButton = GUICtrlCreateButton("Close", 1085, 410, 100, 30)
+$EndDivider = GUICtrlCreateLabel("", 1070, 465, 44, 1, $WS_BORDER)
+Local $hEndDivider = GUICtrlGetHandle($EndDivider)
+
+$ExitButton = GUICtrlCreateButton("Close", 1048, 410, 88, 30)
 Local $hExitButton = GUICtrlGetHandle($ExitButton)
 
-$PolicyActions = GUICtrlCreateLabel("Policy Actions:", 468, 370, 220, 30)
+$PolicyActions = GUICtrlCreateLabel("Policy Actions:", 453, 370, 220, 30)
 Local $hPolicyActions = GUICtrlGetHandle($PolicyActions)
 
-$AddButton = GUICtrlCreateButton("Add or Update Policies", 425, 410, 200, 30)
+$AddButton = GUICtrlCreateButton("Add or Update Policies", 410, 410, 200, 30)
 Local $hAddButton = GUICtrlGetHandle($AddButton)
 
-$RemoveButton = GUICtrlCreateButton("Remove Selected Policies", 425, 450, 200, 30)
+$RemoveButton = GUICtrlCreateButton("Remove Selected Policies", 410, 450, 200, 30)
 Local $hRemoveButton = GUICtrlGetHandle($RemoveButton)
 
-$ConvertButton = GUICtrlCreateButton("Convert (xml to binary)", 425, 490, 200, 30)
+$RemoveEFILabel = GUICtrlCreateLabel("", 460, 505, 100, 1, $WS_BORDER)
+Local $hRemoveEFILabel = GUICtrlGetHandle($RemoveEFILabel)
+
+$ConvertButton = GUICtrlCreateButton("Convert (xml to binary)", 410, 530, 200, 30)
 Local $hConvertButton = GUICtrlGetHandle($ConvertButton)
 
-$RefreshButton = GUICtrlCreateButton("Refresh Policy List", 425, 530, 200, 30)
+$RefreshButton = GUICtrlCreateButton("Refresh Policy List", 410, 570, 200, 30)
 Local $hRefreshButton = GUICtrlGetHandle($RefreshButton)
 
-$FilterLogs = GUICtrlCreateLabel("Filtering Options:", 692, 370, 220, 30)
+$FilterLogs = GUICtrlCreateLabel("Filtering Options:", 662, 370, 220, 30)
 Local $hFilterLogs = GUICtrlGetHandle($FilterLogs)
 
-$FilterEnforced = GUICtrlCreateButton("Enforced", 675, 410, 85, 30)
+$FilterEnforced = GUICtrlCreateButton("Enforced", 645, 410, 85, 30)
 Local $hFilterEnforced = GUICtrlGetHandle($FilterEnforced)
 
-$FilterBase = GUICtrlCreateButton("Base", 675, 450, 85, 30)
+$FilterBase = GUICtrlCreateButton("Base", 645, 450, 85, 30)
 Local $hFilterBase = GUICtrlGetHandle($FilterBase)
 
-$FilterSupp = GUICtrlCreateButton("Suppl.", 675, 490, 85, 30)
+$FilterSupp = GUICtrlCreateButton("Suppl.", 645, 490, 85, 30)
 Local $hFilterSupp = GUICtrlGetHandle($FilterSupp)
 _GUIToolTip_AddTool($hToolTip2, 0, "Supplemental", $hFilterSupp)
 
-$FilterSigned = GUICtrlCreateButton("Signed", 770, 410, 85, 30)
+$FilterSigned = GUICtrlCreateButton("Signed", 740, 410, 85, 30)
 Local $hFilterSigned = GUICtrlGetHandle($FilterSigned)
 
 If $is24H2 = False Then
-$FilterSignedLabel = GUICtrlCreateLabel("", 768, 408, 87, 32, $WS_CLIPSIBLINGS)
+$FilterSignedLabel = GUICtrlCreateLabel("", 738, 408, 87, 32, $WS_CLIPSIBLINGS)
 Local $hFilterSignedLabel = GUICtrlGetHandle($FilterSignedLabel)
 GUICtrlSetState($FilterSigned,$GUI_DISABLE)
 _GUIToolTip_AddTool($hToolTip2, 0, "Policy list cannot be filtered by Signed policies on pre-24H2 builds of Windows 11.", $hFilterSignedLabel)
 EndIf
 
-$FilterSystem = GUICtrlCreateButton("System", 770, 450, 85, 30)
+$FilterSystem = GUICtrlCreateButton("System", 740, 450, 85, 30)
 Local $hFilterSystem = GUICtrlGetHandle($FilterSystem)
 
-$FilterReset = GUICtrlCreateButton("Reset", 770, 490, 85, 30)
+$FilterReset = GUICtrlCreateButton("Reset", 740, 490, 85, 30)
 Local $hFilterReset = GUICtrlGetHandle($FilterReset)
 
-$EventLogs = GUICtrlCreateLabel("Event Logs:", 923, 370, 100, 30)
+$EFILabelDivider = GUICtrlCreateLabel("", 690, 545, 90, 1, $WS_BORDER)
+Local $hEFILabelDivider = GUICtrlGetHandle($EFILabelDivider)
+
+$EFIButton = GUICtrlCreateButton("EFI (Signed/System)", 645, 570, 180, 30)
+Local $hEFIButton = GUICtrlGetHandle($EFIButton)
+
+$EventLogs = GUICtrlCreateLabel("Tools && Logs:", 880, 370, 120, 30)
 Local $hEventLogs = GUICtrlGetHandle($EventLogs)
 
-$CodeIntegrity = GUICtrlCreateButton("Code Integrity", 905, 410, 130, 30)
+$PolicyWizard = GUICtrlCreateButton("App Control Wizard", 860, 410, 154, 30)
+Local $hPolicyWizard = GUICtrlGetHandle($PolicyWizard)
+
+$ToolsDivider = GUICtrlCreateLabel("", 898.5, 465, 77, 1, $WS_BORDER)
+Local $hToolsDivider = GUICtrlGetHandle($ToolsDivider)
+
+$CodeIntegrity = GUICtrlCreateButton("Code Integrity", 860, 490, 154, 30)
 Local $hCodeIntegrity = GUICtrlGetHandle($CodeIntegrity)
 
-$MSIandScript = GUICtrlCreateButton("MSI and Script", 905, 450, 130, 30)
+$MSIandScript = GUICtrlCreateButton("MSI and Script", 860, 530, 154, 30)
 Local $hMSIandScript = GUICtrlGetHandle($MSIandScript)
 
 $cListView = GUICtrlCreateListView("|Enforced|Policy Name|Policy ID|Base Policy ID|Version|On Disk|Signed Policy|System Policy|Authorized|Policy Options", 10, 10, 1200, 340, $LVS_EX_DOUBLEBUFFER)
@@ -1014,6 +1249,11 @@ _GUICtrlListView_SetExtendedListViewStyle($hListView, $exStyles)
 
 _GUICtrlListView_AddArray($hListView,$aWords)
 
+
+; header text fix for dark mode
+
+HeaderFix()
+Func HeaderFix()
 If $isDarkMode = True Then
 ;get handle to child SysHeader32 control of ListView
 Global $hHeader = HWnd(GUICtrlSendMsg($cListView, $LVM_GETHEADER, 0, 0))
@@ -1027,6 +1267,7 @@ Global $wProcOld = _WinAPI_SetWindowLong($hListView, $GWL_WNDPROC, DllCallbackGe
 Global $iStyle = _WinAPI_GetWindowLong($hHeader, $GWL_STYLE)
 _WinAPI_SetWindowLong($hHeader, $GWL_STYLE, BitOR($iStyle, $HDS_FLAT))
 EndIf
+Endfunc
 
 CountTotal()
 Func CountTotal()
@@ -1049,20 +1290,15 @@ Endfunc
 
 $Label2 = GUICtrlCreateLabel("Current Policy Information:", 96, 370, 240, 25)
 Local $hLabel2 = GUICtrlGetHandle($Label2)
-$PolicyStatus = GUICtrlCreateLabel(" Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced & @CRLF & @CRLF & " " & $topstatus9, 35, 410, 340, 112, $WS_BORDER)
+;$PolicyStatus = GUICtrlCreateLabel(" Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced & @CRLF & @CRLF & " " & $topstatus9 & @CRLF & @CRLF & $sVulnDrivermsg, 35, 410, 340, 156, $WS_BORDER)
+$PolicyStatus = GUICtrlCreateLabel(" " & $topstatus9 & @CRLF & @CRLF & $sVulnDrivermsg & @CRLF & @CRLF & " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced, 35, 410, 340, 154, $WS_BORDER)
 Local $hPolicyStatus = GUICtrlGetHandle($PolicyStatus)
 
 If $is24H2 = True Then
 Else
-	$pre24H2Lablel = GUICtrlCreateLabel("* Pre-24H2 OS will show less information.", 66, 550, 340, 30)
+	$pre24H2Lablel = GUICtrlCreateLabel("* Pre-24H2 OS will show less information.", 66, 584, 340, 30)
 	Local $hpre24H2Lablel = GUICtrlGetHandle($pre24H2Lablel)
-	If $isDarkMode = True Then
-		GUICtrlSetColor($pre24H2Lablel, $COLOR_WHITE)
-		GUICtrlSetFont($pre24H2Lablel, 8.5, -1, -1, "Segoe UI")
-	Else
-		GUICtrlSetColor($pre24H2Lablel, $COLOR_BLACK)
-		GUICtrlSetFont($pre24H2Lablel, 8.5, -1, -1, "Segoe UI")
-	EndIf
+	GUICtrlSetFont($pre24H2Lablel, 8.5, -1, -1, "Segoe UI")
 EndIf
 
 _GUICtrlListView_SetColumnWidth($hListView, 0, $LVSCW_AUTOSIZE_USEHEADER)
@@ -1077,24 +1313,13 @@ _GUICtrlListView_SetColumnWidth($hListView, 8, $LVSCW_AUTOSIZE_USEHEADER)
 _GUICtrlListView_SetColumnWidth($hListView, 9, $LVSCW_AUTOSIZE_USEHEADER)
 _GUICtrlListView_SetColumnWidth($hListView, 10, $LVSCW_AUTOSIZE_USEHEADER)
 
-If $isDarkMode = True Then
-GUICtrlSetColor($Label2, $COLOR_WHITE)
-GUICtrlSetFont($Label2, 11, -1, -1, "Segoe UI")
-GUICtrlSetColor($EventLogs, $COLOR_WHITE)
-GUICtrlSetFont($EventLogs, 11, -1, -1, "Segoe UI")
-GUICtrlSetColor($PolicyActions, $COLOR_WHITE)
-GUICtrlSetColor($FilterLogs, $COLOR_WHITE)
-GUICtrlSetFont($FilterLogs, 11, -1, -1, "Segoe UI")
 
-Else
-GUICtrlSetColor($Label2, $COLOR_BLACK)
 GUICtrlSetFont($Label2, 11, -1, -1, "Segoe UI")
-GUICtrlSetColor($EventLogs, $COLOR_BLACK)
 GUICtrlSetFont($EventLogs, 11, -1, -1, "Segoe UI")
-GUICtrlSetColor($PolicyActions, $COLOR_BLACK)
-GUICtrlSetColor($FilterLogs, $COLOR_BLACK)
 GUICtrlSetFont($FilterLogs, 11, -1, -1, "Segoe UI")
-EndIf
+GUICtrlSetFont($Label2, 11, -1, -1, "Segoe UI")
+GUICtrlSetFont($EventLogs, 11, -1, -1, "Segoe UI")
+GUICtrlSetFont($FilterLogs, 11, -1, -1, "Segoe UI")
 GUICtrlSetFont($PolicyActions, 11, -1, -1, "Segoe UI")
 GUICtrlSetFont($AboutButton, 9, -1, -1, "Segoe UI")
 GUICtrlSetFont($ExitButton, 9, -1, -1, "Segoe UI")
@@ -1111,9 +1336,15 @@ GUICtrlSetFont($FilterSupp, 9, -1, -1, "Segoe UI")
 GUICtrlSetFont($FilterSigned, 9, -1, -1, "Segoe UI")
 GUICtrlSetFont($FilterSystem, 9, -1, -1, "Segoe UI")
 GUICtrlSetFont($FilterReset, 9, -1, -1, "Segoe UI")
+GUICtrlSetFont($EFIButton, 9, -1, -1, "Segoe UI")
+GUICtrlSetFont($PolicyWizard, 9, -1, -1, "Segoe UI")
 
 ; Read ListView content into an array
 $aContent = _GUIListViewEx_ReadToArray($cListView)
+
+
+ApplyThemeColor()
+Func ApplyThemeColor()
 
 If $isDarkMode = True Then
 	GuiDarkmodeApply($hGUI)
@@ -1121,6 +1352,9 @@ Else
 	Local $bEnableDarkTheme = False
     GuiLightmodeApply($hGUI)
 EndIf
+
+Endfunc
+
 
 ; Initiate ListView
 $iLV_Index = _GUIListViewEx_Init($cListView, $aContent, 0, Default, False, 1)
@@ -1433,65 +1667,251 @@ Func ConvertPolicy()
 Endfunc
 
 
+Func PolicyWizard()
+	Local $o_CmdString1 = " Get-AppxPackage -Name 'Microsoft.WDAC.WDACWizard'"
+	Local $o_powershell = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -Command"
+	Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
+	ProcessWaitClose($o_Pid)
+	$out = StdoutRead($o_Pid)
+	Local $iString = StringInStr($out, "Microsoft.WDAC.WDACWizard")
+	If $iString = 0 Then
+		$sMsg = " App Control Wizard doesn't appear to be installed. " & @CRLF
+		$sMsg &= " " & @CRLF
+		$sMsg &= " Would you like to visit the App Control Wizard download page? " & @CRLF
+		$sMsg &= " " & @CRLF
+		$iRetValue = _ExtMsgBox (0, 4, "App Control Wizard", $sMsg)
+
+		If $iRetValue = 1 Then
+		;ConsoleWrite("Yes" & @CRLF)
+		ShellExecute("https://webapp-wdac-wizard.azurewebsites.net/")
+		ElseIf $iRetValue = 2 Then
+		;ConsoleWrite("No" & @CRLF)
+		EndIf
+	Else
+		Run(@ComSpec & " /c " & 'Explorer.Exe Shell:AppsFolder\Microsoft.WDAC.WDACWizard_8wekyb3d8bbwe!WDACWizard', "", @SW_HIDE)
+	EndIf
+Endfunc
+
+
+Func MountEFI()
+	Local $o_CmdString1 = " $MountPoint = $env:SystemDrive+'\EFIMount'; $EFIPartition = (Get-Partition | Where-Object IsSystem).AccessPaths[0]; if (-Not (Test-Path $MountPoint)) { New-Item -Path $MountPoint -Type Directory -Force }; mountvol $MountPoint $EFIPartition"
+	Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide)
+	ProcessWaitClose($o_Pid)
+	Local $systemdrive = EnvGet('SystemDrive')
+	;MsgBox(0, '$systemdrive', $systemdrive)
+	Local Const $sFilePath = $systemdrive & '\EFIMount\EFI\Microsoft'
+	Local $iFileExists = FileExists($sFilePath)
+	If $iFileExists Then
+		ListEFI()
+	EndIf
+Endfunc
+
+Func ListEFI()
+	Local $o_CmdString1 = " $MountPoint = $env:SystemDrive+'\EFIMount'; $MultiPolicyDir = $MountPoint+'\EFI\Microsoft\Boot\CiPolicies\Active'; $CIPFiles = Get-ChildItem $MultiPolicyDir\*.cip -Name; $CIPFiles"
+
+	Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
+	ProcessWaitClose($o_Pid)
+	$out = StdoutRead($o_Pid)
+	;MsgBox(0, 'test', $out)
+	Local $CIPFiles1 = StringReplace($out, "[32;1m", "")
+	Local $CIPFiles2 = StringReplace($CIPFiles1, "[0m", "")
+	Local $CIPFiles3 = StringReplace($CIPFiles2, ".cip", "")
+	Local $CIPFiles4 = StringStripWS($CIPFiles3, $STR_STRIPLEADING + $STR_STRIPTRAILING + $STR_STRIPSPACES)
+	Local $finalparse = $CIPFiles4
+	;MsgBox(0, 'test', $CIPFiles4)
+	$EFIsplit = stringsplit($finalparse, @CR , 0)
+	;_ArrayDisplay($EFIsplit, "test")
+	Global $EFIarray[0][11]
+	;_ArrayDisplay($CIParray, "test")
+
+	For $i = 0 To UBound($aWords) -1
+		; column 3 is PolicyID
+		$iEFI = $aWords[$i][3]
+		;MsgBox(0, 'test', $iCIP)
+		Local $iPosition = StringInStr($finalparse , $iEFI)
+		;Local $iPosition2 = StringInStr($finalparse , "{82443e1e-8a39-4b4a-96a8-f40ddc00b9f3}")
+		;Local $iPosition3 = StringInStr($finalparse , "{CDD5CB55-DB68-4D71-AA38-3DF2B6473A52}")
+		;MsgBox(0, 'test', $iPosition)
+		Global $aExtract
+		If $iPosition <> '0' Then
+			;_ArrayAdd($CIParray, $aWords[1])
+			Local $aExtract = _ArrayExtract($aWords, $i, $i)
+			_ArrayAdd($EFIarray, $aExtract)
+			;Local $CIParray[1][11] = $aExtract
+			;$CIParray[1] = $aWords[$i]
+		EndIf
+
+	Next
+
+	;$iCIPtest = $aWords[2][3]
+	;MsgBox(0, 'test', $iCIPtest)
+	;_ArrayDisplay($EFIarray, "test")
+	ListEFIp7b()
+
+Endfunc
+
+Func ListEFIp7b()
+	Local $o_CmdString1 = " $MountPoint = $env:SystemDrive+'\EFIMount'; $SinglePolicyDir = $MountPoint+'\EFI\Microsoft\Boot'; $p7bFiles = Get-ChildItem $SinglePolicyDir\*.p7b -Name; $p7bFiles"
+
+	Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
+	ProcessWaitClose($o_Pid)
+	$out = StdoutRead($o_Pid)
+	;MsgBox(0, 'test', $out)
+	Local $p7bFiles1 = StringReplace($out, "[32;1m", "")
+	Local $p7bFiles2 = StringReplace($p7bFiles1, "[0m", "")
+	Local $p7bFiles3 = StringReplace($p7bFiles2, "driversipolicy.p7b", "{d2bda982-ccf6-4344-ac5b-0b44427b6816}")
+	Local $p7bFiles4 = StringReplace($p7bFiles3, "winsipolicy.p7b", "{5951a96a-e0b5-4d3d-8fb8-3e5b61030784}")
+	Local $p7bFiles5 = StringStripWS($p7bFiles4, $STR_STRIPLEADING + $STR_STRIPTRAILING + $STR_STRIPSPACES)
+	Local $finalparse = $p7bFiles5
+	;MsgBox(0, 'test', $CIPFiles4)
+	$EFIp7bsplit = stringsplit($finalparse, @CR , 0)
+	;_ArrayDisplay($EFIsplit, "test")
+	;Global $EFIarray[0][11]
+	;_ArrayDisplay($CIParray, "test")
+
+	For $i = 0 To UBound($aWords) -1
+		; column 3 is PolicyID
+		$iEFI = $aWords[$i][3]
+		;MsgBox(0, 'test', $iCIP)
+		Local $iPosition = StringInStr($finalparse , $iEFI)
+		;Local $iPosition2 = StringInStr($finalparse , "{82443e1e-8a39-4b4a-96a8-f40ddc00b9f3}")
+		;Local $iPosition3 = StringInStr($finalparse , "{CDD5CB55-DB68-4D71-AA38-3DF2B6473A52}")
+		;MsgBox(0, 'test', $iPosition)
+		Global $aExtract
+		If $iPosition <> '0' Then
+			;_ArrayAdd($CIParray, $aWords[1])
+			Local $aExtract = _ArrayExtract($aWords, $i, $i)
+			_ArrayAdd($EFIarray, $aExtract)
+			;Local $CIParray[1][11] = $aExtract
+			;$CIParray[1] = $aWords[$i]
+		EndIf
+
+	Next
+
+	;$iCIPtest = $aWords[2][3]
+	;MsgBox(0, 'test', $iCIPtest)
+	_ArrayDisplay($EFIarray, "test")
+	EFIlistview()
+
+Endfunc
+
+Func EFIlistview()
+
+	_GUICtrlListView_DeleteAllItems($EFIListView)
+	_GUICtrlListView_AddArray($hEFIListView,$EFIarray)
+
+Endfunc
+
+Func UnmountEFI()
+	Local $o_CmdString1 = " $MountPoint = $env:SystemDrive+'\EFIMount'; mountvol $MountPoint /D"
+	Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide)
+	ProcessWaitClose($o_Pid)
+
+	Local $systemdrive = EnvGet('SystemDrive')
+	Local Const $sFilePath = $systemdrive & '\EFIMount\EFI\Microsoft'
+	Local Const $sFilePath2 = $systemdrive & '\EFIMount'
+	Local $iFileExists = FileExists($sFilePath)
+	If $iFileExists Then
+	Else
+		DirRemove($sFilePath2)
+	EndIf
+
+Endfunc
+
+Local $aMsg
+
 While 1
-    Switch GUIGetMsg()
-		Case $GUI_EVENT_CLOSE, $ExitButton
-			Exit
-		Case $AddButton
-			AddPolicies()
-		Case $ConvertButton
-			ConvertPolicy()
-		Case $RefreshButton
-			_GUICtrlListView_DeleteAllItems($cListView)
-			GetPolicyInfo()
-			GetPolicyStatus()
-			_GUICtrlListView_AddArray($hListView,$aWords)
-			GUICtrlSetData($PolicyStatus, " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced & @CRLF & @CRLF & " " & $topstatus9)
-		Case $RemoveButton
-			CountChecked()
-		Case $AboutButton
-			About()
-		Case $CodeIntegrity
-			LogsCI()
-		Case $MSIandScript
-			LogsScript()
-		Case $FilterEnforced
-			_GUICtrlListView_DeleteAllItems($cListView)
-			GetPolicyEnforced()
-			GetPolicyStatus()
-			_GUICtrlListView_AddArray($hListView,$aWords)
-			GUICtrlSetData($PolicyStatus, " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced & @CRLF & @CRLF & " " & $topstatus9)
-		Case $FilterBase
-			_GUICtrlListView_DeleteAllItems($cListView)
-			GetPolicyBase()
-			GetPolicyStatus()
-			_GUICtrlListView_AddArray($hListView,$aWords)
-			GUICtrlSetData($PolicyStatus, " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced & @CRLF & @CRLF & " " & $topstatus9)
-		Case $FilterSupp
-			_GUICtrlListView_DeleteAllItems($cListView)
-			GetPolicySupp()
-			GetPolicyStatus()
-			_GUICtrlListView_AddArray($hListView,$aWords)
-			GUICtrlSetData($PolicyStatus, " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced & @CRLF & @CRLF & " " & $topstatus9)
-		Case $FilterSigned
-			_GUICtrlListView_DeleteAllItems($cListView)
-			GetPolicySigned()
-			GetPolicyStatus()
-			_GUICtrlListView_AddArray($hListView,$aWords)
-			GUICtrlSetData($PolicyStatus, " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced & @CRLF & @CRLF & " " & $topstatus9)
-		Case $FilterSystem
-			_GUICtrlListView_DeleteAllItems($cListView)
-			GetPolicySystem()
-			GetPolicyStatus()
-			_GUICtrlListView_AddArray($hListView,$aWords)
-			GUICtrlSetData($PolicyStatus, " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced & @CRLF & @CRLF & " " & $topstatus9)
-		Case $FilterReset
-			_GUICtrlListView_DeleteAllItems($cListView)
-			GetPolicyInfo()
-			GetPolicyStatus()
-			_GUICtrlListView_AddArray($hListView,$aWords)
-			GUICtrlSetData($PolicyStatus, " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced & @CRLF & @CRLF & " " & $topstatus9)
-	EndSwitch
+    $aMsg = GUIGetMsg(1)
+	If Not IsHWnd($aMsg[1]) Then ContinueLoop
+	Switch $aMsg[1]
+		Case $hGUI
+			Switch $aMsg[0]
+				Case $GUI_EVENT_CLOSE, $ExitButton
+					ExitLoop
+				Case $AddButton
+					AddPolicies()
+				Case $ConvertButton
+					ConvertPolicy()
+				Case $RefreshButton
+					_GUICtrlListView_DeleteAllItems($cListView)
+					GetPolicyInfo()
+					GetPolicyStatus()
+					_GUICtrlListView_AddArray($hListView,$aWords)
+					GUICtrlSetData($PolicyStatus, " " & $topstatus9 & @CRLF & @CRLF & $sVulnDrivermsg & @CRLF & @CRLF & " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced)
+				Case $RemoveButton
+					CountChecked()
+				Case $EFIButton
+					;MountEFI()
+					;GetPolicyInfo()
+					GUISetState(@SW_HIDE, $hGUI)
+					GUI2()
+				Case $AboutButton
+					About()
+				Case $PolicyWizard
+					PolicyWizard()
+				Case $CodeIntegrity
+					LogsCI()
+				Case $MSIandScript
+					LogsScript()
+				Case $FilterEnforced
+					_GUICtrlListView_DeleteAllItems($cListView)
+					GetPolicyEnforced()
+					GetPolicyStatus()
+					_GUICtrlListView_AddArray($hListView,$aWords)
+					GUICtrlSetData($PolicyStatus, " " & $topstatus9 & @CRLF & @CRLF & $sVulnDrivermsg & @CRLF & @CRLF & " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced)
+				Case $FilterBase
+					_GUICtrlListView_DeleteAllItems($cListView)
+					GetPolicyBase()
+					GetPolicyStatus()
+					_GUICtrlListView_AddArray($hListView,$aWords)
+					GUICtrlSetData($PolicyStatus, " " & $topstatus9 & @CRLF & @CRLF & $sVulnDrivermsg & @CRLF & @CRLF & " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced)
+				Case $FilterSupp
+					_GUICtrlListView_DeleteAllItems($cListView)
+					GetPolicySupp()
+					GetPolicyStatus()
+					_GUICtrlListView_AddArray($hListView,$aWords)
+					GUICtrlSetData($PolicyStatus, " " & $topstatus9 & @CRLF & @CRLF & $sVulnDrivermsg & @CRLF & @CRLF & " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced)
+				Case $FilterSigned
+					_GUICtrlListView_DeleteAllItems($cListView)
+					GetPolicySigned()
+					GetPolicyStatus()
+					_GUICtrlListView_AddArray($hListView,$aWords)
+					GUICtrlSetData($PolicyStatus, " " & $topstatus9 & @CRLF & @CRLF & $sVulnDrivermsg & @CRLF & @CRLF & " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced)
+				Case $FilterSystem
+					_GUICtrlListView_DeleteAllItems($cListView)
+					GetPolicySystem()
+					GetPolicyStatus()
+					_GUICtrlListView_AddArray($hListView,$aWords)
+					GUICtrlSetData($PolicyStatus, " " & $topstatus9 & @CRLF & @CRLF & $sVulnDrivermsg & @CRLF & @CRLF & " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced)
+				Case $FilterReset
+					_GUICtrlListView_DeleteAllItems($cListView)
+					GetPolicyInfo()
+					GetPolicyStatus()
+					_GUICtrlListView_AddArray($hListView,$aWords)
+					GUICtrlSetData($PolicyStatus, " " & $topstatus9 & @CRLF & @CRLF & $sVulnDrivermsg & @CRLF & @CRLF & " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced)
+			EndSwitch
+		Case $hGUI2
+			Switch $aMsg[0]
+				Case $GUI_EVENT_CLOSE, $ExitButtonEFI
+					UnmountEFI()
+					GUIDelete($hGUI2)
+					GUISetState(@SW_SHOW, $hGUI)
+					If $isDarkMode = True Then
+						If $wProcOld Then _WinAPI_SetWindowLong($hListView, $GWL_WNDPROC, $wProcOld)
+					; Delete callback function
+						If $wProcNew Then DllCallbackFree($wProcNew)
+						HeaderFix()
+						ApplyThemeColor()
+					Else
+					ApplyThemeColor()
+					EndIf
+					;HeaderFix()
+					;GUICtrlSetState($g_idButton2, $GUI_ENABLE) ; ... enable button (previously disabled)
+				;Case $g_idButton3
+					;MsgBox($MB_OK, "MsgBox", "Test from GUI 2")
+			EndSwitch
+		EndSwitch
+
 ;_GUIListViewEx_EventMonitor()
 
 	;If $wProcOld Then _WinAPI_SetWindowLong($hListView, $GWL_WNDPROC, $wProcOld)

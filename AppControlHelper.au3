@@ -17,8 +17,8 @@
 #AutoIt3Wrapper_Icon=AppControl.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Tray Helper
-#AutoIt3Wrapper_Res_Fileversion=4.8.0.0
-#AutoIt3Wrapper_Res_ProductVersion=4.8.0
+#AutoIt3Wrapper_Res_Fileversion=5.0.0.0
+#AutoIt3Wrapper_Res_ProductVersion=5.0.0
 #AutoIt3Wrapper_Res_ProductName=AppControlTrayHelper
 #AutoIt3Wrapper_Res_LegalCopyright=@ 2024 WildByDesign
 #AutoIt3Wrapper_Res_Language=1033
