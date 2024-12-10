@@ -1436,7 +1436,7 @@ Else
 		_GUICtrlListView_AddArray($hListView,$aWords)
 		CountTotal()
 		CountEnforced()
-		GUICtrlSetData($PolicyStatus, " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced & @CRLF & @CRLF & " " & $topstatus9)
+		GUICtrlSetData($PolicyStatus, " " & $topstatus9 & @CRLF & @CRLF & $sVulnDrivermsg & @CRLF & @CRLF & " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced)
      Else
 		$path = $spFile[1]
         _ArrayDelete($spFile, 0)
@@ -1461,7 +1461,7 @@ Else
 			_GUICtrlListView_AddArray($hListView,$aWords)
 			CountTotal()
 			CountEnforced()
-			GUICtrlSetData($PolicyStatus, " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced & @CRLF & @CRLF & " " & $topstatus9)
+			GUICtrlSetData($PolicyStatus, " " & $topstatus9 & @CRLF & @CRLF & $sVulnDrivermsg & @CRLF & @CRLF & " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced)
 	EndIf
 EndIf
 EndFunc
@@ -1592,7 +1592,7 @@ Func PolicyRemoval()
 		_GUICtrlListView_AddArray($hListView,$aWords)
 		CountTotal()
 		CountEnforced()
-		GUICtrlSetData($PolicyStatus, " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced & @CRLF & @CRLF & " " & $topstatus9)
+		GUICtrlSetData($PolicyStatus, " " & $topstatus9 & @CRLF & @CRLF & $sVulnDrivermsg & @CRLF & @CRLF & " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced)
 Endfunc
 
 Func ConvertPolicy()
