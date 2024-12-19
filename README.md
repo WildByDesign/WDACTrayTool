@@ -2,6 +2,12 @@
 
 I created this App Control System Tray Tool to facilitate more efficient changing of App Control policies. Specifically, I wanted a way to quickly switch between Enforced Mode and Audit Mode so that I could review logs and change rules in the policies as necessary. Since this has really helped benefit my application allowlisting journey, I wanted to share it so that others could also benefit. 
 
+### Requirements:
+
+- Windows 11 (22H2/23H2/24H2 or newer) required for usage of CiTool
+- PowerShell 7 or Windows PowerShell
+
+
 ### Screenshots:
 
 ![AppControlPolicyManager-5](https://github.com/user-attachments/assets/8b17f389-aa04-4553-9e19-5af4b1da1963)
