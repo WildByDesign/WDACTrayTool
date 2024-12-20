@@ -5,8 +5,8 @@
 #AutoIt3Wrapper_Icon=AppControl.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Policy Manager
-#AutoIt3Wrapper_Res_Fileversion=5.0.0.0
-#AutoIt3Wrapper_Res_ProductVersion=5.0.0
+#AutoIt3Wrapper_Res_Fileversion=5.1.0.0
+#AutoIt3Wrapper_Res_ProductVersion=5.1.0
 #AutoIt3Wrapper_Res_ProductName=AppControlPolicyManager
 #AutoIt3Wrapper_Res_LegalCopyright=@ 2024 WildByDesign
 #AutoIt3Wrapper_Res_Language=1033
@@ -38,6 +38,7 @@
 #include <StructureConstants.au3>
 #include <WinAPISysInternals.au3>
 #include <WinAPISysWin.au3>
+#include <StaticConstants.au3>
 #EndRegion
 
 #include "includes\ExtMsgBox.au3"
@@ -46,9 +47,161 @@
 #include "includes\GUIListViewEx.au3"
 #include "includes\XML.au3"
 
-Global $programversion = "5.0"
+Global $programversion = "5.1"
 
 ;Opt('MustDeclareVars', 1)
+
+$GetDPI = _GetDPI()
+
+; 96 DPI = 100% scaling
+; 120 DPI = 125% scaling
+; 144 DPI = 150% scaling
+; 168 DPI = 175% scaling
+; 192 DPI = 200% scaling
+
+
+If $GetDPI = 96 Then
+	$DPIScale = 100
+	$ListViewWidth = 1000
+	$ListViewHeight = 340
+	$hGUIWidth = 1020
+	$hGUIHeight = 580
+	$PolicyInfoWidth = -1
+	$PolicyInfoHeight = -1
+	$HorizontalSpace = 25
+	$HorizontalSpaceSml = 15
+	$VerticalSpaceSml = 8
+	$VerticalSpace = 48
+	$PolicyInfoLabelWidth = 340
+	$PolicyActionLabelWidth = 200
+	$FilteringLabelWidth = 180
+	$ToolslogsLabelWidth = 154
+	$PolicyInfoLabelHeight= 30
+	$PolicyActionLabelHeight = 30
+	$FilteringLabelHeight = 30
+	$ToolslogsLabelHeight = 30
+ElseIf $GetDPI = 120 Then
+	$DPIScale = 125
+	$ListViewWidth = 1200
+	$ListViewHeight = 340
+	$hGUIWidth = 1220
+	$hGUIHeight = 634
+	$PolicyInfoWidth = -1
+	$PolicyInfoHeight = -1
+	$HorizontalSpace = 34
+	$HorizontalSpaceSml = 10
+	$VerticalSpaceSml = 14
+	$VerticalSpace = 48
+	$PolicyInfoLabelWidth = 340
+	$PolicyActionLabelWidth = 200
+	$FilteringLabelWidth = 180
+	$ToolslogsLabelWidth = 154
+	$PolicyInfoLabelHeight= 30
+	$PolicyActionLabelHeight = 30
+	$FilteringLabelHeight = 30
+	$ToolslogsLabelHeight = 30
+ElseIf $GetDPI = 144 Then
+	$DPIScale = 150
+	$ListViewWidth = 1400
+	$ListViewHeight = 380
+	$hGUIWidth = 1420
+	$hGUIHeight = 750
+	$PolicyInfoWidth = -1
+	$PolicyInfoHeight = -1
+	$HorizontalSpace = 25
+	$HorizontalSpaceSml = 20
+	$VerticalSpaceSml = 14
+	$VerticalSpace = 68
+	$PolicyInfoLabelWidth = 340
+	$PolicyActionLabelWidth = 200
+	$FilteringLabelWidth = 180
+	$ToolslogsLabelWidth = 154
+	$PolicyInfoLabelHeight= 30
+	$PolicyActionLabelHeight = 30
+	$FilteringLabelHeight = 30
+	$ToolslogsLabelHeight = 30
+ElseIf $GetDPI = 168 Then
+	$DPIScale = 175
+	$ListViewWidth = 1520
+	$ListViewHeight = 380
+	$hGUIWidth = 1540
+	$hGUIHeight = 770
+	$PolicyInfoWidth = -1
+	$PolicyInfoHeight = -1
+	$HorizontalSpace = 25
+	$HorizontalSpaceSml = 20
+	$VerticalSpaceSml = 14
+	$VerticalSpace = 68
+	$PolicyInfoLabelWidth = 340
+	$PolicyActionLabelWidth = 200
+	$FilteringLabelWidth = 180
+	$ToolslogsLabelWidth = 154
+	$PolicyInfoLabelHeight= 30
+	$PolicyActionLabelHeight = 30
+	$FilteringLabelHeight = 30
+	$ToolslogsLabelHeight = 30
+ElseIf $GetDPI = 192 Then
+	$DPIScale = 200
+	$ListViewWidth = 1640
+	$ListViewHeight = 380
+	$hGUIWidth = 1660
+	$hGUIHeight = 800
+	$PolicyInfoWidth = -1
+	$PolicyInfoHeight = -1
+	$HorizontalSpace = 25
+	$HorizontalSpaceSml = 20
+	$VerticalSpaceSml = 14
+	$VerticalSpace = 68
+	$PolicyInfoLabelWidth = 340
+	$PolicyActionLabelWidth = 200
+	$FilteringLabelWidth = 180
+	$ToolslogsLabelWidth = 154
+	$PolicyInfoLabelHeight= 30
+	$PolicyActionLabelHeight = 30
+	$FilteringLabelHeight = 30
+	$ToolslogsLabelHeight = 30
+Else
+	$ListViewWidth = 1200
+	$ListViewHeight = 340
+	$hGUIWidth = 1220
+	$hGUIHeight = 634
+	$PolicyInfoWidth = -1
+	$PolicyInfoHeight = -1
+	$HorizontalSpace = 25
+	$HorizontalSpaceSml = 15
+	$VerticalSpaceSml = 8
+	$VerticalSpace = 48
+	$PolicyInfoLabelWidth = 340
+	$PolicyActionLabelWidth = 200
+	$FilteringLabelWidth = 180
+	$ToolslogsLabelWidth = 154
+	$PolicyInfoLabelHeight= 30
+	$PolicyActionLabelHeight = 30
+	$FilteringLabelHeight = 30
+	$ToolslogsLabelHeight = 30
+EndIf
+
+Func _GetDPI()
+    Local $iDPI, $iDPIRat, $Logpixelsy = 90, $hWnd = 0
+    Local $hDC = DllCall("user32.dll", "long", "GetDC", "long", $hWnd)
+    Local $aRet = DllCall("gdi32.dll", "long", "GetDeviceCaps", "long", $hDC[0], "long", $Logpixelsy)
+    DllCall("user32.dll", "long", "ReleaseDC", "long", $hWnd, "long", $hDC)
+    $iDPI = $aRet[0]
+    ;; Set a ratio for the GUI dimensions based upon the current DPI value.
+    If $iDPI < 145 And $iDPI > 121 Then
+        $iDPIRat = $iDPI / 95
+    ElseIf $iDPI < 121 And $iDPI > 84 Then
+        $iDPIRat = $iDPI / 96
+    ElseIf $iDPI < 84 And $iDPI > 0 Then
+        $iDPIRat = $iDPI / 105
+    ElseIf $iDPI = 0 Then
+        $iDPI = 96
+        $iDPIRat = 94
+    Else
+        $iDPIRat = $iDPI / 94
+    EndIf
+    Return SetError(0, $iDPIRat, $iDPI)
+EndFunc
 
 isDarkMode()
 Func isDarkMode()
@@ -65,7 +218,7 @@ Else
 	_ExtMsgBoxSet(1, 4, -1, -1, 9, -1, 1200)
 EndIf
 
-Global $hGUI, $cListView, $hListView, $EFIarray, $hGUI2, $ExitButtonEFI, $EFIListView, $hEFIListView
+Global $hGUI, $cListView, $hListView, $EFIarray, $hGUI2, $ExitButtonEFI, $EFIListView, $hEFIListView, $PolicyStatusInfo
 Global $out, $arpol, $arraycount, $policycount, $policyoutput, $policycorrect, $CountTotal, $ExitButton, $TestButton, $Label2, $aContent, $iLV_Index
 Global $CountEnforced = 0
 
@@ -131,6 +284,23 @@ EndIf
 Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
 ProcessWaitClose($o_Pid)
 $out = StdoutRead($o_Pid)
+
+;;;
+
+; Testing in case of parsing issues
+
+;Local Const $sFilePath = @DesktopDir & "\test-output.txt"
+;Local $hFileOpen = FileOpen($sFilePath, $FO_OVERWRITE)
+;FileWrite($hFileOpen, $out)
+;FileClose($hFileOpen)
+
+;Local Const $sFilePath2 = @DesktopDir & "\test-parsed.txt"
+;Local $hFileOpen2 = FileOpen($sFilePath2, $FO_OVERWRITE)
+;FileWrite($hFileOpen2, $finalparse)
+;FileClose($hFileOpen2)
+
+;;;
+
 CreatePolicyTable($out)
 EndFunc
 
@@ -247,6 +417,9 @@ Else
 
 EndIf
 
+
+;MsgBox($MB_SYSTEMMODAL, "Title", "Final parse = " & $finalparse)
+
 ;;;
 
 ; Testing in case of parsing issues
@@ -263,6 +436,10 @@ EndIf
 
 ;;;
 
+If $finalparse = "" Then
+Global $policycount = 0
+Else
+
 $arpol = stringsplit($finalparse, @CR , 0)
 
 ;_ArrayDisplay($arpol, "test")
@@ -271,6 +448,7 @@ Global $policyoutput = UBound ($arpol, $UBOUND_ROWS)
 Global $policycorrect = $policyoutput - 1
 Global $policycount = $policycorrect / 10
 
+EndIf
 
 If $policycount = 0 Then
 Global $aWords[1][11] = [["", "", "", "", "", "", "", "", "", "", ""]]
@@ -932,11 +1110,11 @@ VulnerableDriver()
 Func VulnerableDriver()
 Local $sVulnDriver = RegRead("HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\CI\Config", "VulnerableDriverBlocklistEnable")
 If $sVulnDriver = '1' Then
-	Global $sVulnDrivermsg = " Vulnerable Driver Blocklist" & @TAB & ": Enabled"
+	Global $sVulnDrivermsg = " Vulnerable Driver Blocklist  : Enabled"
 ElseIf $sVulnDriver = '0' Then
-	Global $sVulnDrivermsg = " Vulnerable Driver Blocklist" & @TAB & ": Disabled"
+	Global $sVulnDrivermsg = " Vulnerable Driver Blocklist  : Disabled"
 Else
-	Global $sVulnDrivermsg = " Vulnerable Driver Blocklist" & @TAB & ": Unknown"
+	Global $sVulnDrivermsg = " Vulnerable Driver Blocklist  : Unknown"
 EndIf
 
 Endfunc
@@ -950,12 +1128,12 @@ $out = StdoutRead($o_Pid)
 
 Local $topstatus1 = StringReplace($out, "[32;1m", "")
 Local $topstatus2 = StringReplace($topstatus1, "[0m", "")
-Local $topstatus3 = StringReplace($topstatus2, "UsermodeCodeIntegrityPolicyEnforcementStatus : 0", " App Control user mode policy" & @TAB & ": Not Configured")
-Local $topstatus4 = StringReplace($topstatus3, "UsermodeCodeIntegrityPolicyEnforcementStatus : 1", " App Control user mode policy" & @TAB & ": Audit Mode")
-Local $topstatus5 = StringReplace($topstatus4, "UsermodeCodeIntegrityPolicyEnforcementStatus : 2", " App Control user mode policy" & @TAB & ": Enforced Mode")
-Local $topstatus6 = StringReplace($topstatus5, "CodeIntegrityPolicyEnforcementStatus         : 0", "App Control policy" & @TAB & @TAB & ": Not Configured")
-Local $topstatus7 = StringReplace($topstatus6, "CodeIntegrityPolicyEnforcementStatus         : 1", "App Control policy" & @TAB & @TAB & ": Audit Mode")
-Local $topstatus8 = StringReplace($topstatus7, "CodeIntegrityPolicyEnforcementStatus         : 2", "App Control policy" & @TAB & @TAB & ": Enforced Mode")
+Local $topstatus3 = StringReplace($topstatus2, "UsermodeCodeIntegrityPolicyEnforcementStatus : 0", " App Control user mode policy : " & "Not Configured ")
+Local $topstatus4 = StringReplace($topstatus3, "UsermodeCodeIntegrityPolicyEnforcementStatus : 1", " App Control user mode policy : " & "Audit Mode     ")
+Local $topstatus5 = StringReplace($topstatus4, "UsermodeCodeIntegrityPolicyEnforcementStatus : 2", " App Control user mode policy : " & "Enforced Mode  ")
+Local $topstatus6 = StringReplace($topstatus5, "CodeIntegrityPolicyEnforcementStatus         : 0", "App Control policy           : " & "Not Configured ")
+Local $topstatus7 = StringReplace($topstatus6, "CodeIntegrityPolicyEnforcementStatus         : 1", "App Control policy           : " & "Audit Mode     ")
+Local $topstatus8 = StringReplace($topstatus7, "CodeIntegrityPolicyEnforcementStatus         : 2", "App Control policy           : " & "Enforced Mode  ")
 Global $topstatus9 = StringStripWS($topstatus8, $STR_STRIPLEADING + $STR_STRIPTRAILING)
 
 ;MsgBox($MB_SYSTEMMODAL, "Title", $topstatus9)
@@ -965,11 +1143,12 @@ Endfunc
 
 Func GUI2()
 
-	$hGUI2 = GUICreate("App Control Policy Manager - EFI", 1220, 430, -1, -1, 0x00CF0000)
+	$hGUI2 = GUICreate("App Control Policy Manager - EFI [Work-in-Progress]", 1220, 430, -1, -1)
 
 	GUISetIcon(@ScriptFullPath, 201)
+	GUISetFont(10, -1, -1, "Cascadia Mono")
 
-	Local $exStyles = BitOR($LVS_EX_FULLROWSELECT, $LVS_EX_CHECKBOXES), $EFIListView
+	Local $exStyles = BitOR($LVS_EX_FULLROWSELECT, $LVS_EX_CHECKBOXES, $LVS_EX_DOUBLEBUFFER), $EFIListView
 
 	Local $hToolTip2 = _GUIToolTip_Create(0)
 	_GUIToolTip_SetMaxTipWidth($hToolTip2, 286)
@@ -977,24 +1156,13 @@ Func GUI2()
 	$ExitButtonEFI = GUICtrlCreateButton("Close", 1048, 380, 88, 30)
 	Local $hExitButtonEFI = GUICtrlGetHandle($ExitButtonEFI)
 
-	$EFIListView = GUICtrlCreateListView("|Enforced|Policy Name|Policy ID|Base Policy ID|Version|On Disk|Signed Policy|System Policy|Authorized|Policy Options", 10, 10, 1200, 340, $LVS_EX_DOUBLEBUFFER)
+	$EFIListView = GUICtrlCreateListView("|Enforced|Policy Name|Policy ID|Base Policy ID|Version|On Disk|Signed Policy|System Policy|Authorized|Policy Options", 10, 10, $ListViewWidth, 340)
 
 	$hEFIListView = GUICtrlGetHandle($EFIListView)
 
 	_GUICtrlListView_SetExtendedListViewStyle($hEFIListView, $exStyles)
 
 
-	_GUICtrlListView_SetColumnWidth($hEFIListView, 0, $LVSCW_AUTOSIZE_USEHEADER)
-	_GUICtrlListView_SetColumnWidth($hEFIListView, 1, $LVSCW_AUTOSIZE_USEHEADER)
-	_GUICtrlListView_SetColumnWidth($hEFIListView, 2, 355)
-	_GUICtrlListView_SetColumnWidth($hEFIListView, 3, 295)
-	_GUICtrlListView_SetColumnWidth($hEFIListView, 4, 295)
-	_GUICtrlListView_SetColumnWidth($hEFIListView, 5, 95)
-	_GUICtrlListView_SetColumnWidth($hEFIListView, 6, $LVSCW_AUTOSIZE_USEHEADER)
-	_GUICtrlListView_SetColumnWidth($hEFIListView, 7, $LVSCW_AUTOSIZE_USEHEADER)
-	_GUICtrlListView_SetColumnWidth($hEFIListView, 8, $LVSCW_AUTOSIZE_USEHEADER)
-	_GUICtrlListView_SetColumnWidth($hEFIListView, 9, $LVSCW_AUTOSIZE_USEHEADER)
-	_GUICtrlListView_SetColumnWidth($hEFIListView, 10, $LVSCW_AUTOSIZE_USEHEADER)
 
 	If $isDarkMode = True Then
 	;get handle to child SysHeader32 control of ListView
@@ -1010,7 +1178,7 @@ Func GUI2()
 	_WinAPI_SetWindowLong($hHeader, $GWL_STYLE, BitOR($iStyle, $HDS_FLAT))
 	EndIf
 
-	GUISetState(@SW_SHOW)
+	;GUISetState(@SW_SHOW)
 
 	If $isDarkMode = True Then
 		GuiDarkmodeApply($hGUI2)
@@ -1018,6 +1186,20 @@ Func GUI2()
 		Local $bEnableDarkTheme = False
 		GuiLightmodeApply($hGUI2)
 	EndIf
+
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 0, $LVSCW_AUTOSIZE_USEHEADER)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 1, $LVSCW_AUTOSIZE_USEHEADER)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 2, $LVSCW_AUTOSIZE)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 3, $LVSCW_AUTOSIZE)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 4, $LVSCW_AUTOSIZE)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 5, $LVSCW_AUTOSIZE)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 6, $LVSCW_AUTOSIZE_USEHEADER)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 7, $LVSCW_AUTOSIZE_USEHEADER)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 8, $LVSCW_AUTOSIZE_USEHEADER)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 9, $LVSCW_AUTOSIZE_USEHEADER)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 10, $LVSCW_AUTOSIZE_USEHEADER)
+
+	GUISetState(@SW_SHOW)
 
 	; Refresh policy list
 	GetPolicyInfo()
@@ -1125,10 +1307,10 @@ Func GUI2()
 
 	_GUICtrlListView_SetColumnWidth($hEFIListView, 0, $LVSCW_AUTOSIZE_USEHEADER)
 	_GUICtrlListView_SetColumnWidth($hEFIListView, 1, $LVSCW_AUTOSIZE_USEHEADER)
-	_GUICtrlListView_SetColumnWidth($hEFIListView, 2, 355)
-	_GUICtrlListView_SetColumnWidth($hEFIListView, 3, 295)
-	_GUICtrlListView_SetColumnWidth($hEFIListView, 4, 295)
-	_GUICtrlListView_SetColumnWidth($hEFIListView, 5, 95)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 2, $LVSCW_AUTOSIZE)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 3, $LVSCW_AUTOSIZE)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 4, $LVSCW_AUTOSIZE)
+	_GUICtrlListView_SetColumnWidth($hEFIListView, 5, $LVSCW_AUTOSIZE)
 	_GUICtrlListView_SetColumnWidth($hEFIListView, 6, $LVSCW_AUTOSIZE_USEHEADER)
 	_GUICtrlListView_SetColumnWidth($hEFIListView, 7, $LVSCW_AUTOSIZE_USEHEADER)
 	_GUICtrlListView_SetColumnWidth($hEFIListView, 8, $LVSCW_AUTOSIZE_USEHEADER)
@@ -1153,97 +1335,49 @@ Func GUI2()
 
 Endfunc
 
-Local $exStyles = BitOR($LVS_EX_FULLROWSELECT, $LVS_EX_CHECKBOXES), $cListView
 
 ;$hGUI = GUICreate("App Control Policy Manager", 1220, 560, -1, -1, 0x00CF0000)
 ;$hGUI = GUICreate("App Control Policy Manager", 1220, 594, -1, -1, 0x00CF0000)
-$hGUI = GUICreate("App Control Policy Manager", 1220, 634, -1, -1, 0x00CF0000)
+$hGUI = GUICreate("App Control Policy Manager", $hGUIWidth, $hGUIHeight, -1, -1)
 
 GUISetIcon(@ScriptFullPath, 201)
 
-Local $hToolTip2 = _GUIToolTip_Create(0)
-_GUIToolTip_SetMaxTipWidth($hToolTip2, 286)
+Local Const $sCascadiaPath = @WindowsDir & "\fonts\CascadiaCode.ttf"
+Local $iCascadiaExists = FileExists($sCascadiaPath)
 
-$AboutButton = GUICtrlCreateButton("About", 1048, 490, 88, 30)
-Local $hAboutButton = GUICtrlGetHandle($AboutButton)
-
-$EndDivider = GUICtrlCreateLabel("", 1070, 465, 44, 1, $WS_BORDER)
-Local $hEndDivider = GUICtrlGetHandle($EndDivider)
-
-$ExitButton = GUICtrlCreateButton("Close", 1048, 410, 88, 30)
-Local $hExitButton = GUICtrlGetHandle($ExitButton)
-
-$PolicyActions = GUICtrlCreateLabel("Policy Actions:", 453, 370, 220, 30)
-Local $hPolicyActions = GUICtrlGetHandle($PolicyActions)
-
-$AddButton = GUICtrlCreateButton("Add or Update Policies", 410, 410, 200, 30)
-Local $hAddButton = GUICtrlGetHandle($AddButton)
-
-$RemoveButton = GUICtrlCreateButton("Remove Selected Policies", 410, 450, 200, 30)
-Local $hRemoveButton = GUICtrlGetHandle($RemoveButton)
-
-$RemoveEFILabel = GUICtrlCreateLabel("", 460, 505, 100, 1, $WS_BORDER)
-Local $hRemoveEFILabel = GUICtrlGetHandle($RemoveEFILabel)
-
-$ConvertButton = GUICtrlCreateButton("Convert (xml to binary)", 410, 530, 200, 30)
-Local $hConvertButton = GUICtrlGetHandle($ConvertButton)
-
-$RefreshButton = GUICtrlCreateButton("Refresh Policy List", 410, 570, 200, 30)
-Local $hRefreshButton = GUICtrlGetHandle($RefreshButton)
-
-$FilterLogs = GUICtrlCreateLabel("Filtering Options:", 662, 370, 220, 30)
-Local $hFilterLogs = GUICtrlGetHandle($FilterLogs)
-
-$FilterEnforced = GUICtrlCreateButton("Enforced", 645, 410, 85, 30)
-Local $hFilterEnforced = GUICtrlGetHandle($FilterEnforced)
-
-$FilterBase = GUICtrlCreateButton("Base", 645, 450, 85, 30)
-Local $hFilterBase = GUICtrlGetHandle($FilterBase)
-
-$FilterSupp = GUICtrlCreateButton("Suppl.", 645, 490, 85, 30)
-Local $hFilterSupp = GUICtrlGetHandle($FilterSupp)
-_GUIToolTip_AddTool($hToolTip2, 0, "Supplemental", $hFilterSupp)
-
-$FilterSigned = GUICtrlCreateButton("Signed", 740, 410, 85, 30)
-Local $hFilterSigned = GUICtrlGetHandle($FilterSigned)
-
-If $is24H2 = False Then
-$FilterSignedLabel = GUICtrlCreateLabel("", 738, 408, 87, 32, $WS_CLIPSIBLINGS)
-Local $hFilterSignedLabel = GUICtrlGetHandle($FilterSignedLabel)
-GUICtrlSetState($FilterSigned,$GUI_DISABLE)
-_GUIToolTip_AddTool($hToolTip2, 0, "Policy list cannot be filtered by Signed policies on pre-24H2 builds of Windows 11.", $hFilterSignedLabel)
+If $iCascadiaExists Then
+	GUISetFont(10, $FW_THIN, -1, "Cascadia Code")
+Else
+	GUISetFont(10, $FW_NORMAL, -1, "Consolas")
 EndIf
 
-$FilterSystem = GUICtrlCreateButton("System", 740, 450, 85, 30)
-Local $hFilterSystem = GUICtrlGetHandle($FilterSystem)
 
-$FilterReset = GUICtrlCreateButton("Reset", 740, 490, 85, 30)
-Local $hFilterReset = GUICtrlGetHandle($FilterReset)
+Local $hToolTip2 = _GUIToolTip_Create(0)
+;_GUIToolTip_SetMaxTipWidth($hToolTip2, 400)
 
-$EFILabelDivider = GUICtrlCreateLabel("", 690, 545, 90, 1, $WS_BORDER)
-Local $hEFILabelDivider = GUICtrlGetHandle($EFILabelDivider)
+If $isDarkMode = True Then
+	_WinAPI_SetWindowTheme($hToolTip2, "", "")
+	_GUIToolTip_SetTipBkColor($hToolTip2, 0x202020)
+	_GUIToolTip_SetTipTextColor($hToolTip2, 0xe0e0e0)
+Else
+	_WinAPI_SetWindowTheme($hToolTip2, "", "")
+	_GUIToolTip_SetTipBkColor($hToolTip2, 0xffffff)
+	_GUIToolTip_SetTipTextColor($hToolTip2, 0x000000)
+EndIf
 
-$EFIButton = GUICtrlCreateButton("EFI (Signed/System)", 645, 570, 180, 30)
-Local $hEFIButton = GUICtrlGetHandle($EFIButton)
+_GUIToolTip_SetMaxTipWidth($hToolTip2, 260)
 
-$EventLogs = GUICtrlCreateLabel("Tools && Logs:", 880, 370, 120, 30)
-Local $hEventLogs = GUICtrlGetHandle($EventLogs)
 
-$PolicyWizard = GUICtrlCreateButton("App Control Wizard", 860, 410, 154, 30)
-Local $hPolicyWizard = GUICtrlGetHandle($PolicyWizard)
-
-$ToolsDivider = GUICtrlCreateLabel("", 898.5, 465, 77, 1, $WS_BORDER)
-Local $hToolsDivider = GUICtrlGetHandle($ToolsDivider)
-
-$CodeIntegrity = GUICtrlCreateButton("Code Integrity", 860, 490, 154, 30)
-Local $hCodeIntegrity = GUICtrlGetHandle($CodeIntegrity)
-
-$MSIandScript = GUICtrlCreateButton("MSI and Script", 860, 530, 154, 30)
-Local $hMSIandScript = GUICtrlGetHandle($MSIandScript)
-
-$cListView = GUICtrlCreateListView("|Enforced|Policy Name|Policy ID|Base Policy ID|Version|On Disk|Signed Policy|System Policy|Authorized|Policy Options", 10, 10, 1200, 340, $LVS_EX_DOUBLEBUFFER)
-
+Local $exStyles = BitOR($LVS_EX_FULLROWSELECT, $LVS_EX_CHECKBOXES, $LVS_EX_DOUBLEBUFFER), $cListView
+$cListView = GUICtrlCreateListView("|Enforced|Policy Name|Policy ID|Base Policy ID|Version|On Disk|Signed Policy|System Policy|Authorized|Policy Options", 10, $VerticalSpaceSml + $VerticalSpaceSml, $ListViewWidth, $ListViewHeight)
 $hListView = GUICtrlGetHandle($cListView)
+
+$aPos = ControlGetPos($hGUI, "", $cListView)
+;MsgBox($MB_SYSTEMMODAL, "", "Position: " & $aPos[0] & ", " & $aPos[1] & @CRLF & "Size: " & $aPos[2] & ", " & $aPos[3])
+$cListViewPosV = $aPos[1]
+$cListViewPosH = $aPos[0] + $aPos[2] + $HorizontalSpace
+$cListViewLength = $aPos[2]
+$cListViewHeight = $aPos[3]
 
 _GUICtrlListView_SetExtendedListViewStyle($hListView, $exStyles)
 
@@ -1288,56 +1422,203 @@ Func CountEnforced()
 	;MsgBox($MB_SYSTEMMODAL, "Title", "Count = " & $CountEnforced)
 Endfunc
 
-$Label2 = GUICtrlCreateLabel("Current Policy Information:", 96, 370, 240, 25)
-Local $hLabel2 = GUICtrlGetHandle($Label2)
+
 ;$PolicyStatus = GUICtrlCreateLabel(" Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced & @CRLF & @CRLF & " " & $topstatus9 & @CRLF & @CRLF & $sVulnDrivermsg, 35, 410, 340, 156, $WS_BORDER)
-$PolicyStatus = GUICtrlCreateLabel(" " & $topstatus9 & @CRLF & @CRLF & $sVulnDrivermsg & @CRLF & @CRLF & " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced, 35, 410, 340, 154, $WS_BORDER)
+
+UpdatePolicyStatus()
+Func UpdatePolicyStatus()
+Global $PolicyStatusInfo = " " & $topstatus9 & @CRLF & @CRLF & $sVulnDrivermsg & @CRLF & @CRLF & " Policies (total)      : " & $CountTotal & @CRLF & " Policies (enforced)   : " & $CountEnforced
+EndFunc
+
+If $iCascadiaExists Then
+	GUISetFont(10, $FW_THIN, -1, "Cascadia Code")
+Else
+	GUISetFont(10, $FW_NORMAL, -1, "Consolas")
+EndIf
+
+;$PolicyStatus = GUICtrlCreateLabel($PolicyStatusInfo, 35, $Label2PosV + $Label2Height + $VerticalSpaceSml, $PolicyInfoWidth, $PolicyInfoHeight, $WS_BORDER + $SS_LEFTNOWORDWRAP)
+$PolicyStatus = GUICtrlCreateLabel($PolicyStatusInfo, 35, $cListViewPosV + $cListViewHeight + $VerticalSpace, $PolicyInfoWidth, $PolicyInfoHeight, $WS_BORDER + $SS_LEFTNOWORDWRAP)
 Local $hPolicyStatus = GUICtrlGetHandle($PolicyStatus)
+$aPos = ControlGetPos($hGUI, "", $PolicyStatus)
+
+$PolicyStatusPosV = $aPos[1] + 4
+$PolicyStatusPosV2 = $aPos[1]
+$PolicyStatusPosH = $aPos[0] + $aPos[2] + $HorizontalSpace
+$PolicyStatusWidth = $aPos[2]
+$PolicyStatusHeight = $aPos[3]
+
+
+GUISetFont(10, $FW_BOLD, -1, "Segoe UI")
+
+$Label2 = GUICtrlCreateLabel("Current Policy Information:", 35, $cListViewPosV + $cListViewHeight + $VerticalSpaceSml, $PolicyStatusWidth, $PolicyInfoLabelHeight, $SS_CENTER)
+Local $hLabel2 = GUICtrlGetHandle($Label2)
+
+$aPos = ControlGetPos($hGUI, "", $Label2)
+;MsgBox($MB_SYSTEMMODAL, "", "Position: " & $aPos[0] & ", " & $aPos[1] & @CRLF & "Size: " & $aPos[2] & ", " & $aPos[3])
+$Label2PosV = $aPos[1]
+$Label2PosH = $aPos[0] + $aPos[2] + $HorizontalSpace
+$Label2Length = $aPos[2]
+$Label2Height = $aPos[3]
+
+GUISetFont(10, $FW_NORMAL, -1, "Segoe UI")
 
 If $is24H2 = True Then
 Else
-	$pre24H2Lablel = GUICtrlCreateLabel("* Pre-24H2 OS will show less information.", 66, 584, 340, 30)
+	$pre24H2Lablel = GUICtrlCreateLabel("* Pre-24H2 OS will show less information.", 35, $PolicyStatusPosV2 + $PolicyStatusHeight + $VerticalSpaceSml + 4, $PolicyStatusWidth, 30, $SS_CENTER)
 	Local $hpre24H2Lablel = GUICtrlGetHandle($pre24H2Lablel)
 	GUICtrlSetFont($pre24H2Lablel, 8.5, -1, -1, "Segoe UI")
 EndIf
 
-_GUICtrlListView_SetColumnWidth($hListView, 0, $LVSCW_AUTOSIZE_USEHEADER)
-_GUICtrlListView_SetColumnWidth($hListView, 1, $LVSCW_AUTOSIZE_USEHEADER)
-_GUICtrlListView_SetColumnWidth($hListView, 2, 355)
-_GUICtrlListView_SetColumnWidth($hListView, 3, 295)
-_GUICtrlListView_SetColumnWidth($hListView, 4, 295)
-_GUICtrlListView_SetColumnWidth($hListView, 5, 95)
-_GUICtrlListView_SetColumnWidth($hListView, 6, $LVSCW_AUTOSIZE_USEHEADER)
-_GUICtrlListView_SetColumnWidth($hListView, 7, $LVSCW_AUTOSIZE_USEHEADER)
-_GUICtrlListView_SetColumnWidth($hListView, 8, $LVSCW_AUTOSIZE_USEHEADER)
-_GUICtrlListView_SetColumnWidth($hListView, 9, $LVSCW_AUTOSIZE_USEHEADER)
-_GUICtrlListView_SetColumnWidth($hListView, 10, $LVSCW_AUTOSIZE_USEHEADER)
+
+$AddButton = GUICtrlCreateButton("    Add or Update Policies    ", $PolicyStatusPosH, $cListViewPosV + $cListViewHeight + $VerticalSpace, -1, -1, $BS_CENTER)
+Local $hAddButton = GUICtrlGetHandle($AddButton)
+
+$aPos = ControlGetPos($hGUI, "", $AddButton)
+;MsgBox($MB_SYSTEMMODAL, "", "Position: " & $aPos[0] & ", " & $aPos[1] & @CRLF & "Size: " & $aPos[2] & ", " & $aPos[3])
+$AddButtonPosV = $aPos[1]
+$AddButtonPosH = $aPos[0] + $aPos[2] + $HorizontalSpace
+$AddButtonLength = $aPos[2]
+$AddButtonHeight = $aPos[3]
+
+GUISetFont(10, $FW_BOLD, -1, "Segoe UI")
+
+$PolicyActions = GUICtrlCreateLabel("Policy Actions:", $PolicyStatusPosH, $cListViewPosV + $cListViewHeight + $VerticalSpaceSml, $AddButtonLength, $PolicyActionLabelHeight, $SS_CENTER)
+Local $hPolicyActions = GUICtrlGetHandle($PolicyActions)
+
+GUISetFont(10, $FW_NORMAL, -1, "Segoe UI")
+
+$RemoveButton = GUICtrlCreateButton(" Remove Selected Policies ", $PolicyStatusPosH, $AddButtonPosV + $VerticalSpaceSml + $AddButtonHeight, $AddButtonLength, -1, $BS_CENTER)
+Local $hRemoveButton = GUICtrlGetHandle($RemoveButton)
+
+$aPos = ControlGetPos($hGUI, "", $RemoveButton)
+
+$RemoveButtonPosV = $aPos[1]
+$RemoveButtonPosH = $aPos[0] + $aPos[2] + $HorizontalSpace
+$RemoveButtonHeight = $aPos[3]
+
+;$ConvertButton = GUICtrlCreateButton(" Convert (xml to binary) ", $PolicyStatusPosH, 530, -1, -1)
+$ConvertButton = GUICtrlCreateButton("Convert XML to Binary", $PolicyStatusPosH, $RemoveButtonPosV + $RemoveButtonHeight + $VerticalSpaceSml, $AddButtonLength, -1, $BS_CENTER)
+Local $hConvertButton = GUICtrlGetHandle($ConvertButton)
+
+$aPos = ControlGetPos($hGUI, "", $ConvertButton)
+
+$ConvertButtonPosV = $aPos[1]
+$ConvertButtonPosH = $aPos[0] + $aPos[2] + $HorizontalSpace
+$ConvertButtonHeight = $aPos[3]
+
+$RefreshButton = GUICtrlCreateButton("Refresh Policy List", $PolicyStatusPosH, $ConvertButtonPosV + $ConvertButtonHeight + $VerticalSpaceSml, $AddButtonLength, -1, $BS_CENTER)
+Local $hRefreshButton = GUICtrlGetHandle($RefreshButton)
 
 
-GUICtrlSetFont($Label2, 11, -1, -1, "Segoe UI")
-GUICtrlSetFont($EventLogs, 11, -1, -1, "Segoe UI")
-GUICtrlSetFont($FilterLogs, 11, -1, -1, "Segoe UI")
-GUICtrlSetFont($Label2, 11, -1, -1, "Segoe UI")
-GUICtrlSetFont($EventLogs, 11, -1, -1, "Segoe UI")
-GUICtrlSetFont($FilterLogs, 11, -1, -1, "Segoe UI")
-GUICtrlSetFont($PolicyActions, 11, -1, -1, "Segoe UI")
-GUICtrlSetFont($AboutButton, 9, -1, -1, "Segoe UI")
-GUICtrlSetFont($ExitButton, 9, -1, -1, "Segoe UI")
-GUICtrlSetFont($RemoveButton, 9, -1, -1, "Segoe UI")
-GUICtrlSetFont($AddButton, 9, -1, -1, "Segoe UI")
-GUICtrlSetFont($RefreshButton, 9, -1, -1, "Segoe UI")
-GUICtrlSetFont($ConvertButton, 9, -1, -1, "Segoe UI")
-GUICtrlSetFont($PolicyStatus, 10, -1, -1, "Segoe UI")
-GUICtrlSetFont($CodeIntegrity, 9, -1, -1, "Segoe UI")
-GUICtrlSetFont($MSIandScript, 9, -1, -1, "Segoe UI")
-GUICtrlSetFont($FilterEnforced, 9, -1, -1, "Segoe UI")
-GUICtrlSetFont($FilterBase, 9, -1, -1, "Segoe UI")
-GUICtrlSetFont($FilterSupp, 9, -1, -1, "Segoe UI")
-GUICtrlSetFont($FilterSigned, 9, -1, -1, "Segoe UI")
-GUICtrlSetFont($FilterSystem, 9, -1, -1, "Segoe UI")
-GUICtrlSetFont($FilterReset, 9, -1, -1, "Segoe UI")
-GUICtrlSetFont($EFIButton, 9, -1, -1, "Segoe UI")
-GUICtrlSetFont($PolicyWizard, 9, -1, -1, "Segoe UI")
+$FilterEnforced = GUICtrlCreateButton(" Enforced ", $RemoveButtonPosH, $cListViewPosV + $cListViewHeight + $VerticalSpace, -1, -1, $BS_CENTER)
+Local $hFilterEnforced = GUICtrlGetHandle($FilterEnforced)
+
+$aPos = ControlGetPos($hGUI, "", $FilterEnforced)
+
+$FilterEnforcedPosV = $aPos[1] + 4
+$FilterEnforcedPosV2 = $aPos[1]
+$FilterEnforcedPosH = $aPos[0] + $aPos[2] + $HorizontalSpaceSml
+$FilterEnforcedLength = $aPos[2]
+$FilterEnforcedHeight = $aPos[3]
+;MsgBox($MB_SYSTEMMODAL, "", $FilterEnforcedLength)
+
+GUISetFont(10, $FW_BOLD, -1, "Segoe UI")
+
+$FilterLogs = GUICtrlCreateLabel("Filtering Options:", $RemoveButtonPosH, $cListViewPosV + $cListViewHeight + $VerticalSpaceSml, $FilterEnforcedLength + $FilterEnforcedLength + $HorizontalSpaceSml, $FilteringLabelHeight, $SS_CENTER)
+Local $hFilterLogs = GUICtrlGetHandle($FilterLogs)
+
+GUISetFont(10, $FW_NORMAL, -1, "Segoe UI")
+
+$FilterBase = GUICtrlCreateButton("Base", $RemoveButtonPosH, $FilterEnforcedPosV2 + $FilterEnforcedHeight + $VerticalSpaceSml, $FilterEnforcedLength, -1, $BS_CENTER)
+Local $hFilterBase = GUICtrlGetHandle($FilterBase)
+
+$aPos = ControlGetPos($hGUI, "", $FilterBase)
+
+$FilterBasePosV = $aPos[1]
+$FilterBasePosH = $aPos[0] + $aPos[2] + $HorizontalSpace
+$FilterBaseHeight = $aPos[3]
+
+$FilterSupp = GUICtrlCreateButton("Suppl.", $RemoveButtonPosH, $FilterBasePosV + $FilterBaseHeight + $VerticalSpaceSml, $FilterEnforcedLength, -1, $BS_CENTER)
+Local $hFilterSupp = GUICtrlGetHandle($FilterSupp)
+_GUIToolTip_AddTool($hToolTip2, 0, "Supplemental", $hFilterSupp)
+
+$FilterSigned = GUICtrlCreateButton("Signed", $FilterEnforcedPosH, $cListViewPosV + $cListViewHeight + $VerticalSpace, $FilterEnforcedLength, -1, $BS_CENTER)
+Local $hFilterSigned = GUICtrlGetHandle($FilterSigned)
+
+$aPos = ControlGetPos($hGUI, "", $FilterSigned)
+
+$FilterSignedPosV = $aPos[1]
+$FilterSignedPosH = $aPos[0] + $aPos[2] + $HorizontalSpace
+$FilterSignedHeight = $aPos[3]
+
+If $is24H2 = False Then
+$FilterSignedLabelOffset = $Label2PosV + $Label2Height + $VerticalSpaceSml
+$FilterSignedLabel = GUICtrlCreateLabel("", $FilterEnforcedPosH - 2, $cListViewPosV + $cListViewHeight + $VerticalSpace - 2, $FilterEnforcedLength + 4, $FilterEnforcedHeight + 4, $WS_CLIPSIBLINGS)
+Local $hFilterSignedLabel = GUICtrlGetHandle($FilterSignedLabel)
+GUICtrlSetState($FilterSigned,$GUI_DISABLE)
+_GUIToolTip_AddTool($hToolTip2, 0, "Policy list cannot be filtered by Signed policies on pre-24H2 builds of Windows 11.", $hFilterSignedLabel)
+EndIf
+
+$FilterSystem = GUICtrlCreateButton("System", $FilterEnforcedPosH, $FilterSignedPosV + $FilterSignedHeight + $VerticalSpaceSml, $FilterEnforcedLength, -1, $BS_CENTER)
+Local $hFilterSystem = GUICtrlGetHandle($FilterSystem)
+
+$aPos = ControlGetPos($hGUI, "", $FilterSystem)
+
+$FilterSystemPosV = $aPos[1] + 4
+$FilterSystemPosH = $aPos[0] + $aPos[2] + $HorizontalSpace
+
+$FilterReset = GUICtrlCreateButton("Reset", $FilterEnforcedPosH, $FilterBasePosV + $FilterBaseHeight + $VerticalSpaceSml, $FilterEnforcedLength, -1, $BS_CENTER)
+Local $hFilterReset = GUICtrlGetHandle($FilterReset)
+
+$aPos = ControlGetPos($hGUI, "", $FilterReset)
+
+$FilterResetPosV = $aPos[1]
+$FilterResetPosH = $aPos[0] + $aPos[2] + $HorizontalSpace
+$FilterResetHeight = $aPos[3]
+
+$EFIButton = GUICtrlCreateButton("EFI (Signed/System)", $RemoveButtonPosH, $FilterResetPosV + $FilterResetHeight + $VerticalSpaceSml, $FilterEnforcedLength * 2 + $HorizontalSpaceSml, -1, $BS_CENTER)
+Local $hEFIButton = GUICtrlGetHandle($EFIButton)
+
+$aPos = ControlGetPos($hGUI, "", $EFIButton)
+;MsgBox($MB_SYSTEMMODAL, "", "Position: " & $aPos[0] & ", " & $aPos[1] & @CRLF & "Size: " & $aPos[2] & ", " & $aPos[3])
+$EFIButtonPosV = $aPos[1] + 4
+$EFIButtonPosH = $aPos[0] + $aPos[2] + $HorizontalSpace
+$EFIButtonLength = $aPos[2]
+;MsgBox($MB_SYSTEMMODAL, "", $EFIButtonLength)
+
+
+$PolicyWizard = GUICtrlCreateButton(" App Control Wizard ", $FilterSystemPosH, $cListViewPosV + $cListViewHeight + $VerticalSpace, -1, -1, $BS_CENTER)
+Local $hPolicyWizard = GUICtrlGetHandle($PolicyWizard)
+
+$aPos = ControlGetPos($hGUI, "", $PolicyWizard)
+;MsgBox($MB_SYSTEMMODAL, "", "Position: " & $aPos[0] & ", " & $aPos[1] & @CRLF & "Size: " & $aPos[2] & ", " & $aPos[3])
+$PolicyWizardPosV = $aPos[1] + 4
+$PolicyWizardPosV2 = $aPos[1]
+$PolicyWizardPosH = $aPos[0] + $aPos[2] + $HorizontalSpace
+$PolicyWizardLength = $aPos[2]
+$PolicyWizardHeight = $aPos[3]
+
+GUISetFont(10, $FW_BOLD, -1, "Segoe UI")
+
+$EventLogs = GUICtrlCreateLabel("Tools && Logs:", $FilterSystemPosH, $cListViewPosV + $cListViewHeight + $VerticalSpaceSml, $PolicyWizardLength, $ToolslogsLabelHeight, $SS_CENTER)
+Local $hEventLogs = GUICtrlGetHandle($EventLogs)
+
+GUISetFont(10, $FW_NORMAL, -1, "Segoe UI")
+
+$CodeIntegrity = GUICtrlCreateButton("Code Integrity", $FilterSystemPosH, $PolicyWizardPosV2 + $PolicyWizardHeight + $PolicyWizardHeight + $VerticalSpaceSml + $VerticalSpaceSml, $PolicyWizardLength, -1, $BS_CENTER)
+Local $hCodeIntegrity = GUICtrlGetHandle($CodeIntegrity)
+
+$aPos = ControlGetPos($hGUI, "", $CodeIntegrity)
+;MsgBox($MB_SYSTEMMODAL, "", "Position: " & $aPos[0] & ", " & $aPos[1] & @CRLF & "Size: " & $aPos[2] & ", " & $aPos[3])
+$CodeIntegrityPosV = $aPos[1] + 4
+$CodeIntegrityPosV2 = $aPos[1]
+$CodeIntegrityPosH = $aPos[0] + $aPos[2] + $HorizontalSpace
+$CodeIntegrityLength = $aPos[2]
+$CodeIntegrityHeight = $aPos[3]
+
+$MSIandScript = GUICtrlCreateButton("MSI and Script", $FilterSystemPosH, $CodeIntegrityPosV2 + $CodeIntegrityHeight + $VerticalSpaceSml, $PolicyWizardLength, -1, $BS_CENTER)
+Local $hMSIandScript = GUICtrlGetHandle($MSIandScript)
+
 
 ; Read ListView content into an array
 $aContent = _GUIListViewEx_ReadToArray($cListView)
@@ -1361,6 +1642,37 @@ $iLV_Index = _GUIListViewEx_Init($cListView, $aContent, 0, Default, False, 1)
 
 ; Register required messages
 _GUIListViewEx_MsgRegister()
+
+hListViewRefreshColWidth()
+Func hListViewRefreshColWidth()
+_GUICtrlListView_SetColumnWidth($hListView, 0, $LVSCW_AUTOSIZE_USEHEADER)
+_GUICtrlListView_SetColumnWidth($hListView, 1, $LVSCW_AUTOSIZE_USEHEADER)
+
+If $policycount = 0 Then
+_GUICtrlListView_SetColumnWidth($hListView, 2, $LVSCW_AUTOSIZE_USEHEADER)
+_GUICtrlListView_SetColumnWidth($hListView, 3, $LVSCW_AUTOSIZE_USEHEADER)
+_GUICtrlListView_SetColumnWidth($hListView, 4, $LVSCW_AUTOSIZE_USEHEADER)
+Else
+_GUICtrlListView_SetColumnWidth($hListView, 2, $LVSCW_AUTOSIZE)
+_GUICtrlListView_SetColumnWidth($hListView, 3, $LVSCW_AUTOSIZE)
+_GUICtrlListView_SetColumnWidth($hListView, 4, $LVSCW_AUTOSIZE)
+EndIf
+;_GUICtrlListView_SetColumnWidth($hListView, 5, $LVSCW_AUTOSIZE)
+
+_GUICtrlListView_SetColumnWidth($hListView, 5, $LVSCW_AUTOSIZE)
+Local $aTmp1 = _GUICtrlListView_GetColumn($hListView, 5)
+_GUICtrlListView_SetColumnWidth($hListView, 5, $LVSCW_AUTOSIZE_USEHEADER)
+Local $aTmp2 = _GUICtrlListView_GetColumn($hListView, 5)
+
+If $aTmp1[4] < $aTmp2[4] Then _GUICtrlListView_SetColumnWidth($hListView, 5, $LVSCW_AUTOSIZE_USEHEADER)
+If $aTmp1[4] > $aTmp2[4] Then _GUICtrlListView_SetColumnWidth($hListView, 5, $LVSCW_AUTOSIZE)
+
+_GUICtrlListView_SetColumnWidth($hListView, 6, $LVSCW_AUTOSIZE_USEHEADER)
+_GUICtrlListView_SetColumnWidth($hListView, 7, $LVSCW_AUTOSIZE_USEHEADER)
+_GUICtrlListView_SetColumnWidth($hListView, 8, $LVSCW_AUTOSIZE_USEHEADER)
+_GUICtrlListView_SetColumnWidth($hListView, 9, $LVSCW_AUTOSIZE_USEHEADER)
+_GUICtrlListView_SetColumnWidth($hListView, 10, $LVSCW_AUTOSIZE_USEHEADER)
+EndFunc
 
 GUISetState(@SW_SHOW)
 
@@ -1436,7 +1748,9 @@ Else
 		_GUICtrlListView_AddArray($hListView,$aWords)
 		CountTotal()
 		CountEnforced()
-		GUICtrlSetData($PolicyStatus, " " & $topstatus9 & @CRLF & @CRLF & $sVulnDrivermsg & @CRLF & @CRLF & " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced)
+		UpdatePolicyStatus()
+		hListViewRefreshColWidth()
+		GUICtrlSetData($PolicyStatus, $PolicyStatusInfo)
      Else
 		$path = $spFile[1]
         _ArrayDelete($spFile, 0)
@@ -1461,7 +1775,9 @@ Else
 			_GUICtrlListView_AddArray($hListView,$aWords)
 			CountTotal()
 			CountEnforced()
-			GUICtrlSetData($PolicyStatus, " " & $topstatus9 & @CRLF & @CRLF & $sVulnDrivermsg & @CRLF & @CRLF & " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced)
+			UpdatePolicyStatus()
+			hListViewRefreshColWidth()
+			GUICtrlSetData($PolicyStatus, $PolicyStatusInfo)
 	EndIf
 EndIf
 EndFunc
@@ -1592,7 +1908,9 @@ Func PolicyRemoval()
 		_GUICtrlListView_AddArray($hListView,$aWords)
 		CountTotal()
 		CountEnforced()
-		GUICtrlSetData($PolicyStatus, " " & $topstatus9 & @CRLF & @CRLF & $sVulnDrivermsg & @CRLF & @CRLF & " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced)
+		UpdatePolicyStatus()
+		hListViewRefreshColWidth()
+		GUICtrlSetData($PolicyStatus, $PolicyStatusInfo)
 Endfunc
 
 Func ConvertPolicy()
@@ -1826,7 +2144,7 @@ While 1
 	Switch $aMsg[1]
 		Case $hGUI
 			Switch $aMsg[0]
-				Case $GUI_EVENT_CLOSE, $ExitButton
+				Case $GUI_EVENT_CLOSE
 					ExitLoop
 				Case $AddButton
 					AddPolicies()
@@ -1837,7 +2155,9 @@ While 1
 					GetPolicyInfo()
 					GetPolicyStatus()
 					_GUICtrlListView_AddArray($hListView,$aWords)
-					GUICtrlSetData($PolicyStatus, " " & $topstatus9 & @CRLF & @CRLF & $sVulnDrivermsg & @CRLF & @CRLF & " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced)
+					hListViewRefreshColWidth()
+					UpdatePolicyStatus()
+					GUICtrlSetData($PolicyStatus, $PolicyStatusInfo)
 				Case $RemoveButton
 					CountChecked()
 				Case $EFIButton
@@ -1845,8 +2165,6 @@ While 1
 					;GetPolicyInfo()
 					GUISetState(@SW_HIDE, $hGUI)
 					GUI2()
-				Case $AboutButton
-					About()
 				Case $PolicyWizard
 					PolicyWizard()
 				Case $CodeIntegrity
@@ -1858,37 +2176,49 @@ While 1
 					GetPolicyEnforced()
 					GetPolicyStatus()
 					_GUICtrlListView_AddArray($hListView,$aWords)
-					GUICtrlSetData($PolicyStatus, " " & $topstatus9 & @CRLF & @CRLF & $sVulnDrivermsg & @CRLF & @CRLF & " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced)
+					hListViewRefreshColWidth()
+					UpdatePolicyStatus()
+					GUICtrlSetData($PolicyStatus, $PolicyStatusInfo)
 				Case $FilterBase
 					_GUICtrlListView_DeleteAllItems($cListView)
 					GetPolicyBase()
 					GetPolicyStatus()
 					_GUICtrlListView_AddArray($hListView,$aWords)
-					GUICtrlSetData($PolicyStatus, " " & $topstatus9 & @CRLF & @CRLF & $sVulnDrivermsg & @CRLF & @CRLF & " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced)
+					hListViewRefreshColWidth()
+					UpdatePolicyStatus()
+					GUICtrlSetData($PolicyStatus, $PolicyStatusInfo)
 				Case $FilterSupp
 					_GUICtrlListView_DeleteAllItems($cListView)
 					GetPolicySupp()
 					GetPolicyStatus()
 					_GUICtrlListView_AddArray($hListView,$aWords)
-					GUICtrlSetData($PolicyStatus, " " & $topstatus9 & @CRLF & @CRLF & $sVulnDrivermsg & @CRLF & @CRLF & " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced)
+					hListViewRefreshColWidth()
+					UpdatePolicyStatus()
+					GUICtrlSetData($PolicyStatus, $PolicyStatusInfo)
 				Case $FilterSigned
 					_GUICtrlListView_DeleteAllItems($cListView)
 					GetPolicySigned()
 					GetPolicyStatus()
 					_GUICtrlListView_AddArray($hListView,$aWords)
-					GUICtrlSetData($PolicyStatus, " " & $topstatus9 & @CRLF & @CRLF & $sVulnDrivermsg & @CRLF & @CRLF & " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced)
+					hListViewRefreshColWidth()
+					UpdatePolicyStatus()
+					GUICtrlSetData($PolicyStatus, $PolicyStatusInfo)
 				Case $FilterSystem
 					_GUICtrlListView_DeleteAllItems($cListView)
 					GetPolicySystem()
 					GetPolicyStatus()
 					_GUICtrlListView_AddArray($hListView,$aWords)
-					GUICtrlSetData($PolicyStatus, " " & $topstatus9 & @CRLF & @CRLF & $sVulnDrivermsg & @CRLF & @CRLF & " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced)
+					hListViewRefreshColWidth()
+					UpdatePolicyStatus()
+					GUICtrlSetData($PolicyStatus, $PolicyStatusInfo)
 				Case $FilterReset
 					_GUICtrlListView_DeleteAllItems($cListView)
 					GetPolicyInfo()
 					GetPolicyStatus()
 					_GUICtrlListView_AddArray($hListView,$aWords)
-					GUICtrlSetData($PolicyStatus, " " & $topstatus9 & @CRLF & @CRLF & $sVulnDrivermsg & @CRLF & @CRLF & " Policies (total)" & @TAB & @TAB & ": " & $CountTotal & @CRLF & " Policies (enforced)" & @TAB & @TAB & ": " & $CountEnforced)
+					hListViewRefreshColWidth()
+					UpdatePolicyStatus()
+					GUICtrlSetData($PolicyStatus, $PolicyStatusInfo)
 			EndSwitch
 		Case $hGUI2
 			Switch $aMsg[0]

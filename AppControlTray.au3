@@ -3,8 +3,8 @@
 #AutoIt3Wrapper_Icon=AppControl.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Tray Tool
-#AutoIt3Wrapper_Res_Fileversion=5.0.0.0
-#AutoIt3Wrapper_Res_ProductVersion=5.0.0
+#AutoIt3Wrapper_Res_Fileversion=5.1.0.0
+#AutoIt3Wrapper_Res_ProductVersion=5.1.0
 #AutoIt3Wrapper_Res_ProductName=AppControlTrayTool
 #AutoIt3Wrapper_Res_LegalCopyright=@ 2024 WildByDesign
 #AutoIt3Wrapper_Res_Language=1033
@@ -34,7 +34,7 @@
 Opt("TrayMenuMode", 3)
 Opt("TrayAutoPause", 0)
 
-Global $programVersion = "5.0"
+Global $programVersion = "5.1"
 ;Global $softName = "App Control Tray Tool"
 Global $trayIcon = "AppControl.ico"
 Global $idRegTitleKey = "App Control Tray Tool"
@@ -72,13 +72,13 @@ Func initial_set_theme()
 	Local $isDarkMode = _WinAPI_ShouldAppsUseDarkMode()
 If $isDarkMode = True Then
 	_ExtMsgBoxSet(Default)
-	_ExtMsgBoxSet(1, 4, 0x202020, 0xFFFFFF, 10, "Cascadia Mono", 800)
+	_ExtMsgBoxSet(1, 4, 0x202020, 0xFFFFFF, 10, -1, 800)
 	$LastTheme = "Dark"
 	Local $hGUI = _HiDpi_GUICreate("Tray Tool", 100, 100)
     GuiDarkmodeApply($hGUI)
 Else
 	_ExtMsgBoxSet(Default)
-	_ExtMsgBoxSet(1, 4, -1, -1, 10, "Cascadia Mono", 800)
+	_ExtMsgBoxSet(1, 4, -1, -1, 10, -1, 800)
 	$LastTheme = "Light"
 	Local $hGUI = _HiDpi_GUICreate("Tray Tool", 100, 100)
 	Local $bEnableDarkTheme = False
