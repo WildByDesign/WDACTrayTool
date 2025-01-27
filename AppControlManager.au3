@@ -1,53 +1,53 @@
-
 #NoTrayIcon
 #RequireAdmin
-#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
-#AutoIt3Wrapper_Icon=AppControl.ico
-#AutoIt3Wrapper_UseX64=y
-#AutoIt3Wrapper_Res_Description=App Control Policy Manager
-#AutoIt3Wrapper_Res_Fileversion=5.1.0.0
-#AutoIt3Wrapper_Res_ProductVersion=5.1.0
-#AutoIt3Wrapper_Res_ProductName=AppControlPolicyManager
-#AutoIt3Wrapper_Res_LegalCopyright=@ 2024 WildByDesign
-#AutoIt3Wrapper_Res_Language=1033
-#AutoIt3Wrapper_Res_HiDpi=P
-#AutoIt3Wrapper_Res_Icon_Add=AppControl.ico
-#EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
-#Region
 
-#include <AutoItConstants.au3>
-#include <File.au3>
-#include <MsgBoxConstants.au3>
-#include <Array.au3>
-#include <FileConstants.au3>
-#include <String.au3>
-#include <StringConstants.au3>
-#include <GUIConstantsEx.au3>
-#include <GuiListView.au3>
-#include <ColorConstants.au3>
-#include <FontConstants.au3>
-#include <GUIToolTip.au3>
-#include <WindowsConstants.au3>
-#include <FontConstants.au3>
-#include <Constants.au3>
-#include <ListViewConstants.au3>
-#include <WinAPIFiles.au3>
-#include <Constants.au3>
-#include <ButtonConstants.au3>
-#include <HeaderConstants.au3>
-#include <StructureConstants.au3>
-#include <WinAPISysInternals.au3>
-#include <WinAPISysWin.au3>
-#include <StaticConstants.au3>
-#EndRegion
+#Region ; *** Dynamically added Include files ***
+#include <Array.au3>                                         ; added:01/27/25 07:16:20
+#include <AutoItConstants.au3>                               ; added:01/27/25 07:16:20
+#include <ButtonConstants.au3>                               ; added:01/27/25 07:16:20
+#include <File.au3>                                          ; added:01/27/25 07:16:20
+#include <FileConstants.au3>                                 ; added:01/27/25 07:16:20
+#include <FontConstants.au3>                                 ; added:01/27/25 07:16:20
+#include <GUIConstantsEx.au3>                                ; added:01/27/25 07:16:20
+#include <GuiListView.au3>                                   ; added:01/27/25 07:16:20
+#include <GuiToolTip.au3>                                    ; added:01/27/25 07:16:20
+#include <HeaderConstants.au3>                               ; added:01/27/25 07:16:20
+#include <ListViewConstants.au3>                             ; added:01/27/25 07:16:20
+#include <StaticConstants.au3>                               ; added:01/27/25 07:16:20
+#include <String.au3>                                        ; added:01/27/25 07:16:20
+#include <StringConstants.au3>                               ; added:01/27/25 07:16:20
+#include <StructureConstants.au3>                            ; added:01/27/25 07:16:20
+#include <WinAPISysInternals.au3>                            ; added:01/27/25 07:16:20
+#include <WinAPISysWin.au3>                                  ; added:01/27/25 07:16:20
+#include <WinAPITheme.au3>                                   ; added:01/27/25 07:16:20
+#include <WindowsConstants.au3>                              ; added:01/27/25 07:16:20
+#EndRegion ; *** Dynamically added Include files ***
 
 #include "includes\ExtMsgBox.au3"
-#include "includes\GuiCtrls_HiDpi.au3"
 #include "includes\GUIDarkMode_v0.02mod.au3"
 #include "includes\GUIListViewEx.au3"
 #include "includes\XML.au3"
 
-Global $programversion = "5.1"
+#pragma compile(Out, _build\AppControlManager.exe)
+#pragma compile(OriginalFilename, AppControlManager.exe)
+#pragma compile(Icon, AppControl.ico)
+#pragma compile(x64, true)
+#pragma compile(FileDescription, App Control Policy Manager)
+#pragma compile(FileVersion, 5.2.0)
+#pragma compile(ProductVersion, 5.2.0)
+#pragma compile(ProductName, AppControlPolicyManager)
+#pragma compile(LegalCopyright, @ 2025 WildByDesign)
+#pragma compile(Compatibility, win10)
+#pragma compile(ExecLevel, requireAdministrator)
+
+; System aware DPI awareness
+;DllCall("User32.dll", "bool", "SetProcessDPIAware")
+
+; Per-monitor V2 DPI awareness
+DllCall("User32.dll", "bool", "SetProcessDpiAwarenessContext" , "HWND", "DPI_AWARENESS_CONTEXT" -4)
+
+
+Global $programversion = "5.2"
 
 ;Opt('MustDeclareVars', 1)
 
@@ -80,6 +80,7 @@ If $GetDPI = 96 Then
 	$PolicyActionLabelHeight = 30
 	$FilteringLabelHeight = 30
 	$ToolslogsLabelHeight = 30
+	$ClientAreaTitlebar = 24
 ElseIf $GetDPI = 120 Then
 	$DPIScale = 125
 	$ListViewWidth = 1200
@@ -100,6 +101,7 @@ ElseIf $GetDPI = 120 Then
 	$PolicyActionLabelHeight = 30
 	$FilteringLabelHeight = 30
 	$ToolslogsLabelHeight = 30
+	$ClientAreaTitlebar = 30
 ElseIf $GetDPI = 144 Then
 	$DPIScale = 150
 	$ListViewWidth = 1400
@@ -120,6 +122,7 @@ ElseIf $GetDPI = 144 Then
 	$PolicyActionLabelHeight = 30
 	$FilteringLabelHeight = 30
 	$ToolslogsLabelHeight = 30
+	$ClientAreaTitlebar = 34
 ElseIf $GetDPI = 168 Then
 	$DPIScale = 175
 	$ListViewWidth = 1520
@@ -140,6 +143,7 @@ ElseIf $GetDPI = 168 Then
 	$PolicyActionLabelHeight = 30
 	$FilteringLabelHeight = 30
 	$ToolslogsLabelHeight = 30
+	$ClientAreaTitlebar = 40
 ElseIf $GetDPI = 192 Then
 	$DPIScale = 200
 	$ListViewWidth = 1640
@@ -160,6 +164,7 @@ ElseIf $GetDPI = 192 Then
 	$PolicyActionLabelHeight = 30
 	$FilteringLabelHeight = 30
 	$ToolslogsLabelHeight = 30
+	$ClientAreaTitlebar = 48
 Else
 	$ListViewWidth = 1200
 	$ListViewHeight = 340
@@ -179,6 +184,7 @@ Else
 	$PolicyActionLabelHeight = 30
 	$FilteringLabelHeight = 30
 	$ToolslogsLabelHeight = 30
+	$ClientAreaTitlebar = 48
 EndIf
 
 Func _GetDPI()
@@ -1338,7 +1344,7 @@ Endfunc
 
 ;$hGUI = GUICreate("App Control Policy Manager", 1220, 560, -1, -1, 0x00CF0000)
 ;$hGUI = GUICreate("App Control Policy Manager", 1220, 594, -1, -1, 0x00CF0000)
-$hGUI = GUICreate("App Control Policy Manager", $hGUIWidth, $hGUIHeight, -1, -1)
+$hGUI = GUICreate("App Control Policy Manager", @DesktopWidth - 420, $hGUIHeight, -1, -1, $WS_SIZEBOX + $WS_SYSMENU + $WS_MINIMIZEBOX + $WS_MAXIMIZEBOX)
 
 GUISetIcon(@ScriptFullPath, 201)
 
@@ -1346,7 +1352,7 @@ Local Const $sCascadiaPath = @WindowsDir & "\fonts\CascadiaCode.ttf"
 Local $iCascadiaExists = FileExists($sCascadiaPath)
 
 If $iCascadiaExists Then
-	GUISetFont(10, $FW_THIN, -1, "Cascadia Code")
+	GUISetFont(10.5, $FW_NORMAL, -1, "Cascadia Code")
 Else
 	GUISetFont(10, $FW_NORMAL, -1, "Consolas")
 EndIf
@@ -1369,7 +1375,8 @@ _GUIToolTip_SetMaxTipWidth($hToolTip2, 260)
 
 
 Local $exStyles = BitOR($LVS_EX_FULLROWSELECT, $LVS_EX_CHECKBOXES, $LVS_EX_DOUBLEBUFFER), $cListView
-$cListView = GUICtrlCreateListView("|Enforced|Policy Name|Policy ID|Base Policy ID|Version|On Disk|Signed Policy|System Policy|Authorized|Policy Options", 10, $VerticalSpaceSml + $VerticalSpaceSml, $ListViewWidth, $ListViewHeight)
+$cListView = GUICtrlCreateListView("|Enforced|Policy Name|Policy ID|Base Policy ID|Version|On Disk|Signed Policy|System Policy|Authorized|Policy Options", 10, $VerticalSpaceSml + $VerticalSpaceSml, @DesktopWidth - 440, @DesktopHeight / 3)
+GUICtrlSetResizing(-1, $GUI_DOCKALL)
 $hListView = GUICtrlGetHandle($cListView)
 
 $aPos = ControlGetPos($hGUI, "", $cListView)
@@ -1431,13 +1438,14 @@ Global $PolicyStatusInfo = " " & $topstatus9 & @CRLF & @CRLF & $sVulnDrivermsg &
 EndFunc
 
 If $iCascadiaExists Then
-	GUISetFont(10, $FW_THIN, -1, "Cascadia Code")
+	GUISetFont(10, $FW_NORMAL, -1, "Cascadia Code")
 Else
 	GUISetFont(10, $FW_NORMAL, -1, "Consolas")
 EndIf
 
 ;$PolicyStatus = GUICtrlCreateLabel($PolicyStatusInfo, 35, $Label2PosV + $Label2Height + $VerticalSpaceSml, $PolicyInfoWidth, $PolicyInfoHeight, $WS_BORDER + $SS_LEFTNOWORDWRAP)
-$PolicyStatus = GUICtrlCreateLabel($PolicyStatusInfo, 35, $cListViewPosV + $cListViewHeight + $VerticalSpace, $PolicyInfoWidth, $PolicyInfoHeight, $WS_BORDER + $SS_LEFTNOWORDWRAP)
+$PolicyStatus = GUICtrlCreateLabel($PolicyStatusInfo, 35, $cListViewPosV + $cListViewHeight + $VerticalSpace, -1, -1, $WS_BORDER + $SS_LEFTNOWORDWRAP)
+GUICtrlSetResizing(-1, $GUI_DOCKALL)
 Local $hPolicyStatus = GUICtrlGetHandle($PolicyStatus)
 $aPos = ControlGetPos($hGUI, "", $PolicyStatus)
 
@@ -1450,7 +1458,8 @@ $PolicyStatusHeight = $aPos[3]
 
 GUISetFont(10, $FW_BOLD, -1, "Segoe UI")
 
-$Label2 = GUICtrlCreateLabel("Current Policy Information:", 35, $cListViewPosV + $cListViewHeight + $VerticalSpaceSml, $PolicyStatusWidth, $PolicyInfoLabelHeight, $SS_CENTER)
+$Label2 = GUICtrlCreateLabel("Current Policy Information:", 35, $cListViewPosV + $cListViewHeight + $VerticalSpaceSml, $PolicyStatusWidth, -1, $SS_CENTER)
+GUICtrlSetResizing(-1, $GUI_DOCKALL)
 Local $hLabel2 = GUICtrlGetHandle($Label2)
 
 $aPos = ControlGetPos($hGUI, "", $Label2)
@@ -1460,17 +1469,33 @@ $Label2PosH = $aPos[0] + $aPos[2] + $HorizontalSpace
 $Label2Length = $aPos[2]
 $Label2Height = $aPos[3]
 
-GUISetFont(10, $FW_NORMAL, -1, "Segoe UI")
+GUISetFont(8.5, $FW_NORMAL, -1, "Segoe UI")
 
 If $is24H2 = True Then
+	$pre24H2Lablel = GUICtrlCreateLabel(" ", 35, $PolicyStatusPosV2 + $PolicyStatusHeight + $VerticalSpaceSml + 4, $PolicyStatusWidth, -1, $SS_CENTER)
+	GUICtrlSetResizing(-1, $GUI_DOCKALL)
 Else
-	$pre24H2Lablel = GUICtrlCreateLabel("* Pre-24H2 OS will show less information.", 35, $PolicyStatusPosV2 + $PolicyStatusHeight + $VerticalSpaceSml + 4, $PolicyStatusWidth, 30, $SS_CENTER)
+	$pre24H2Lablel = GUICtrlCreateLabel("* Pre-24H2 OS will show less information.", 35, $PolicyStatusPosV2 + $PolicyStatusHeight + $VerticalSpaceSml + 4, $PolicyStatusWidth, -1, $SS_CENTER)
+	GUICtrlSetResizing(-1, $GUI_DOCKALL)
 	Local $hpre24H2Lablel = GUICtrlGetHandle($pre24H2Lablel)
-	GUICtrlSetFont($pre24H2Lablel, 8.5, -1, -1, "Segoe UI")
 EndIf
 
+Local $hpre24H2Lablel = GUICtrlGetHandle($pre24H2Lablel)
+
+$aPos = ControlGetPos($hGUI, "", $pre24H2Lablel)
+;MsgBox($MB_SYSTEMMODAL, "", "Position: " & $aPos[0] & ", " & $aPos[1] & @CRLF & "Size: " & $aPos[2] & ", " & $aPos[3])
+$pre24H2LablelPosV = $aPos[1]
+$pre24H2LablelPosH = $aPos[0] + $aPos[2] + $HorizontalSpace
+$pre24H2LablelLength = $aPos[2]
+$pre24H2LablelHeight = $aPos[3]
+$pre24H2LablelbottomPos = $pre24H2LablelPosV + $pre24H2LablelHeight
+
+;MsgBox($MB_SYSTEMMODAL, "", $pre24H2LablelbottomPos)
+
+GUISetFont(10, $FW_NORMAL, -1, "Segoe UI")
 
 $AddButton = GUICtrlCreateButton("    Add or Update Policies    ", $PolicyStatusPosH, $cListViewPosV + $cListViewHeight + $VerticalSpace, -1, -1, $BS_CENTER)
+GUICtrlSetResizing(-1, $GUI_DOCKALL)
 Local $hAddButton = GUICtrlGetHandle($AddButton)
 
 $aPos = ControlGetPos($hGUI, "", $AddButton)
@@ -1483,11 +1508,13 @@ $AddButtonHeight = $aPos[3]
 GUISetFont(10, $FW_BOLD, -1, "Segoe UI")
 
 $PolicyActions = GUICtrlCreateLabel("Policy Actions:", $PolicyStatusPosH, $cListViewPosV + $cListViewHeight + $VerticalSpaceSml, $AddButtonLength, $PolicyActionLabelHeight, $SS_CENTER)
+GUICtrlSetResizing(-1, $GUI_DOCKALL)
 Local $hPolicyActions = GUICtrlGetHandle($PolicyActions)
 
 GUISetFont(10, $FW_NORMAL, -1, "Segoe UI")
 
 $RemoveButton = GUICtrlCreateButton(" Remove Selected Policies ", $PolicyStatusPosH, $AddButtonPosV + $VerticalSpaceSml + $AddButtonHeight, $AddButtonLength, -1, $BS_CENTER)
+GUICtrlSetResizing(-1, $GUI_DOCKALL)
 Local $hRemoveButton = GUICtrlGetHandle($RemoveButton)
 
 $aPos = ControlGetPos($hGUI, "", $RemoveButton)
@@ -1498,6 +1525,7 @@ $RemoveButtonHeight = $aPos[3]
 
 ;$ConvertButton = GUICtrlCreateButton(" Convert (xml to binary) ", $PolicyStatusPosH, 530, -1, -1)
 $ConvertButton = GUICtrlCreateButton("Convert XML to Binary", $PolicyStatusPosH, $RemoveButtonPosV + $RemoveButtonHeight + $VerticalSpaceSml, $AddButtonLength, -1, $BS_CENTER)
+GUICtrlSetResizing(-1, $GUI_DOCKALL)
 Local $hConvertButton = GUICtrlGetHandle($ConvertButton)
 
 $aPos = ControlGetPos($hGUI, "", $ConvertButton)
@@ -1507,10 +1535,12 @@ $ConvertButtonPosH = $aPos[0] + $aPos[2] + $HorizontalSpace
 $ConvertButtonHeight = $aPos[3]
 
 $RefreshButton = GUICtrlCreateButton("Refresh Policy List", $PolicyStatusPosH, $ConvertButtonPosV + $ConvertButtonHeight + $VerticalSpaceSml, $AddButtonLength, -1, $BS_CENTER)
+GUICtrlSetResizing(-1, $GUI_DOCKALL)
 Local $hRefreshButton = GUICtrlGetHandle($RefreshButton)
 
 
 $FilterEnforced = GUICtrlCreateButton(" Enforced ", $RemoveButtonPosH, $cListViewPosV + $cListViewHeight + $VerticalSpace, -1, -1, $BS_CENTER)
+GUICtrlSetResizing(-1, $GUI_DOCKALL)
 Local $hFilterEnforced = GUICtrlGetHandle($FilterEnforced)
 
 $aPos = ControlGetPos($hGUI, "", $FilterEnforced)
@@ -1525,11 +1555,13 @@ $FilterEnforcedHeight = $aPos[3]
 GUISetFont(10, $FW_BOLD, -1, "Segoe UI")
 
 $FilterLogs = GUICtrlCreateLabel("Filtering Options:", $RemoveButtonPosH, $cListViewPosV + $cListViewHeight + $VerticalSpaceSml, $FilterEnforcedLength + $FilterEnforcedLength + $HorizontalSpaceSml, $FilteringLabelHeight, $SS_CENTER)
+GUICtrlSetResizing(-1, $GUI_DOCKALL)
 Local $hFilterLogs = GUICtrlGetHandle($FilterLogs)
 
 GUISetFont(10, $FW_NORMAL, -1, "Segoe UI")
 
 $FilterBase = GUICtrlCreateButton("Base", $RemoveButtonPosH, $FilterEnforcedPosV2 + $FilterEnforcedHeight + $VerticalSpaceSml, $FilterEnforcedLength, -1, $BS_CENTER)
+GUICtrlSetResizing(-1, $GUI_DOCKALL)
 Local $hFilterBase = GUICtrlGetHandle($FilterBase)
 
 $aPos = ControlGetPos($hGUI, "", $FilterBase)
@@ -1539,10 +1571,12 @@ $FilterBasePosH = $aPos[0] + $aPos[2] + $HorizontalSpace
 $FilterBaseHeight = $aPos[3]
 
 $FilterSupp = GUICtrlCreateButton("Suppl.", $RemoveButtonPosH, $FilterBasePosV + $FilterBaseHeight + $VerticalSpaceSml, $FilterEnforcedLength, -1, $BS_CENTER)
+GUICtrlSetResizing(-1, $GUI_DOCKALL)
 Local $hFilterSupp = GUICtrlGetHandle($FilterSupp)
 _GUIToolTip_AddTool($hToolTip2, 0, "Supplemental", $hFilterSupp)
 
 $FilterSigned = GUICtrlCreateButton("Signed", $FilterEnforcedPosH, $cListViewPosV + $cListViewHeight + $VerticalSpace, $FilterEnforcedLength, -1, $BS_CENTER)
+GUICtrlSetResizing(-1, $GUI_DOCKALL)
 Local $hFilterSigned = GUICtrlGetHandle($FilterSigned)
 
 $aPos = ControlGetPos($hGUI, "", $FilterSigned)
@@ -1554,12 +1588,14 @@ $FilterSignedHeight = $aPos[3]
 If $is24H2 = False Then
 $FilterSignedLabelOffset = $Label2PosV + $Label2Height + $VerticalSpaceSml
 $FilterSignedLabel = GUICtrlCreateLabel("", $FilterEnforcedPosH - 2, $cListViewPosV + $cListViewHeight + $VerticalSpace - 2, $FilterEnforcedLength + 4, $FilterEnforcedHeight + 4, $WS_CLIPSIBLINGS)
+GUICtrlSetResizing(-1, $GUI_DOCKALL)
 Local $hFilterSignedLabel = GUICtrlGetHandle($FilterSignedLabel)
 GUICtrlSetState($FilterSigned,$GUI_DISABLE)
 _GUIToolTip_AddTool($hToolTip2, 0, "Policy list cannot be filtered by Signed policies on pre-24H2 builds of Windows 11.", $hFilterSignedLabel)
 EndIf
 
 $FilterSystem = GUICtrlCreateButton("System", $FilterEnforcedPosH, $FilterSignedPosV + $FilterSignedHeight + $VerticalSpaceSml, $FilterEnforcedLength, -1, $BS_CENTER)
+GUICtrlSetResizing(-1, $GUI_DOCKALL)
 Local $hFilterSystem = GUICtrlGetHandle($FilterSystem)
 
 $aPos = ControlGetPos($hGUI, "", $FilterSystem)
@@ -1568,6 +1604,7 @@ $FilterSystemPosV = $aPos[1] + 4
 $FilterSystemPosH = $aPos[0] + $aPos[2] + $HorizontalSpace
 
 $FilterReset = GUICtrlCreateButton("Reset", $FilterEnforcedPosH, $FilterBasePosV + $FilterBaseHeight + $VerticalSpaceSml, $FilterEnforcedLength, -1, $BS_CENTER)
+GUICtrlSetResizing(-1, $GUI_DOCKALL)
 Local $hFilterReset = GUICtrlGetHandle($FilterReset)
 
 $aPos = ControlGetPos($hGUI, "", $FilterReset)
@@ -1577,6 +1614,7 @@ $FilterResetPosH = $aPos[0] + $aPos[2] + $HorizontalSpace
 $FilterResetHeight = $aPos[3]
 
 $EFIButton = GUICtrlCreateButton("EFI (Signed/System)", $RemoveButtonPosH, $FilterResetPosV + $FilterResetHeight + $VerticalSpaceSml, $FilterEnforcedLength * 2 + $HorizontalSpaceSml, -1, $BS_CENTER)
+GUICtrlSetResizing(-1, $GUI_DOCKALL)
 Local $hEFIButton = GUICtrlGetHandle($EFIButton)
 
 $aPos = ControlGetPos($hGUI, "", $EFIButton)
@@ -1588,6 +1626,7 @@ $EFIButtonLength = $aPos[2]
 
 
 $PolicyWizard = GUICtrlCreateButton(" App Control Wizard ", $FilterSystemPosH, $cListViewPosV + $cListViewHeight + $VerticalSpace, -1, -1, $BS_CENTER)
+GUICtrlSetResizing(-1, $GUI_DOCKALL)
 Local $hPolicyWizard = GUICtrlGetHandle($PolicyWizard)
 
 $aPos = ControlGetPos($hGUI, "", $PolicyWizard)
@@ -1601,11 +1640,13 @@ $PolicyWizardHeight = $aPos[3]
 GUISetFont(10, $FW_BOLD, -1, "Segoe UI")
 
 $EventLogs = GUICtrlCreateLabel("Tools && Logs:", $FilterSystemPosH, $cListViewPosV + $cListViewHeight + $VerticalSpaceSml, $PolicyWizardLength, $ToolslogsLabelHeight, $SS_CENTER)
+GUICtrlSetResizing(-1, $GUI_DOCKALL)
 Local $hEventLogs = GUICtrlGetHandle($EventLogs)
 
 GUISetFont(10, $FW_NORMAL, -1, "Segoe UI")
 
 $CodeIntegrity = GUICtrlCreateButton("Code Integrity", $FilterSystemPosH, $PolicyWizardPosV2 + $PolicyWizardHeight + $PolicyWizardHeight + $VerticalSpaceSml + $VerticalSpaceSml, $PolicyWizardLength, -1, $BS_CENTER)
+GUICtrlSetResizing(-1, $GUI_DOCKALL)
 Local $hCodeIntegrity = GUICtrlGetHandle($CodeIntegrity)
 
 $aPos = ControlGetPos($hGUI, "", $CodeIntegrity)
@@ -1617,6 +1658,7 @@ $CodeIntegrityLength = $aPos[2]
 $CodeIntegrityHeight = $aPos[3]
 
 $MSIandScript = GUICtrlCreateButton("MSI and Script", $FilterSystemPosH, $CodeIntegrityPosV2 + $CodeIntegrityHeight + $VerticalSpaceSml, $PolicyWizardLength, -1, $BS_CENTER)
+GUICtrlSetResizing(-1, $GUI_DOCKALL)
 Local $hMSIandScript = GUICtrlGetHandle($MSIandScript)
 
 
@@ -1674,7 +1716,31 @@ _GUICtrlListView_SetColumnWidth($hListView, 9, $LVSCW_AUTOSIZE_USEHEADER)
 _GUICtrlListView_SetColumnWidth($hListView, 10, $LVSCW_AUTOSIZE_USEHEADER)
 EndFunc
 
-GUISetState(@SW_SHOW)
+
+
+$GUIHeightMeasured = $ClientAreaTitlebar + $pre24H2LablelbottomPos + 10
+
+
+WinMove($hGUI,'',(@Desktopwidth - WinGetPos($hGUI)[2]) / 2,(@Desktopheight - WinGetPos($hGUI)[3]) / 2, @DesktopWidth - 420 + 6, $GUIHeightMeasured + 6)
+
+;Sleep(500)
+
+;GUISetState()
+
+GUISetStyle($GUI_SS_DEFAULT_GUI, -1)
+
+WinMove($hGUI,'', (@Desktopwidth - WinGetPos($hGUI)[2]) / 2,(@Desktopheight - WinGetPos($hGUI)[3]) / 2)
+
+GUISetState(@SW_SHOWMINIMIZED)
+GUISetState(@SW_RESTORE)
+
+WinSetOnTop($hGUI, "", $WINDOWS_ONTOP)
+WinSetOnTop($hGUI, "", $WINDOWS_NOONTOP)
+
+
+;GUISetState(@SW_SHOW)
+
+
 
 Func _LVWndProc($hWnd, $iMsg, $wParam, $lParam)
     #forceref $hWnd, $iMsg, $wParam
