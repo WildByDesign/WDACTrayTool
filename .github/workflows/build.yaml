@@ -1,0 +1,60 @@
+
+name: Build App Control Policy Manager
+run-name: Build version ${{ inputs.version }}
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: The version of the library
+        required: true
+        default: 0.1.0
+        type: string
+      release:
+        description: Create a release
+        required: true
+        default: false
+        type: boolean
+permissions:
+  contents: write
+  actions: write
+  checks: write
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - name: Install AutoIt3
+      run: |
+        $Setup = "autoit-v3-setup.exe"
+        $Uri = "https://www.autoitscript.com/cgi-bin/getfile.pl?autoit3/$Setup"
+        Invoke-WebRequest -Uri $Uri -OutFile $Setup
+        & .\$Setup /S
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Compile AutoIt3 files
+      run: |
+        $Aut2exe = "C:\Program Files (x86)\AutoIt3\Aut2exe\Aut2exe.exe"
+        New-Item -Type Directory -Name _build
+        & $Aut2exe /in AppControlManager.au3 /out _build\AppControlManager.exe
+    - name: Archive binaries
+      uses: actions/upload-artifact@v4
+      with:
+        name: executable-files
+        path: |
+          _build
+    - name: Zip files
+      shell: pwsh
+      run: |
+        7z a AppControlManager.zip .\_build\*
+    - name: Rename archive with tag
+      shell: pwsh
+      run: |
+        Copy-Item AppControlManager.zip -Destination AppControlManager-${{ inputs.version }}.zip
+    - name: Create release
+      uses: softprops/action-gh-release@v2
+      if: ${{ inputs.release }}
+      with:
+        draft: true
+        name: AppControlManager ${{ inputs.version }}
+        tag_name: ${{ inputs.version }}
+        files: |
+          AppControlManager-${{ inputs.version }}.zip
