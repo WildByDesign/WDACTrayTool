@@ -1,5 +1,4 @@
-
-name: Build App Control Policy Manager
+name: Build Binaries
 run-name: Build version ${{ inputs.version }}
 on:
   workflow_dispatch:
@@ -22,39 +21,64 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-    - name: Install AutoIt3
-      run: |
-        $Setup = "autoit-v3-setup.exe"
-        $Uri = "https://www.autoitscript.com/cgi-bin/getfile.pl?autoit3/$Setup"
-        Invoke-WebRequest -Uri $Uri -OutFile $Setup
-        & .\$Setup /S
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    - name: Compile AutoIt3 files
-      run: |
-        $Aut2exe = "C:\Program Files (x86)\AutoIt3\Aut2exe\Aut2exe.exe"
-        New-Item -Type Directory -Name _build
-        & $Aut2exe /in AppControlManager.au3 /out _build\AppControlManager.exe
-    - name: Archive binaries
-      uses: actions/upload-artifact@v4
-      with:
-        name: executable-files
-        path: |
-          _build
-    - name: Zip files
-      shell: pwsh
-      run: |
-        7z a AppControlManager.zip .\_build\*
-    - name: Rename archive with tag
-      shell: pwsh
-      run: |
-        Copy-Item AppControlManager.zip -Destination AppControlManager-${{ inputs.version }}.zip
-    - name: Create release
-      uses: softprops/action-gh-release@v2
-      if: ${{ inputs.release }}
-      with:
-        draft: true
-        name: AppControlManager ${{ inputs.version }}
-        tag_name: ${{ inputs.version }}
-        files: |
-          AppControlManager-${{ inputs.version }}.zip
+      - uses: actions/checkout@v4
+      - name: Cache tools
+        uses: actions/cache@v4
+        id: cache
+        with:
+          path: |
+            autoit-v3-setup.exe
+            SciTE4AutoIt3.exe
+            C:\Program Files (x86)\AutoIt3\SciTE\Au3Stripper
+          key: v3
+      - name: Download tools
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          curl -sSfL https://www.autoitscript.com/cgi-bin/getfile.pl?autoit3/autoit-v3-setup.exe -o autoit-v3-setup.exe `
+            -sSfL https://www.autoitscript.com/cgi-bin/getfile.pl?../autoit3/scite/download/SciTE4AutoIt3.exe -o SciTE4AutoIt3.exe `
+            -sSfLO https://www.autoitscript.com/autoit3/scite/download/Au3Stripper.zip
+          Expand-Archive Au3Stripper.zip "${env:ProgramFiles(x86)}\AutoIt3\SciTE\Au3Stripper"
+      - name: Install tools
+        run: |
+          Start-Process autoit-v3-setup.exe -ArgumentList /S -NoNewWindow -Wait
+          Start-Process SciTE4AutoIt3.exe -ArgumentList /S -NoNewWindow -Wait
+      - name: Compile
+        run: |
+          Start-Process "${env:ProgramFiles(x86)}\AutoIt3\AutoIt3.exe" "`"${env:ProgramFiles(x86)}\AutoIt3\SciTE\AutoIt3Wrapper\AutoIt3Wrapper.au3`" /NoStatus /prod /in AppControlHelper.au3" -NoNewWindow -Wait
+          Start-Process "${env:ProgramFiles(x86)}\AutoIt3\AutoIt3.exe" "`"${env:ProgramFiles(x86)}\AutoIt3\SciTE\AutoIt3Wrapper\AutoIt3Wrapper.au3`" /NoStatus /prod /in AppControlManager.au3" -NoNewWindow -Wait
+          Start-Process "${env:ProgramFiles(x86)}\AutoIt3\AutoIt3.exe" "`"${env:ProgramFiles(x86)}\AutoIt3\SciTE\AutoIt3Wrapper\AutoIt3Wrapper.au3`" /NoStatus /prod /in AppControlTask.au3" -NoNewWindow -Wait
+          Start-Process "${env:ProgramFiles(x86)}\AutoIt3\AutoIt3.exe" "`"${env:ProgramFiles(x86)}\AutoIt3\SciTE\AutoIt3Wrapper\AutoIt3Wrapper.au3`" /NoStatus /prod /in AppControlTray.au3" -NoNewWindow -Wait
+      - uses: actions/upload-artifact@v4
+        with:
+          name: executable-files
+          path: |
+            AppControlHelper*.exe
+            AppControlManager*.exe
+            AppControlTask*.exe
+            AppControlTray*.exe
+          if-no-files-found: error
+      - name: Zip package (AppControlManager)
+        run: 7z a AppControlManager.zip AppControlManager*.exe
+      - name: Zip package (AppControlTray)
+        run: 7z a AppControlTray.zip AppControlHelper*.exe AppControlManager*.exe AppControlTask*.exe AppControlTray*.exe
+          7z a AppControlTray.zip policies\
+          7z a AppControlTray.zip test\
+          7z a AppControlTray.zip toasts\
+      - name: Rename AppControlManager zip with tag
+        shell: pwsh
+        run: |
+          Copy-Item AppControlManager.zip -Destination AppControlManager-${{ inputs.version }}.zip
+      - name: Rename AppControlTray zip with tag
+        shell: pwsh
+        run: |
+          Copy-Item AppControlTray.zip -Destination AppControlTray-${{ inputs.version }}.zip
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        if: ${{ inputs.release }}
+        with:
+          draft: true
+          name: App Control Tray and Policy Manager ${{ inputs.version }}
+          tag_name: ${{ inputs.version }}
+          files: |
+            AppControlManager-${{ inputs.version }}.zip
+            AppControlTray-${{ inputs.version }}.zip
