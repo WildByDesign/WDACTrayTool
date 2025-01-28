@@ -17,15 +17,23 @@
 #AutoIt3Wrapper_Icon=AppControl.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Task Manager
-#AutoIt3Wrapper_Res_Fileversion=5.1.0.0
-#AutoIt3Wrapper_Res_ProductVersion=5.1.0
+#AutoIt3Wrapper_Res_Fileversion=5.2.0.0
+#AutoIt3Wrapper_Res_ProductVersion=5.2.0
 #AutoIt3Wrapper_Res_ProductName=AppControlTaskManager
-#AutoIt3Wrapper_Res_LegalCopyright=@ 2024 WildByDesign
+#AutoIt3Wrapper_Outfile_x64=AppControlTask.exe
+#AutoIt3Wrapper_Res_LegalCopyright=@ 2025 WildByDesign
 #AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_Res_HiDpi=P
 #AutoIt3Wrapper_Res_Icon_Add=AppControl.ico
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 $sTitle = "AppControlTaskHelper"
+
+If @Compiled = 0 Then
+	; System aware DPI awareness
+	;DllCall("User32.dll", "bool", "SetProcessDPIAware")
+	; Per-monitor V2 DPI awareness
+	DllCall("User32.dll", "bool", "SetProcessDpiAwarenessContext" , "HWND", "DPI_AWARENESS_CONTEXT" -4)
+EndIf
 
 Func task_create_folder()
 	Global $oService = _TS_Open()

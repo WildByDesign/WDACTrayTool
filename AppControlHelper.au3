@@ -17,15 +17,24 @@
 #AutoIt3Wrapper_Icon=AppControl.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Tray Helper
-#AutoIt3Wrapper_Res_Fileversion=5.1.0.0
-#AutoIt3Wrapper_Res_ProductVersion=5.1.0
+#AutoIt3Wrapper_res_requestedExecutionLevel=requireAdministrator
+#AutoIt3Wrapper_Res_Fileversion=5.2.0.0
+#AutoIt3Wrapper_Res_ProductVersion=5.2.0
 #AutoIt3Wrapper_Res_ProductName=AppControlTrayHelper
-#AutoIt3Wrapper_Res_LegalCopyright=@ 2024 WildByDesign
+#AutoIt3Wrapper_Outfile_x64=AppControlHelper.exe
+#AutoIt3Wrapper_Res_LegalCopyright=@ 2025 WildByDesign
 #AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_Res_HiDpi=P
 #AutoIt3Wrapper_Res_Icon_Add=AppControl.ico
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 $sTitle = "AppControlTrayHelper"
+
+If @Compiled = 0 Then
+	; System aware DPI awareness
+	;DllCall("User32.dll", "bool", "SetProcessDPIAware")
+	; Per-monitor V2 DPI awareness
+	DllCall("User32.dll", "bool", "SetProcessDpiAwarenessContext" , "HWND", "DPI_AWARENESS_CONTEXT" -4)
+EndIf
 
 Global $isDarkMode = is_app_dark_theme()
 

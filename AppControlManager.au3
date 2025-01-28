@@ -28,26 +28,31 @@
 #include "includes\GUIListViewEx.au3"
 #include "includes\XML.au3"
 
-#pragma compile(Out, _build\AppControlManager.exe)
-#pragma compile(OriginalFilename, AppControlManager.exe)
-#pragma compile(Icon, AppControl.ico)
-#pragma compile(x64, true)
-#pragma compile(FileDescription, App Control Policy Manager)
-#pragma compile(FileVersion, 5.2.0)
-#pragma compile(ProductVersion, 5.2.0)
-#pragma compile(ProductName, AppControlPolicyManager)
-#pragma compile(LegalCopyright, @ 2025 WildByDesign)
-#pragma compile(Compatibility, win10)
-#pragma compile(ExecLevel, requireAdministrator)
-
-; System aware DPI awareness
-;DllCall("User32.dll", "bool", "SetProcessDPIAware")
-
-; Per-monitor V2 DPI awareness
-DllCall("User32.dll", "bool", "SetProcessDpiAwarenessContext" , "HWND", "DPI_AWARENESS_CONTEXT" -4)
-
+#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
+#AutoIt3Wrapper_Icon=AppControl.ico
+#AutoIt3Wrapper_UseX64=y
+#AutoIt3Wrapper_Res_Description=App Control Policy Manager
+#AutoIt3Wrapper_res_requestedExecutionLevel=requireAdministrator
+#AutoIt3Wrapper_Res_Fileversion=5.2.0.0
+#AutoIt3Wrapper_Res_ProductVersion=5.2.0
+#AutoIt3Wrapper_Res_ProductName=AppControlPolicyManager
+#AutoIt3Wrapper_Outfile_x64=AppControlManager.exe
+#AutoIt3Wrapper_Res_LegalCopyright=@ 2025 WildByDesign
+#AutoIt3Wrapper_Res_Language=1033
+#AutoIt3Wrapper_Res_HiDpi=P
+#AutoIt3Wrapper_Res_Icon_Add=AppControl.ico
+#EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
+#Region
 
 Global $programversion = "5.2"
+
+If @Compiled = 0 Then
+	; System aware DPI awareness
+	;DllCall("User32.dll", "bool", "SetProcessDPIAware")
+	; Per-monitor V2 DPI awareness
+	DllCall("User32.dll", "bool", "SetProcessDpiAwarenessContext" , "HWND", "DPI_AWARENESS_CONTEXT" -4)
+EndIf
+
 
 ;Opt('MustDeclareVars', 1)
 
@@ -208,6 +213,7 @@ Func _GetDPI()
     EndIf
     Return SetError(0, $iDPIRat, $iDPI)
 EndFunc
+
 
 isDarkMode()
 Func isDarkMode()

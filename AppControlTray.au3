@@ -1,12 +1,14 @@
 #NoTrayIcon
+
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=AppControl.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Tray Tool
-#AutoIt3Wrapper_Res_Fileversion=5.1.0.0
-#AutoIt3Wrapper_Res_ProductVersion=5.1.0
+#AutoIt3Wrapper_Res_Fileversion=5.2.0.0
+#AutoIt3Wrapper_Res_ProductVersion=5.2.0
 #AutoIt3Wrapper_Res_ProductName=AppControlTrayTool
-#AutoIt3Wrapper_Res_LegalCopyright=@ 2024 WildByDesign
+#AutoIt3Wrapper_Outfile_x64=AppControlTray.exe
+#AutoIt3Wrapper_Res_LegalCopyright=@ 2025 WildByDesign
 #AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_Res_HiDpi=P
 #AutoIt3Wrapper_Res_Icon_Add=AppControl.ico
@@ -14,6 +16,7 @@
 #AutoIt3Wrapper_Res_Icon_Add=AppControl-Disabled.ico
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #Region
+
 #include <MsgBoxConstants.au3>
 #include <TrayConstants.au3>
 #include <Array.au3>
@@ -31,10 +34,17 @@
 
 #include "includes\TaskScheduler.au3"
 
+If @Compiled = 0 Then
+	; System aware DPI awareness
+	;DllCall("User32.dll", "bool", "SetProcessDPIAware")
+	; Per-monitor V2 DPI awareness
+	DllCall("User32.dll", "bool", "SetProcessDpiAwarenessContext" , "HWND", "DPI_AWARENESS_CONTEXT" -4)
+EndIf
+
 Opt("TrayMenuMode", 3)
 Opt("TrayAutoPause", 0)
 
-Global $programVersion = "5.1"
+Global $programVersion = "5.2"
 ;Global $softName = "App Control Tray Tool"
 Global $trayIcon = "AppControl.ico"
 Global $idRegTitleKey = "App Control Tray Tool"
@@ -268,19 +278,24 @@ Func Msinfo32()
     Run("C:\Windows\System32\msinfo32.exe", "", @SW_SHOWMAXIMIZED)
 EndFunc
 Func CiTool()
-    Run(@ScriptDir & "\AppControlHelper.exe /CiTool")
+    ;Run(@ScriptDir & "\AppControlHelper.exe /CiTool")
+	ShellExecute("AppControlHelper.exe", "/CiTool", @ScriptDir)
 EndFunc
 Func LogsCI()
-	Run(@ScriptDir & "\AppControlHelper.exe /LogsCI")
+	;Run(@ScriptDir & "\AppControlHelper.exe /LogsCI")
+	ShellExecute("AppControlHelper.exe", "/LogsCI", @ScriptDir)
 EndFunc
 Func LogsScript()
-	Run(@ScriptDir & "\AppControlHelper.exe /LogsScript")
+	;Run(@ScriptDir & "\AppControlHelper.exe /LogsScript")
+	ShellExecute("AppControlHelper.exe", "/LogsScript", @ScriptDir)
 EndFunc
 Func AddPolicies()
-    Run(@ScriptDir & "\AppControlHelper.exe /AddPolicies")
+    ;Run(@ScriptDir & "\AppControlHelper.exe /AddPolicies")
+	ShellExecute("AppControlHelper.exe", "/AddPolicies", @ScriptDir)
 EndFunc
 Func RemovePolicies()
-    Run(@ScriptDir & "\AppControlHelper.exe /RemovePolicies")
+    ;Run(@ScriptDir & "\AppControlHelper.exe /RemovePolicies")
+	ShellExecute("AppControlHelper.exe", "/RemovePolicies", @ScriptDir)
 EndFunc
 Func ConvertPolicy()
 	Run(@ScriptDir & "\AppControlTask.exe convert")
@@ -310,7 +325,8 @@ Func StartWithWindows()
     EndIf
 EndFunc
 Func PStest()
-	Run(@ScriptDir & "\AppControlManager.exe")
+	;Run(@ScriptDir & "\AppControlManager.exe")
+	ShellExecute("AppControlManager.exe", "", @ScriptDir)
 EndFunc
 
 TraySetToolTip($tipTitle & $dString14)
