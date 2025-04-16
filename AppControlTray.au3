@@ -4,8 +4,8 @@
 #AutoIt3Wrapper_Icon=AppControl.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Tray Tool
-#AutoIt3Wrapper_Res_Fileversion=5.2.0.0
-#AutoIt3Wrapper_Res_ProductVersion=5.2.0
+#AutoIt3Wrapper_Res_Fileversion=5.5.0.0
+#AutoIt3Wrapper_Res_ProductVersion=5.5.0
 #AutoIt3Wrapper_Res_ProductName=AppControlTrayTool
 #AutoIt3Wrapper_Outfile_x64=AppControlTray.exe
 #AutoIt3Wrapper_Res_LegalCopyright=@ 2025 WildByDesign
@@ -14,6 +14,7 @@
 #AutoIt3Wrapper_Res_Icon_Add=AppControl.ico
 #AutoIt3Wrapper_Res_Icon_Add=AppControl-Audit.ico
 #AutoIt3Wrapper_Res_Icon_Add=AppControl-Disabled.ico
+#AutoIt3Wrapper_Res_Icon_Add=AppControl-Blocked.ico
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #Region
 
@@ -43,8 +44,9 @@ EndIf
 
 Opt("TrayMenuMode", 3)
 Opt("TrayAutoPause", 0)
+Opt("TrayOnEventMode", 1)
 
-Global $programVersion = "5.2"
+Global $programVersion = "5.5"
 ;Global $softName = "App Control Tray Tool"
 Global $trayIcon = "AppControl.ico"
 Global $idRegTitleKey = "App Control Tray Tool"
@@ -52,6 +54,8 @@ Global $createdBy = "WildByDesign"
 
 Global $LastTheme = ""
 Global $tasksExist = ""
+
+Global $WDACWizardExists, $MainFont
 
 ;$softName = 'App Control Tray Tool' & @CRLF & @CRLF
 ;$softName &= 'App Control policy' & @TAB & @TAB
@@ -75,6 +79,19 @@ If _Singleton("AppControlTray", 1) = 0 Then
         Exit
 EndIf
 
+
+Local Const $sSegUIVar = @WindowsDir & "\fonts\SegUIVar.ttf"
+Local $SegUIVarExists = FileExists($sSegUIVar)
+
+If $SegUIVarExists Then
+	Global $MainFont = "Segoe UI Variable Display"
+	GUISetFont(8.5, $FW_NORMAL, -1, $MainFont)
+Else
+	Global $MainFont = "Segoe UI"
+	GUISetFont(8.5, $FW_NORMAL, -1, $MainFont)
+EndIf
+
+
 initial_set_theme()
 
 Func initial_set_theme()
@@ -82,19 +99,20 @@ Func initial_set_theme()
 	Local $isDarkMode = _WinAPI_ShouldAppsUseDarkMode()
 If $isDarkMode = True Then
 	_ExtMsgBoxSet(Default)
-	_ExtMsgBoxSet(1, 4, 0x202020, 0xFFFFFF, 10, -1, 800)
+	_ExtMsgBoxSet(1, 4, 0x202020, 0xFFFFFF, 10, $MainFont, 800)
 	$LastTheme = "Dark"
 	Local $hGUI = _HiDpi_GUICreate("Tray Tool", 100, 100)
     GuiDarkmodeApply($hGUI)
 Else
 	_ExtMsgBoxSet(Default)
-	_ExtMsgBoxSet(1, 4, -1, -1, 10, -1, 800)
+	_ExtMsgBoxSet(1, 4, -1, -1, 10, $MainFont, 800)
 	$LastTheme = "Light"
 	Local $hGUI = _HiDpi_GUICreate("Tray Tool", 100, 100)
 	Local $bEnableDarkTheme = False
     GuiLightmodeApply($hGUI)
 EndIf
 Endfunc
+
 
 ThemeChanges()
 
@@ -108,6 +126,13 @@ PolicyChanges()
 Func PolicyChanges()
         ; Check for theme changes every 7 seconds
 		AdlibRegister("policy_changes", 7000)
+EndFunc
+
+
+BlockEvents()
+Func BlockEvents()
+	; Check for theme changes every 3 seconds
+	AdlibRegister("block_events", 3000)
 EndFunc
 
 ;query_theme_changes()
@@ -139,7 +164,7 @@ Func policy_changes()
 	Local $o_CmdString1 = " Get-CimInstance -ClassName Win32_DeviceGuard -Namespace root\Microsoft\Windows\DeviceGuard | FL *codeintegrity*"
 	Local $o_powershell = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -Command"
 	Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
-	ProcessWaitClose($o_Pid)
+	ProcessWaitCloseEx($o_Pid)
 	$out = StdoutRead($o_Pid)
 	$test = stringsplit($out , @CR , 2)
 	_ArrayDelete($test, 4)
@@ -164,54 +189,53 @@ Func policy_changes()
 	Local $iAudit = StringInStr($dString14, "Audit Mode")
 	Local $iEnforced = StringInStr($dString14, "Enforced Mode")
 	Local $iDisabled = StringInStr($dString14, "Not Configured")
-	If $iAudit <> '0' Then
-		TraySetIcon(@ScriptFullPath, 202)
-	ElseIf $iEnforced <> '0' Then
-		TraySetIcon(@ScriptFullPath, 201)
-	ElseIf $iDisabled <> '0' Then
-		TraySetIcon(@ScriptFullPath, 203)
+	$iSignal = RegRead("HKEY_CURRENT_USER\Software\AppControlTray", "Blocked")
+	If $iSignal = '1' Then
+		; don't change icon
+	Else
+		If $iAudit <> '0' Then
+			TraySetIcon(@ScriptFullPath, 202)
+		ElseIf $iEnforced <> '0' Then
+			TraySetIcon(@ScriptFullPath, 201)
+		ElseIf $iDisabled <> '0' Then
+			TraySetIcon(@ScriptFullPath, 203)
+		EndIf
 	EndIf
-;_ExtMsgBox (0 & ";" & @ScriptDir & "\AppControlTray.exe", 0, "App Control Policy Status", $dString14)
 Endfunc
+
+
+Func block_events()
+	$iSignal = RegRead("HKEY_CURRENT_USER\Software\AppControlTray", "Blocked")
+	If $iSignal = '1' Then
+		TraySetIcon(@ScriptFullPath, 204)
+	EndIf
+EndFunc
+
 
 _TasksExists()
 
 Func _TasksExists()
-; *****************************************************************************
-; Connect to the Task Scheduler Service
-; *****************************************************************************
-Local $oService = _TS_Open()
-If @error <> 0 Then Exit MsgBox($MB_ICONERROR, "Task Scheduler UDF", "Error connecting to the Task Scheduler Service. @error = " & @error & ", @extended = " & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+	; *****************************************************************************
+	; Connect to the Task Scheduler Service
+	; *****************************************************************************
+	Local $oService = _TS_Open()
+	If @error <> 0 Then Exit MsgBox($MB_ICONERROR, "Task Scheduler UDF", "Error connecting to the Task Scheduler Service. @error = " & @error & ", @extended = " & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
 
-; *****************************************************************************
-; Check if a folder exists
-; *****************************************************************************
-Local $sFolder = "\AppControlTray"
-Local $iExists = _TS_FolderExists($oService, $sFolder)
-If Not @error Then
-	;MsgBox($MB_ICONINFORMATION, "_TS_FolderExists", "Checked folder: " & $sFolder & @CRLF & "Exists: " & $iExists)
-	Global $tasksExist = $iExists
-Else
-	;MsgBox($MB_ICONERROR, "_TS_FolderExists", "Returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
-	Global $tasksExist = $iExists
-EndIf
-_TS_Close($oService)
+	; *****************************************************************************
+	; Check if a folder exists
+	; *****************************************************************************
+	Local $sFolder = "\AppControlTray"
+	Local $iExists = _TS_FolderExists($oService, $sFolder)
+	If Not @error Then
+		;MsgBox($MB_ICONINFORMATION, "_TS_FolderExists", "Checked folder: " & $sFolder & @CRLF & "Exists: " & $iExists)
+		Global $tasksExist = $iExists
+	Else
+		;MsgBox($MB_ICONERROR, "_TS_FolderExists", "Returned @error=" & @error & ", @extended=" & @extended & @CRLF & @CRLF & _TS_ErrorText(@error))
+		Global $tasksExist = $iExists
+	EndIf
+	_TS_Close($oService)
 EndFunc
 
-ShortcutExists()
-
-Func ShortcutExists()
-        Local $sFilePath = @AppDataDir & "\Microsoft\Windows\Start Menu\Programs\App Control Tray Tool.lnk"
-		Local $iFileExists = FileExists($sFilePath)
-
-        If $iFileExists Then
-                ;MsgBox($MB_SYSTEMMODAL, "", "The file exists." & @CRLF & "FileExist returned: " & $iFileExists)
-        Else
-                ;MsgBox($MB_SYSTEMMODAL, "", "The file doesn't exist." & @CRLF & "FileExist returned: " & $iFileExists)
-				Run(@ScriptDir & "\AppControlTask.exe install", @ScriptDir, @SW_HIDE)
-        EndIf
-
-EndFunc
 
 ; Set Current Working Directory
 Local $setCWD = True
@@ -220,20 +244,29 @@ If $setCWD Then FileChangeDir(@ScriptDir)
 ; Menu
 ;Local $idPStest = TrayCreateItem("App Control Policy Status")
 Local $idPStest = TrayCreateItem("App Control Policy Manager")
+TrayItemSetOnEvent(-1, "PStest")
 Local $idCiTool = TrayCreateItem("CiTool Status (-lp)")
+TrayItemSetOnEvent(-1, "CiTool")
 TrayCreateItem("")
 Local $idWDACWizard = TrayCreateItem("App Control Wizard")
+TrayItemSetOnEvent(-1, "WDACWizard")
 Local $idMsinfo32 = TrayCreateItem("System Information")
+TrayItemSetOnEvent(-1, "Msinfo32")
 TrayCreateItem("")
 Local $idViewLogs = TrayCreateMenu("View Logs")
 Local $idLogsCI = TrayCreateItem("Code Integrity", $idViewLogs)
+TrayItemSetOnEvent(-1, "LogsCI")
 Local $idLogsScript = TrayCreateItem("MSI and Script", $idViewLogs)
+TrayItemSetOnEvent(-1, "LogsScript")
 TrayCreateItem("")
 Local $idAddRemove = TrayCreateMenu("Change Policies")
 Local $idAddPol = TrayCreateItem("Add or Update Policies", $idAddRemove)
+TrayItemSetOnEvent(-1, "AddPolicies")
 Local $idRemovePol = TrayCreateItem("Remove Policies", $idAddRemove)
+TrayItemSetOnEvent(-1, "RemovePolicies")
 TrayCreateItem("")
 Local $idConvertPol = TrayCreateItem("Convert (xml to binary)")
+TrayItemSetOnEvent(-1, "ConvertPolicy")
 TrayCreateItem("")
 Local $idToasts = TrayCreateItem("Enable Notifications")
 If $tasksExist = '1' Then TrayItemSetState ($idToasts, $TRAY_CHECKED)
@@ -243,21 +276,35 @@ $idRegRead = RegRead ("HKCU\Software\Microsoft\Windows\CurrentVersion\Run", $idR
 If $idRegRead <> '' Then TrayItemSetState ($idStartItem, $TRAY_CHECKED)
 TrayItemSetOnEvent ($idStartItem, "StartWithWindows")
 Local $idAbout = TrayCreateItem("About")
+TrayItemSetOnEvent(-1, "About")
 Local $idExit = TrayCreateItem("Exit")
+TrayItemSetOnEvent(-1, "ExitScript")
 
 ; Tray Icon - 201 is the resource number of embedded icon
 ;TraySetIcon(@ScriptFullPath, 201)
 ; Audit Mode icon
 ;TraySetIcon(@ScriptFullPath, 202)
 
-Func WDACWizard()
+
+Func WDACWizardExists()
 	Local $o_CmdString1 = " Get-AppxPackage -Name 'Microsoft.WDAC.WDACWizard'"
 	Local $o_powershell = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -Command"
 	Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
-	ProcessWaitClose($o_Pid)
+	ProcessWaitCloseEx($o_Pid)
 	$out = StdoutRead($o_Pid)
 	Local $iString = StringInStr($out, "Microsoft.WDAC.WDACWizard")
 	If $iString = 0 Then
+		$WDACWizardExists = False
+	Else
+		$WDACWizardExists = True
+	EndIf
+EndFunc
+
+
+Func WDACWizard()
+	If $WDACWizardExists = True Then
+		Run(@ComSpec & " /c " & 'Explorer.Exe Shell:AppsFolder\Microsoft.WDAC.WDACWizard_8wekyb3d8bbwe!WDACWizard', "", @SW_HIDE)
+	Else
 		$sMsg = " App Control Wizard doesn't appear to be installed. " & @CRLF
 		$sMsg &= " " & @CRLF
 		$sMsg &= " Would you like to visit the App Control Wizard download page? " & @CRLF
@@ -265,41 +312,54 @@ Func WDACWizard()
 		$iRetValue = _ExtMsgBox (0, 4, "App Control Wizard", $sMsg)
 
 		If $iRetValue = 1 Then
-		;ConsoleWrite("Yes" & @CRLF)
-		ShellExecute("https://webapp-wdac-wizard.azurewebsites.net/")
+			;ConsoleWrite("Yes" & @CRLF)
+			ShellExecute("https://webapp-wdac-wizard.azurewebsites.net/")
 		ElseIf $iRetValue = 2 Then
-		;ConsoleWrite("No" & @CRLF)
+			;ConsoleWrite("No" & @CRLF)
 		EndIf
-	Else
-		Run(@ComSpec & " /c " & 'Explorer.Exe Shell:AppsFolder\Microsoft.WDAC.WDACWizard_8wekyb3d8bbwe!WDACWizard', "", @SW_HIDE)
+		; check if user installs Wizard
+		CheckWizardInstall()
 	EndIf
 EndFunc
+
+Func CheckWizardInstall()
+	; Check for Wizard install every 11 seconds
+	AdlibRegister("WDACWizardExists", 11000)
+EndFunc
+
 Func Msinfo32()
     Run("C:\Windows\System32\msinfo32.exe", "", @SW_SHOWMAXIMIZED)
 EndFunc
+
 Func CiTool()
     ;Run(@ScriptDir & "\AppControlHelper.exe /CiTool")
 	ShellExecute("AppControlHelper.exe", "/CiTool", @ScriptDir)
 EndFunc
+
 Func LogsCI()
 	;Run(@ScriptDir & "\AppControlHelper.exe /LogsCI")
 	ShellExecute("AppControlHelper.exe", "/LogsCI", @ScriptDir)
 EndFunc
+
 Func LogsScript()
 	;Run(@ScriptDir & "\AppControlHelper.exe /LogsScript")
 	ShellExecute("AppControlHelper.exe", "/LogsScript", @ScriptDir)
 EndFunc
+
 Func AddPolicies()
     ;Run(@ScriptDir & "\AppControlHelper.exe /AddPolicies")
 	ShellExecute("AppControlHelper.exe", "/AddPolicies", @ScriptDir)
 EndFunc
+
 Func RemovePolicies()
     ;Run(@ScriptDir & "\AppControlHelper.exe /RemovePolicies")
 	ShellExecute("AppControlHelper.exe", "/RemovePolicies", @ScriptDir)
 EndFunc
+
 Func ConvertPolicy()
 	Run(@ScriptDir & "\AppControlTask.exe convert")
 EndFunc
+
 Func Notifications()
     If @Compiled Then
         $_ItemGetState = TrayItemGetState ($idToasts)
@@ -312,6 +372,7 @@ Func Notifications()
         EndIf
     EndIf
 EndFunc
+
 Func StartWithWindows()
     If @Compiled Then
         $_ItemGetState = TrayItemGetState ($idStartItem)
@@ -324,6 +385,7 @@ Func StartWithWindows()
         EndIf
     EndIf
 EndFunc
+
 Func PStest()
 	;Run(@ScriptDir & "\AppControlManager.exe")
 	ShellExecute("AppControlManager.exe", "", @ScriptDir)
@@ -332,36 +394,50 @@ EndFunc
 TraySetToolTip($tipTitle & $dString14)
 ;TraySetToolTip($tipTitle & $tipKernelTitle & $tipKernelStatus & $tipUserTitle & $tipUserStatus)
 
+; check whether or not App Control Wizard is installed
+WDACWizardExists()
+
+
+Func ProcessWaitCloseEx($iPID)
+	While ProcessExists($iPID) And Sleep(10)
+	WEnd
+EndFunc
+
+
+TraySetOnEvent($TRAY_EVENT_PRIMARYUP, "TrayEvent")
+TraySetOnEvent($TRAY_EVENT_SECONDARYUP, "TrayEvent")
+
+
 While 1
-    Switch TrayGetMsg()
-        Case $idWDACWizard
-            WDACWizard()
-        Case $idMsinfo32
-            Msinfo32()
-        Case $idCiTool
-            CiTool()
-        Case $idLogsCI
-            LogsCI()
-        Case $idLogsScript
-            LogsScript()
-		Case $idAddPol
-            AddPolicies()
-		Case $idRemovePol
-            RemovePolicies()
-        Case $idConvertPol
-            ConvertPolicy()
-		Case $idPStest
-            PStest()
-		Case $idStartItem
-            StartWithWindows()
-		Case $idToasts
-            Notifications()
-		Case $idAbout
-			_ExtMsgBox (0 & ";" & @ScriptDir & "\AppControlTray.exe", 0, "About App Control Tray Tool", " Version: " & $programVersion & @CRLF & _
+	Sleep(100)
+WEnd
+
+
+Func TrayEvent()
+	Switch @TRAY_ID
+			Case $TRAY_EVENT_PRIMARYUP
+				$iSignal = RegRead("HKEY_CURRENT_USER\Software\AppControlTray", "Blocked")
+				If $iSignal = '1' Then
+					$iRegWrite = RegWrite("HKEY_CURRENT_USER\Software\AppControlTray", "Blocked", "REG_DWORD", "0")
+					policy_changes()
+				EndIf
+			Case $TRAY_EVENT_SECONDARYUP
+				$iSignal = RegRead("HKEY_CURRENT_USER\Software\AppControlTray", "Blocked")
+				If $iSignal = '1' Then
+					$iRegWrite = RegWrite("HKEY_CURRENT_USER\Software\AppControlTray", "Blocked", "REG_DWORD", "0")
+					policy_changes()
+				EndIf
+	EndSwitch
+EndFunc
+
+
+Func ExitScript()
+	Exit
+EndFunc
+
+
+Func About()
+	_ExtMsgBox (0 & ";" & @ScriptDir & "\AppControlTray.exe", 0, "About App Control Tray Tool", " Version: " & $programVersion & @CRLF & _
                             " Created by: " & $createdBy & @CRLF & @CRLF & _
                             " This program is free and open source. " & @CRLF)
-        Case $idExit
-        ExitLoop
-    EndSwitch
-
-WEnd
+EndFunc

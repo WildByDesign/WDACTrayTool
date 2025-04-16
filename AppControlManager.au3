@@ -33,8 +33,8 @@
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Policy Manager
 #AutoIt3Wrapper_res_requestedExecutionLevel=requireAdministrator
-#AutoIt3Wrapper_Res_Fileversion=5.2.0.0
-#AutoIt3Wrapper_Res_ProductVersion=5.2.0
+#AutoIt3Wrapper_Res_Fileversion=5.5.0.0
+#AutoIt3Wrapper_Res_ProductVersion=5.5.0
 #AutoIt3Wrapper_Res_ProductName=AppControlPolicyManager
 #AutoIt3Wrapper_Outfile_x64=AppControlManager.exe
 #AutoIt3Wrapper_Res_LegalCopyright=@ 2025 WildByDesign
@@ -44,7 +44,7 @@
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #Region
 
-Global $programversion = "5.2"
+Global $programversion = "5.5"
 
 If @Compiled = 0 Then
 	; System aware DPI awareness
@@ -233,6 +233,7 @@ EndIf
 Global $hGUI, $cListView, $hListView, $EFIarray, $hGUI2, $ExitButtonEFI, $EFIListView, $hEFIListView, $PolicyStatusInfo
 Global $out, $arpol, $arraycount, $policycount, $policyoutput, $policycorrect, $CountTotal, $ExitButton, $TestButton, $Label2, $aContent, $iLV_Index
 Global $CountEnforced = 0
+Global $WDACWizardExists
 
 
 If $isDarkMode = True Then
@@ -279,7 +280,7 @@ Else
 EndIf
 
 Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
-ProcessWaitClose($o_Pid)
+ProcessWaitCloseEx($o_Pid)
 $out = StdoutRead($o_Pid)
 CreatePolicyTable($out)
 EndFunc
@@ -294,7 +295,7 @@ Else
 EndIf
 
 Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
-ProcessWaitClose($o_Pid)
+ProcessWaitCloseEx($o_Pid)
 $out = StdoutRead($o_Pid)
 
 ;;;
@@ -326,7 +327,7 @@ Else
 EndIf
 
 Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
-ProcessWaitClose($o_Pid)
+ProcessWaitCloseEx($o_Pid)
 $out = StdoutRead($o_Pid)
 CreatePolicyTable($out)
 EndFunc
@@ -341,7 +342,7 @@ Else
 EndIf
 
 Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
-ProcessWaitClose($o_Pid)
+ProcessWaitCloseEx($o_Pid)
 $out = StdoutRead($o_Pid)
 CreatePolicyTable($out)
 EndFunc
@@ -350,7 +351,7 @@ Func GetPolicySigned()
 	Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.IsSignedPolicy -eq 'True'} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,VersionString,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
 
 	Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
-	ProcessWaitClose($o_Pid)
+	ProcessWaitCloseEx($o_Pid)
 	$out = StdoutRead($o_Pid)
 	CreatePolicyTable($out)
 EndFunc
@@ -365,7 +366,7 @@ Else
 EndIf
 
 Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
-ProcessWaitClose($o_Pid)
+ProcessWaitCloseEx($o_Pid)
 $out = StdoutRead($o_Pid)
 CreatePolicyTable($out)
 EndFunc
@@ -1135,7 +1136,7 @@ GetPolicyStatus()
 Func GetPolicyStatus()
 Local $o_CmdString1 = " Get-CimInstance -ClassName Win32_DeviceGuard -Namespace root\Microsoft\Windows\DeviceGuard | FL *codeintegrity*"
 Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
-ProcessWaitClose($o_Pid)
+ProcessWaitCloseEx($o_Pid)
 $out = StdoutRead($o_Pid)
 
 Local $topstatus1 = StringReplace($out, "[32;1m", "")
@@ -1220,7 +1221,7 @@ Func GUI2()
 
 	Local $o_CmdString1 = " $MountPoint = $env:SystemDrive+'\EFIMount'; $EFIPartition = (Get-Partition | Where-Object IsSystem).AccessPaths[0]; if (-Not (Test-Path $MountPoint)) { New-Item -Path $MountPoint -Type Directory -Force }; mountvol $MountPoint $EFIPartition"
 	Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide)
-	ProcessWaitClose($o_Pid)
+	ProcessWaitCloseEx($o_Pid)
 	Local $systemdrive = EnvGet('SystemDrive')
 	;MsgBox(0, '$systemdrive', $systemdrive)
 	Local Const $sFilePath = $systemdrive & '\EFIMount\EFI\Microsoft'
@@ -1236,7 +1237,7 @@ Func GUI2()
 	Local $o_CmdString1 = " $MountPoint = $env:SystemDrive+'\EFIMount'; $MultiPolicyDir = $MountPoint+'\EFI\Microsoft\Boot\CiPolicies\Active'; $CIPFiles = Get-ChildItem $MultiPolicyDir\*.cip -Name; $CIPFiles"
 
 	Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
-	ProcessWaitClose($o_Pid)
+	ProcessWaitCloseEx($o_Pid)
 	$out = StdoutRead($o_Pid)
 	;MsgBox(0, 'test', $out)
 	Local $CIPFiles1 = StringReplace($out, "[32;1m", "")
@@ -1275,7 +1276,7 @@ Func GUI2()
 	Local $o_CmdString1 = " $MountPoint = $env:SystemDrive+'\EFIMount'; $SinglePolicyDir = $MountPoint+'\EFI\Microsoft\Boot'; $p7bFiles = Get-ChildItem $SinglePolicyDir\*.p7b -Name; $p7bFiles"
 
 	Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
-	ProcessWaitClose($o_Pid)
+	ProcessWaitCloseEx($o_Pid)
 	$out = StdoutRead($o_Pid)
 	;MsgBox(0, 'test', $out)
 	Local $p7bFiles1 = StringReplace($out, "[32;1m", "")
@@ -1743,7 +1744,7 @@ GUISetState(@SW_RESTORE)
 WinSetOnTop($hGUI, "", $WINDOWS_ONTOP)
 WinSetOnTop($hGUI, "", $WINDOWS_NOONTOP)
 
-
+WDACWizardExists()
 ;GUISetState(@SW_SHOW)
 
 
@@ -2057,14 +2058,25 @@ Func ConvertPolicy()
 Endfunc
 
 
-Func PolicyWizard()
+Func WDACWizardExists()
 	Local $o_CmdString1 = " Get-AppxPackage -Name 'Microsoft.WDAC.WDACWizard'"
 	Local $o_powershell = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -Command"
 	Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
-	ProcessWaitClose($o_Pid)
+	ProcessWaitCloseEx($o_Pid)
 	$out = StdoutRead($o_Pid)
 	Local $iString = StringInStr($out, "Microsoft.WDAC.WDACWizard")
 	If $iString = 0 Then
+		$WDACWizardExists = False
+	Else
+		$WDACWizardExists = True
+	EndIf
+EndFunc
+
+
+Func PolicyWizard()
+	If $WDACWizardExists = True Then
+		Run(@ComSpec & " /c " & 'Explorer.Exe Shell:AppsFolder\Microsoft.WDAC.WDACWizard_8wekyb3d8bbwe!WDACWizard', "", @SW_HIDE)
+	Else
 		$sMsg = " App Control Wizard doesn't appear to be installed. " & @CRLF
 		$sMsg &= " " & @CRLF
 		$sMsg &= " Would you like to visit the App Control Wizard download page? " & @CRLF
@@ -2072,21 +2084,27 @@ Func PolicyWizard()
 		$iRetValue = _ExtMsgBox (0, 4, "App Control Wizard", $sMsg)
 
 		If $iRetValue = 1 Then
-		;ConsoleWrite("Yes" & @CRLF)
-		ShellExecute("https://webapp-wdac-wizard.azurewebsites.net/")
+			;ConsoleWrite("Yes" & @CRLF)
+			ShellExecute("https://webapp-wdac-wizard.azurewebsites.net/")
 		ElseIf $iRetValue = 2 Then
-		;ConsoleWrite("No" & @CRLF)
+			;ConsoleWrite("No" & @CRLF)
 		EndIf
-	Else
-		Run(@ComSpec & " /c " & 'Explorer.Exe Shell:AppsFolder\Microsoft.WDAC.WDACWizard_8wekyb3d8bbwe!WDACWizard', "", @SW_HIDE)
+		; check if user installs Wizard
+		CheckWizardInstall()
 	EndIf
 Endfunc
+
+
+Func CheckWizardInstall()
+	; Check for Wizard install every 10 seconds
+	AdlibRegister("WDACWizardExists", 10000)
+EndFunc
 
 
 Func MountEFI()
 	Local $o_CmdString1 = " $MountPoint = $env:SystemDrive+'\EFIMount'; $EFIPartition = (Get-Partition | Where-Object IsSystem).AccessPaths[0]; if (-Not (Test-Path $MountPoint)) { New-Item -Path $MountPoint -Type Directory -Force }; mountvol $MountPoint $EFIPartition"
 	Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide)
-	ProcessWaitClose($o_Pid)
+	ProcessWaitCloseEx($o_Pid)
 	Local $systemdrive = EnvGet('SystemDrive')
 	;MsgBox(0, '$systemdrive', $systemdrive)
 	Local Const $sFilePath = $systemdrive & '\EFIMount\EFI\Microsoft'
@@ -2100,7 +2118,7 @@ Func ListEFI()
 	Local $o_CmdString1 = " $MountPoint = $env:SystemDrive+'\EFIMount'; $MultiPolicyDir = $MountPoint+'\EFI\Microsoft\Boot\CiPolicies\Active'; $CIPFiles = Get-ChildItem $MultiPolicyDir\*.cip -Name; $CIPFiles"
 
 	Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
-	ProcessWaitClose($o_Pid)
+	ProcessWaitCloseEx($o_Pid)
 	$out = StdoutRead($o_Pid)
 	;MsgBox(0, 'test', $out)
 	Local $CIPFiles1 = StringReplace($out, "[32;1m", "")
@@ -2144,7 +2162,7 @@ Func ListEFIp7b()
 	Local $o_CmdString1 = " $MountPoint = $env:SystemDrive+'\EFIMount'; $SinglePolicyDir = $MountPoint+'\EFI\Microsoft\Boot'; $p7bFiles = Get-ChildItem $SinglePolicyDir\*.p7b -Name; $p7bFiles"
 
 	Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
-	ProcessWaitClose($o_Pid)
+	ProcessWaitCloseEx($o_Pid)
 	$out = StdoutRead($o_Pid)
 	;MsgBox(0, 'test', $out)
 	Local $p7bFiles1 = StringReplace($out, "[32;1m", "")
@@ -2195,7 +2213,7 @@ Endfunc
 Func UnmountEFI()
 	Local $o_CmdString1 = " $MountPoint = $env:SystemDrive+'\EFIMount'; mountvol $MountPoint /D"
 	Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide)
-	ProcessWaitClose($o_Pid)
+	ProcessWaitCloseEx($o_Pid)
 
 	Local $systemdrive = EnvGet('SystemDrive')
 	Local Const $sFilePath = $systemdrive & '\EFIMount\EFI\Microsoft'
@@ -2207,6 +2225,13 @@ Func UnmountEFI()
 	EndIf
 
 Endfunc
+
+
+Func ProcessWaitCloseEx($iPID)
+	While ProcessExists($iPID) And Sleep(10)
+	WEnd
+EndFunc
+
 
 Local $aMsg
 

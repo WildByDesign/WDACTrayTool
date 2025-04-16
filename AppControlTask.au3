@@ -1,3 +1,13 @@
+
+; *** Start added Standard Include files by AutoIt3Wrapper ***
+#include <Date.au3>
+#include <FontConstants.au3>
+#include <WinAPISysInternals.au3>
+#include <WinAPIInternals.au3>
+#include <WindowsConstants.au3>
+#include <WinAPIFiles.au3>
+#include <AutoItConstants.au3>
+; *** End added Standard Include files by AutoIt3Wrapper ***
 #Region
 #include <MsgBoxConstants.au3>
 #include <String.au3>
@@ -11,14 +21,17 @@
 
 #include "includes\TaskScheduler.au3"
 
+#include "includes\libnotif.au3"
+#include "includes\GUIDarkMode_v0.02mod.au3"
+
 #NoTrayIcon
 
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=AppControl.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Task Manager
-#AutoIt3Wrapper_Res_Fileversion=5.2.0.0
-#AutoIt3Wrapper_Res_ProductVersion=5.2.0
+#AutoIt3Wrapper_Res_Fileversion=5.5.0.0
+#AutoIt3Wrapper_Res_ProductVersion=5.5.0
 #AutoIt3Wrapper_Res_ProductName=AppControlTaskManager
 #AutoIt3Wrapper_Outfile_x64=AppControlTask.exe
 #AutoIt3Wrapper_Res_LegalCopyright=@ 2025 WildByDesign
@@ -28,12 +41,77 @@
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 $sTitle = "AppControlTaskHelper"
 
+
+Global $MainFont
+
+Global $ifPS7Exists = FileExists(@ProgramFilesDir & '\PowerShell\7\pwsh.exe')
+If $ifPS7Exists Then
+	Global $o_powershell = @ProgramFilesDir & '\PowerShell\7\pwsh.exe -NoProfile -Command'
+Else
+	Global $o_powershell = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -Command"
+EndIf
+
+
 If @Compiled = 0 Then
 	; System aware DPI awareness
 	;DllCall("User32.dll", "bool", "SetProcessDPIAware")
 	; Per-monitor V2 DPI awareness
 	DllCall("User32.dll", "bool", "SetProcessDpiAwarenessContext" , "HWND", "DPI_AWARENESS_CONTEXT" -4)
 EndIf
+
+
+Local Const $sSegUIVar = @WindowsDir & "\fonts\SegUIVar.ttf"
+Local $SegUIVarExists = FileExists($sSegUIVar)
+
+If $SegUIVarExists Then
+	Global $MainFont = "Segoe UI Variable Display"
+	GUISetFont(8.5, $FW_NORMAL, -1, $MainFont)
+Else
+	Global $MainFont = "Segoe UI"
+	GUISetFont(8.5, $FW_NORMAL, -1, $MainFont)
+EndIf
+
+
+;Global $isDarkMode = _WinAPI_ShouldAppsUseDarkMode()
+
+
+;---
+
+; configure library
+_LibNotif_Config($LIBNOTIF_CFG_TIMEOUT, 10000)
+
+_LibNotif_Config($LIBNOTIF_CFG_MINTOASTWIDTH, 128)
+;_LibNotif_Config($LIBNOTIF_CFG_POSITION, $LIBNOTIF_POS_UR)
+_LibNotif_Config($LIBNOTIF_CFG_MAXTEXTWIDTH, @DesktopWidth - 100)
+
+_LibNotif_Config($LIBNOTIF_CFG_CLOSEBUTTON, True)
+
+$idLightBk = _WinAPI_SwitchColor(_WinAPI_GetSysColor($COLOR_BTNFACE))
+
+If $isDarkMode = True Then
+	_LibNotif_Config($LIBNOTIF_CFG_BKCOLOR, 0x202020)
+	_LibNotif_Config($LIBNOTIF_CFG_TEXTCOLOR, 0xe0e0e0)
+Else
+	_LibNotif_Config($LIBNOTIF_CFG_BKCOLOR, $idLightBk)
+	_LibNotif_Config($LIBNOTIF_CFG_TEXTCOLOR, 0x000000)
+EndIf
+
+_LibNotif_Config($LIBNOTIF_CFG_TEXTFONTNAME, $MainFont)
+_LibNotif_Config($LIBNOTIF_CFG_TEXTSIZE, 10)
+_LibNotif_Config($LIBNOTIF_CFG_TEXTWEIGHT, 400)
+_LibNotif_Config($LIBNOTIF_CFG_TEXTATTRIBUTES, 0)
+
+_LibNotif_Config($LIBNOTIF_CFG_TEXTMARGIN, 15)
+_LibNotif_Config($LIBNOTIF_CFG_BUTTONSIZE, 30)
+
+;_LibNotif_Config($LIBNOTIF_CFG_SHOW_ANIMSTYLE, $AW_VER_NEGATIVE)
+;_LibNotif_Config($LIBNOTIF_CFG_HIDE_ANIMSTYLE, $AW_VER_POSITIVE + $AW_HIDE)
+
+; init library
+_LibNotif_Init()
+
+;---
+
 
 Func task_create_folder()
 	Global $oService = _TS_Open()
@@ -81,6 +159,7 @@ Func task_create_blocked()
 			"SETTINGS|DisallowStartIfOnBatteries|False", _
 			"SETTINGS|StopIfGoingOnBatteries|False", _
 			"SETTINGS|Compatibility|4", _
+			"SETTINGS|MultipleInstances|0", _
 			"SETTINGS|ExecutionTimeLimit|PT0S", _
 			"REGISTRATIONINFO|Author|" & @ComputerName & "\" & @UserName, _
 			"REGISTRATIONINFO|Description|Task that triggers a toast notification on App Control block events.", _
@@ -159,6 +238,7 @@ Func task_create_audit()
 			"SETTINGS|DisallowStartIfOnBatteries|False", _
 			"SETTINGS|StopIfGoingOnBatteries|False", _
 			"SETTINGS|Compatibility|4", _
+			"SETTINGS|MultipleInstances|0", _
 			"SETTINGS|ExecutionTimeLimit|PT0S", _
 			"REGISTRATIONINFO|Author|" & @ComputerName & "\" & @UserName, _
 			"REGISTRATIONINFO|Description|Task that triggers a toast notification on App Control audit events.", _
@@ -237,6 +317,7 @@ Func task_create_refresh()
 			"SETTINGS|DisallowStartIfOnBatteries|False", _
 			"SETTINGS|StopIfGoingOnBatteries|False", _
 			"SETTINGS|Compatibility|4", _
+			"SETTINGS|MultipleInstances|0", _
 			"SETTINGS|ExecutionTimeLimit|PT0S", _
 			"REGISTRATIONINFO|Author|" & @ComputerName & "\" & @UserName, _
 			"REGISTRATIONINFO|Description|Task that triggers a toast notification on App Control policy refresh events.", _
@@ -361,27 +442,37 @@ Endfunc
 
 If $CmdLine[0] = 0 Then Exit MsgBox(16, $sTitle, "No parameters passed!")
 
-If $CmdLine[1] = "install" Then
-; install special shortcut with AppID
-$cmdInstall1 = ' -install "App Control Tray Tool.lnk" '
-$cmdInstall2 = @ScriptDir & '\AppControlTray.exe '
-$cmdInstall3 = '"App Control Tray Tool"'
-Run(@ScriptDir & "\toasts\snoretoast.exe" & $cmdInstall1 & $cmdInstall2 & $cmdInstall3, @ScriptDir & "\toasts", @SW_HIDE)
-EndIf
-
 If $CmdLine[1] = "blocked" Then
-$cmdBlocked = ' -t "An application was stopped from running." -m "For security and stability reasons, unknown applications are prevented from running on this device." -appID "App Control Tray Tool" -p toast-blocked.png -silent -d short -b Dismiss'
-Run(@ScriptDir & "\toasts\snoretoast.exe" & $cmdBlocked, @ScriptDir & "\toasts", @SW_HIDE)
+	$sLastBlocked = GetLastBlocked()
+	$iRegWrite = RegWrite("HKEY_CURRENT_USER\Software\AppControlTray", "Blocked", "REG_DWORD", "1")
+	$sText = "An application was stopped from running." & @CRLF & @CRLF & "For security and stability reasons, unknown applications" & @CRLF & "are prevented from running on this device." & @CRLF & @CRLF & 'Blocked App:' & @CRLF & @CRLF & $sLastBlocked
+	_LibNotif_Notif($sText)
+
+	; wait until notification is closed
+	While _LibNotif_IsVisible()
+	Sleep(100)
+	WEnd
 EndIf
 
 If $CmdLine[1] = "audit" Then
-$cmdAudit = ' -t "An application would have been stopped from running." -m "Unknown applications are prevented from running. However, this was able to run due to Audit Mode." -appID "App Control Tray Tool" -p toast-audit.png -silent -d short -b Dismiss'
-Run(@ScriptDir & "\toasts\snoretoast.exe" & $cmdAudit, @ScriptDir & "\toasts", @SW_HIDE)
+	$sLastAudit = GetLastAudit()
+	$sText = "An application would have been stopped from running." & @CRLF & @CRLF & "Unknown applications are prevented from running. However," & @CRLF & "this was able to run due to Audit Mode." & @CRLF & @CRLF & 'Blocked App:' & @CRLF & @CRLF & $sLastAudit
+	_LibNotif_Notif($sText)
+
+	; wait until notification is closed
+	While _LibNotif_IsVisible()
+	Sleep(100)
+	WEnd
 EndIf
 
 If $CmdLine[1] = "refresh" Then
-$cmdRefresh = ' -t "Your App Control policies have been refreshed." -m "Code Integrity policy refresh finished successfully." -appID "App Control Tray Tool" -p toast-refresh.png -silent -d short -b Dismiss'
-Run(@ScriptDir & "\toasts\snoretoast.exe" & $cmdRefresh, @ScriptDir & "\toasts", @SW_HIDE)
+	$sText = "Your App Control policies have been refreshed." & @CRLF & @CRLF & "Code Integrity policy refresh finished successfully."
+	_LibNotif_Notif($sText)
+
+	; wait until notification is closed
+	While _LibNotif_IsVisible()
+	Sleep(100)
+	WEnd
 EndIf
 
 If $CmdLine[1] = "convert" Then
@@ -468,3 +559,69 @@ If $CmdLine[1] = "removetasks" Then
 	Sleep(1000)
 	task_delete_folder()
 EndIf
+
+
+Func GetLastAudit()
+    Local $o_CmdString1 = " (get-winevent -LogName Microsoft-Windows-CodeIntegrity/Operational -FilterXPath '*[System[(EventID = 3076) and (EventRecordID > 0)]]') | foreach {$_.Properties[1]}"
+
+    Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
+    ProcessWaitCloseEx($o_Pid)
+    $out = StdoutRead($o_Pid)
+
+    $sString = StringReplace($out, "[32;1mValue[0m", "")
+    $sString = StringReplace($sString, "[32;1m-----[0m", "")
+    $sString = StringReplace($sString, "Value", "")
+    $sString = StringReplace($sString, "-----", "")
+    $sString = StringStripWS($sString, $STR_STRIPLEADING + $STR_STRIPTRAILING)
+
+    $aDays = StringSplit($sString, @CR)
+
+    $sLastAudit = $aDays[1]
+    $sLastAudit = _DosPathNameToPathName($sLastAudit)
+    Return $sLastAudit
+EndFunc
+
+
+Func GetLastBlocked()
+    Local $o_CmdString1 = " (get-winevent -LogName Microsoft-Windows-CodeIntegrity/Operational -FilterXPath '*[System[(EventID = 3077) and (EventRecordID > 0)]]') | foreach {$_.Properties[1]}"
+
+    Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
+    ProcessWaitCloseEx($o_Pid)
+    $out = StdoutRead($o_Pid)
+
+    $sString = StringReplace($out, "[32;1mValue[0m", "")
+    $sString = StringReplace($sString, "[32;1m-----[0m", "")
+    $sString = StringReplace($sString, "Value", "")
+    $sString = StringReplace($sString, "-----", "")
+    $sString = StringStripWS($sString, $STR_STRIPLEADING + $STR_STRIPTRAILING)
+
+    $aDays = StringSplit($sString, @CR)
+
+    $sLastBlocked = $aDays[1]
+    $sLastBlocked = _DosPathNameToPathName($sLastBlocked)
+    Return $sLastBlocked
+EndFunc
+
+
+Func ProcessWaitCloseEx($iPID)
+	While ProcessExists($iPID) And Sleep(10)
+	WEnd
+EndFunc
+
+
+Func _DosPathNameToPathName($sPath)
+
+        Local $sName, $aDrive = DriveGetDrive('ALL')
+    
+        If Not IsArray($aDrive) Then
+            Return SetError(1, 0, $sPath)
+        EndIf
+    
+        For $i = 1 To $aDrive[0]
+            $sName = _WinAPI_QueryDosDevice($aDrive[$i])
+            If StringInStr($sPath, $sName) = 1 Then
+                Return StringReplace($sPath, $sName, StringUpper($aDrive[$i]), 1)
+            EndIf
+        Next
+        Return SetError(2, 0, $sPath)
+EndFunc

@@ -18,8 +18,8 @@
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Tray Helper
 #AutoIt3Wrapper_res_requestedExecutionLevel=requireAdministrator
-#AutoIt3Wrapper_Res_Fileversion=5.2.0.0
-#AutoIt3Wrapper_Res_ProductVersion=5.2.0
+#AutoIt3Wrapper_Res_Fileversion=5.5.0.0
+#AutoIt3Wrapper_Res_ProductVersion=5.5.0
 #AutoIt3Wrapper_Res_ProductName=AppControlTrayHelper
 #AutoIt3Wrapper_Outfile_x64=AppControlHelper.exe
 #AutoIt3Wrapper_Res_LegalCopyright=@ 2025 WildByDesign
