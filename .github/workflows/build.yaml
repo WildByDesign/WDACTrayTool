@@ -61,9 +61,6 @@ jobs:
         run: 7z a AppControlManager.zip AppControlManager*.exe
       - name: Zip package (AppControlTray)
         run: 7z a AppControlTray.zip AppControlHelper*.exe AppControlManager*.exe AppControlTask*.exe AppControlTray*.exe
-          7z a AppControlTray.zip policies\
-          7z a AppControlTray.zip test\
-          7z a AppControlTray.zip toasts\
       - name: Rename AppControlManager zip with tag
         shell: pwsh
         run: |
