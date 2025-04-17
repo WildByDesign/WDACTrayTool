@@ -1,6 +1,15 @@
 # App Control Tray & Policy Manager
 
-I created this App Control System Tray Tool to facilitate more efficient changing of App Control policies. Specifically, I wanted a way to quickly switch between Enforced Mode and Audit Mode so that I could review logs and change rules in the policies as necessary. Since this has really helped benefit my application allowlisting journey, I wanted to share it so that others could also benefit. 
+### Main Files:
+
+`AppControlTray.exe` - System tray tool which run **unelevated** at all times.
+
+`AppControlManager.exe` - App Control for Business GUI
+
+`AppControlHelper.exe` - Command line-only tool which runs only specific **elevated** commands from AppControlTray related to CiTool commands and Event Viewer.
+
+`AppControlTask.exe` - Command line-only tool which runs only specific **unelevated** commands from AppControlTray related to Scheduled Tasks, Toast Notifications and policy conversion.
+
 
 ### Requirements:
 
@@ -12,16 +21,19 @@ I created this App Control System Tray Tool to facilitate more efficient changin
 
 ![AppControlPolicyManager-5 1](https://github.com/user-attachments/assets/d6f05cdb-19d8-4bde-b992-efc4b54d1705)
 
-![WDAC3screen](https://github.com/user-attachments/assets/e3294dd1-3eb1-4b38-8899-7c935303b7b9)
+![TrayMenu](https://github.com/user-attachments/assets/c3bc3f8b-582d-4e7b-aae4-f9af2e147ef4)
 
 
-### Main Files:
+### Notifications:
 
-`AppControlTray.exe` - System tray tool which run **unelevated** at all times.
+![Notification-Blocked](https://github.com/user-attachments/assets/cea05dc4-6aa0-4bee-a893-187f3ea4efeb)
 
-`AppControlManager.exe` - App Control for Business GUI
+![Notification-Audit](https://github.com/user-attachments/assets/3343d593-0b46-4384-80b0-c86fe52736de)
 
-`AppControlHelper.exe` - Command line-only tool which runs only specific **elevated** commands from AppControlTray related to CiTool commands and Event Viewer.
+![Notification-PolicyRefresh](https://github.com/user-attachments/assets/e1ad7446-3b83-42d7-b0d2-573bf6c67253)
 
-`AppControlTask.exe` - Command line-only tool which runs only specific **unelevated** commands from AppControlTray related to Scheduled Tasks, Toast Notifications and policy conversion.
+
+### System Tray Tooltip:
+
+![TrayToolTip](https://github.com/user-attachments/assets/9c79afd6-57e7-413e-ae97-12674bd4aca4)
 
