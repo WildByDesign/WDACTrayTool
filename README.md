@@ -4,7 +4,7 @@
 
 `AppControlTray.exe` - System tray tool which run **unelevated** at all times.
 
-`AppControlManager.exe` - App Control for Business GUI
+`AppControlPolicy.exe` - App Control for Business GUI
 
 `AppControlHelper.exe` - Command line-only tool which runs only specific **elevated** commands from AppControlTray related to CiTool commands and Event Viewer.
 
@@ -19,7 +19,7 @@
 
 ### Screenshots:
 
-![AppControlPolicyManager-5 1](https://github.com/user-attachments/assets/d6f05cdb-19d8-4bde-b992-efc4b54d1705)
+![AppControlPolicy6](https://github.com/user-attachments/assets/2662e003-9685-46f7-9338-9c63f2daf371)
 
 ![TrayMenu](https://github.com/user-attachments/assets/c3bc3f8b-582d-4e7b-aae4-f9af2e147ef4)
 
