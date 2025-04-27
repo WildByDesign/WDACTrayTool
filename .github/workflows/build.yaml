@@ -45,7 +45,7 @@ jobs:
       - name: Compile
         run: |
           Start-Process "${env:ProgramFiles(x86)}\AutoIt3\AutoIt3.exe" "`"${env:ProgramFiles(x86)}\AutoIt3\SciTE\AutoIt3Wrapper\AutoIt3Wrapper.au3`" /NoStatus /prod /in AppControlHelper.au3" -NoNewWindow -Wait
-          Start-Process "${env:ProgramFiles(x86)}\AutoIt3\AutoIt3.exe" "`"${env:ProgramFiles(x86)}\AutoIt3\SciTE\AutoIt3Wrapper\AutoIt3Wrapper.au3`" /NoStatus /prod /in AppControlManager.au3" -NoNewWindow -Wait
+          Start-Process "${env:ProgramFiles(x86)}\AutoIt3\AutoIt3.exe" "`"${env:ProgramFiles(x86)}\AutoIt3\SciTE\AutoIt3Wrapper\AutoIt3Wrapper.au3`" /NoStatus /prod /in AppControlPolicy.au3" -NoNewWindow -Wait
           Start-Process "${env:ProgramFiles(x86)}\AutoIt3\AutoIt3.exe" "`"${env:ProgramFiles(x86)}\AutoIt3\SciTE\AutoIt3Wrapper\AutoIt3Wrapper.au3`" /NoStatus /prod /in AppControlTask.au3" -NoNewWindow -Wait
           Start-Process "${env:ProgramFiles(x86)}\AutoIt3\AutoIt3.exe" "`"${env:ProgramFiles(x86)}\AutoIt3\SciTE\AutoIt3Wrapper\AutoIt3Wrapper.au3`" /NoStatus /prod /in AppControlTray.au3" -NoNewWindow -Wait
       - uses: actions/upload-artifact@v4
@@ -53,18 +53,18 @@ jobs:
           name: executable-files
           path: |
             AppControlHelper*.exe
-            AppControlManager*.exe
+            AppControlPolicy*.exe
             AppControlTask*.exe
             AppControlTray*.exe
           if-no-files-found: error
-      - name: Zip package (AppControlManager)
-        run: 7z a AppControlManager.zip AppControlManager*.exe
+      - name: Zip package (AppControlPolicy)
+        run: 7z a AppControlPolicy.zip AppControlPolicy*.exe
       - name: Zip package (AppControlTray)
-        run: 7z a AppControlTray.zip AppControlHelper*.exe AppControlManager*.exe AppControlTask*.exe AppControlTray*.exe
-      - name: Rename AppControlManager zip with tag
+        run: 7z a AppControlTray.zip AppControlHelper*.exe AppControlPolicy*.exe AppControlTask*.exe AppControlTray*.exe
+      - name: Rename AppControlPolicy zip with tag
         shell: pwsh
         run: |
-          Copy-Item AppControlManager.zip -Destination AppControlManager-${{ inputs.version }}.zip
+          Copy-Item AppControlPolicy.zip -Destination AppControlPolicy-${{ inputs.version }}.zip
       - name: Rename AppControlTray zip with tag
         shell: pwsh
         run: |
@@ -77,5 +77,5 @@ jobs:
           name: App Control Tray and Policy Manager ${{ inputs.version }}
           tag_name: ${{ inputs.version }}
           files: |
-            AppControlManager-${{ inputs.version }}.zip
+            AppControlPolicy-${{ inputs.version }}.zip
             AppControlTray-${{ inputs.version }}.zip
