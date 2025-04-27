@@ -13,7 +13,7 @@ Enum _
 	$LIBNOTIF_POS_LL, _
 	$LIBNOTIF_POS_UR, _
 	$LIBNOTIF_POS_UL
-
+#cs
 ; Animations style (passed to AnimateWindow)
 Global Const $AW_ACTIVATE = 0x00020000
 Global Const $AW_BLEND = 0x00080000
@@ -24,7 +24,7 @@ Global Const $AW_HOR_NEGATIVE = 0x00000002
 Global Const $AW_SLIDE = 0x00040000
 Global Const $AW_VER_POSITIVE = 0x00000004
 Global Const $AW_VER_NEGATIVE = 0x00000008
-
+#ce
 Enum _ ; _LibNotif_Config - $iCfgOpt
 	$LIBNOTIF_CFG_TIMEOUT, _        ; default: 0 ms (no timeout)
 	$LIBNOTIF_CFG_CLOSEBUTTON, _    ; default: [*]true
