@@ -4,8 +4,8 @@
 #AutoIt3Wrapper_Icon=AppControl.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Tray Tool
-#AutoIt3Wrapper_Res_Fileversion=5.5.0.0
-#AutoIt3Wrapper_Res_ProductVersion=5.5.0
+#AutoIt3Wrapper_Res_Fileversion=6.0.0.0
+#AutoIt3Wrapper_Res_ProductVersion=6.0.0
 #AutoIt3Wrapper_Res_ProductName=AppControlTrayTool
 #AutoIt3Wrapper_Outfile_x64=AppControlTray.exe
 #AutoIt3Wrapper_Res_LegalCopyright=@ 2025 WildByDesign
@@ -46,7 +46,7 @@ Opt("TrayMenuMode", 3)
 Opt("TrayAutoPause", 0)
 Opt("TrayOnEventMode", 1)
 
-Global $programVersion = "5.5"
+Global $programVersion = "6.0"
 ;Global $softName = "App Control Tray Tool"
 Global $trayIcon = "AppControl.ico"
 Global $idRegTitleKey = "App Control Tray Tool"
@@ -179,12 +179,13 @@ Func policy_changes()
 	Local $dString6 = StringReplace($dString5, "Currently  Active  Policies:", "Currently Active Policies:")
 	Local $dString7 = StringReplace($dString6, "PolicyID  FriendlyName", "Policy ID                             Policy Name")
 	Local $dString8 = StringReplace($dString7, "--------  ------------", "---------                             -----------")
-	Local $dString9 = StringReplace($dString8, "UsermodeCodeIntegrityPolicyEnforcementStatus  :  0", 'App Control user mode policy' & @TAB & ':' & ' Not Configured')
-	Local $dString10 = StringReplace($dString9, "UsermodeCodeIntegrityPolicyEnforcementStatus  :  1", 'App Control user mode policy' & @TAB & ':' & ' Audit Mode')
-	Local $dString11 = StringReplace($dString10, "UsermodeCodeIntegrityPolicyEnforcementStatus  :  2", 'App Control user mode policy' & @TAB & ':' & ' Enforced Mode')
-	Local $dString12 = StringReplace($dString11, "CodeIntegrityPolicyEnforcementStatus  :  0", 'App Control policy' & @TAB & @TAB & ':' & ' Not Configured')
-	Local $dString13 = StringReplace($dString12, "CodeIntegrityPolicyEnforcementStatus  :  1", 'App Control policy' & @TAB & @TAB & ':' & ' Audit Mode')
-	Global $dString14 = StringReplace($dString13, "CodeIntegrityPolicyEnforcementStatus  :  2", 'App Control policy' & @TAB & @TAB & ':' & ' Enforced Mode')
+	Local $dString9 = StringReplace($dString8, "UsermodeCodeIntegrityPolicyEnforcementStatus  :  0", 'User Mode Code Integrity' & @TAB & ':' & ' Not Configured')
+	Local $dString10 = StringReplace($dString9, "UsermodeCodeIntegrityPolicyEnforcementStatus  :  1", 'User Mode Code Integrity' & @TAB & ':' & ' Audit Mode')
+	Local $dString11 = StringReplace($dString10, "UsermodeCodeIntegrityPolicyEnforcementStatus  :  2", 'User Mode Code Integrity' & @TAB & ':' & ' Enforced Mode')
+	Local $dString12 = StringReplace($dString11, "CodeIntegrityPolicyEnforcementStatus  :  0", 'Kernel Mode Code Integrity' & @TAB & ':' & ' Not Configured')
+	Local $dString13 = StringReplace($dString12, "CodeIntegrityPolicyEnforcementStatus  :  1", 'Kernel Mode Code Integrity' & @TAB & ':' & ' Audit Mode')
+	Global $dString14 = StringReplace($dString13, "CodeIntegrityPolicyEnforcementStatus  :  2", 'Kernel Mode Code Integrity' & @TAB & ':' & ' Enforced Mode')
+	;TraySetToolTip($tipTitle & $dString14)
 	TraySetToolTip($tipTitle & $dString14)
 	Local $iAudit = StringInStr($dString14, "Audit Mode")
 	Local $iEnforced = StringInStr($dString14, "Enforced Mode")
@@ -242,9 +243,9 @@ Local $setCWD = True
 If $setCWD Then FileChangeDir(@ScriptDir)
 
 ; Menu
-;Local $idPStest = TrayCreateItem("App Control Policy Status")
-Local $idPStest = TrayCreateItem("App Control Policy Manager")
-TrayItemSetOnEvent(-1, "PStest")
+;Local $idAppControlPolicy = TrayCreateItem("App Control Policy Status")
+Local $idAppControlPolicy = TrayCreateItem("App Control Policy Manager")
+TrayItemSetOnEvent(-1, "AppControlPolicy")
 Local $idCiTool = TrayCreateItem("CiTool Status (-lp)")
 TrayItemSetOnEvent(-1, "CiTool")
 TrayCreateItem("")
@@ -386,9 +387,8 @@ Func StartWithWindows()
     EndIf
 EndFunc
 
-Func PStest()
-	;Run(@ScriptDir & "\AppControlManager.exe")
-	ShellExecute("AppControlManager.exe", "", @ScriptDir)
+Func AppControlPolicy()
+	ShellExecute("AppControlPolicy.exe", "", @ScriptDir)
 EndFunc
 
 TraySetToolTip($tipTitle & $dString14)

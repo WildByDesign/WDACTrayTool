@@ -17,6 +17,7 @@
 #include <MsgBoxConstants.au3>
 #include <String.au3>
 #include <StringConstants.au3>
+#include <APISysConstants.au3>
 #EndRegion
 
 #include "includes\TaskScheduler.au3"
@@ -30,8 +31,8 @@
 #AutoIt3Wrapper_Icon=AppControl.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Task Manager
-#AutoIt3Wrapper_Res_Fileversion=5.5.0.0
-#AutoIt3Wrapper_Res_ProductVersion=5.5.0
+#AutoIt3Wrapper_Res_Fileversion=6.0.0.0
+#AutoIt3Wrapper_Res_ProductVersion=6.0.0
 #AutoIt3Wrapper_Res_ProductName=AppControlTaskManager
 #AutoIt3Wrapper_Outfile_x64=AppControlTask.exe
 #AutoIt3Wrapper_Res_LegalCopyright=@ 2025 WildByDesign
