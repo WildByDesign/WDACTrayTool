@@ -1,3 +1,21 @@
+#NoTrayIcon
+#RequireAdmin
+
+#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
+#AutoIt3Wrapper_Icon=AppControl-App.ico
+#AutoIt3Wrapper_Outfile_x64=AppControlPolicy.exe
+#AutoIt3Wrapper_UseX64=y
+#AutoIt3Wrapper_Res_Description=App Control Policy Manager
+#AutoIt3Wrapper_Res_Fileversion=6.0.1.0
+#AutoIt3Wrapper_Res_ProductName=AppControlPolicyManager
+#AutoIt3Wrapper_Res_ProductVersion=6.0.1
+#AutoIt3Wrapper_Res_LegalCopyright=@ 2025 WildByDesign
+#AutoIt3Wrapper_Res_Language=1033
+#AutoIt3Wrapper_Res_requestedExecutionLevel=requireAdministrator
+#AutoIt3Wrapper_Res_HiDpi=P
+#AutoIt3Wrapper_Res_Icon_Add=AppControl-App.ico
+#EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
+
 ; *** Start added Standard Include files by AutoIt3Wrapper ***
 #include <Array.au3>
 #include <GDIPlus.au3>
@@ -36,26 +54,7 @@
 #include "includes\_GUICtrlListView_SaveCSV.au3"
 #include "includes\libnotif.au3"
 
-#NoTrayIcon
-#RequireAdmin
-
-#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
-#AutoIt3Wrapper_Icon=AppControl-App.ico
-#AutoIt3Wrapper_UseX64=y
-#AutoIt3Wrapper_Res_Description=App Control Policy Manager
-#AutoIt3Wrapper_res_requestedExecutionLevel=requireAdministrator
-#AutoIt3Wrapper_Res_Fileversion=6.0.0.0
-#AutoIt3Wrapper_Res_ProductVersion=6.0.0
-#AutoIt3Wrapper_Res_ProductName=AppControlPolicyManager
-#AutoIt3Wrapper_Outfile_x64=AppControlPolicy.exe
-#AutoIt3Wrapper_Res_LegalCopyright=@ 2025 WildByDesign
-#AutoIt3Wrapper_Res_Language=1033
-#AutoIt3Wrapper_Res_HiDpi=P
-#AutoIt3Wrapper_Res_Icon_Add=AppControl-App.ico
-#EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
-#Region
-
-Global $programversion = "6.0"
+Global $programversion = "6.0.1"
 
 If @Compiled = 0 Then
 	; System aware DPI awareness
@@ -67,7 +66,7 @@ EndIf
 
 isDarkMode()
 Func isDarkMode()
-Global $isDarkMode = _WinAPI_ShouldAppsUseDarkMode()
+	Global $isDarkMode = _WinAPI_ShouldAppsUseDarkMode()
 Endfunc
 
 If $isDarkMode = True Then
@@ -90,7 +89,7 @@ Global Const $SBS_SIZEBOX = 0x08, $SBS_SIZEGRIP = 0x10
 $idLightBk = _WinAPI_SwitchColor(_WinAPI_GetSysColor($COLOR_BTNFACE))
 
 If $isDarkMode = True Then
-	Global $g_iBkColor = 0x202020, $g_iTextColor = 0xe0e0e0
+	Global $g_iBkColor = 0x2c2c2c, $g_iTextColor = 0xffffff
 Else
 	Global $g_iBkColor = $idLightBk, $g_iTextColor = 0x000000
 EndIf
@@ -183,80 +182,80 @@ EndIf
 
 GetPolicyInfo()
 Func GetPolicyInfo()
-If $is24H2 = True Then
-	Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,VersionString,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
-Else
-	Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
-	; Pre-24H2 Simulation using older CiTool
-	;Local $o_CmdString1 = " (.\CiTool\22621\CiTool.exe -lp -json | ConvertFrom-Json).Policies | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
-EndIf
+	If $is24H2 = True Then
+		Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,VersionString,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
+	Else
+		Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
+		; Pre-24H2 Simulation using older CiTool
+		;Local $o_CmdString1 = " (.\CiTool\22621\CiTool.exe -lp -json | ConvertFrom-Json).Policies | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
+	EndIf
 
-Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
-ProcessWaitCloseEx($o_Pid)
-$out = StdoutRead($o_Pid)
-CreatePolicyTable($out)
+	Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
+	ProcessWaitCloseEx($o_Pid)
+	$out = StdoutRead($o_Pid)
+	CreatePolicyTable($out)
 EndFunc
 
 Func GetPolicyEnforced()
-If $is24H2 = True Then
-	Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.IsEnforced -eq 'True'} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,VersionString,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
-Else
-	Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.IsEnforced -eq 'True'} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
-	; Pre-24H2 Simulation using older CiTool
-	;Local $o_CmdString1 = " (.\CiTool\22621\CiTool.exe -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.IsEnforced -eq 'True'} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
-EndIf
+	If $is24H2 = True Then
+		Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.IsEnforced -eq 'True'} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,VersionString,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
+	Else
+		Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.IsEnforced -eq 'True'} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
+		; Pre-24H2 Simulation using older CiTool
+		;Local $o_CmdString1 = " (.\CiTool\22621\CiTool.exe -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.IsEnforced -eq 'True'} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
+	EndIf
 
-Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
-ProcessWaitCloseEx($o_Pid)
-$out = StdoutRead($o_Pid)
+	Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
+	ProcessWaitCloseEx($o_Pid)
+	$out = StdoutRead($o_Pid)
 
-;;;
+	;;;
 
-; Testing in case of parsing issues
+	; Testing in case of parsing issues
 
-;Local Const $sFilePath = @DesktopDir & "\test-output.txt"
-;Local $hFileOpen = FileOpen($sFilePath, $FO_OVERWRITE)
-;FileWrite($hFileOpen, $out)
-;FileClose($hFileOpen)
+	;Local Const $sFilePath = @DesktopDir & "\test-output.txt"
+	;Local $hFileOpen = FileOpen($sFilePath, $FO_OVERWRITE)
+	;FileWrite($hFileOpen, $out)
+	;FileClose($hFileOpen)
 
-;Local Const $sFilePath2 = @DesktopDir & "\test-parsed.txt"
-;Local $hFileOpen2 = FileOpen($sFilePath2, $FO_OVERWRITE)
-;FileWrite($hFileOpen2, $finalparse)
-;FileClose($hFileOpen2)
+	;Local Const $sFilePath2 = @DesktopDir & "\test-parsed.txt"
+	;Local $hFileOpen2 = FileOpen($sFilePath2, $FO_OVERWRITE)
+	;FileWrite($hFileOpen2, $finalparse)
+	;FileClose($hFileOpen2)
 
-;;;
+	;;;
 
-CreatePolicyTable($out)
+	CreatePolicyTable($out)
 EndFunc
 
 Func GetPolicyBase()
-If $is24H2 = True Then
-	Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.PolicyID -eq $_.BasePolicyID} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,VersionString,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property FriendlyName | FL"
-Else
-	Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.PolicyID -eq $_.BasePolicyID} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property FriendlyName | FL"
-	; Pre-24H2 Simulation using older CiTool
-	;Local $o_CmdString1 = " (.\CiTool\22621\CiTool.exe -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.PolicyID -eq $_.BasePolicyID} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property FriendlyName | FL"
-EndIf
+	If $is24H2 = True Then
+		Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.PolicyID -eq $_.BasePolicyID} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,VersionString,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property FriendlyName | FL"
+	Else
+		Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.PolicyID -eq $_.BasePolicyID} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property FriendlyName | FL"
+		; Pre-24H2 Simulation using older CiTool
+		;Local $o_CmdString1 = " (.\CiTool\22621\CiTool.exe -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.PolicyID -eq $_.BasePolicyID} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property FriendlyName | FL"
+	EndIf
 
-Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
-ProcessWaitCloseEx($o_Pid)
-$out = StdoutRead($o_Pid)
-CreatePolicyTable($out)
+	Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
+	ProcessWaitCloseEx($o_Pid)
+	$out = StdoutRead($o_Pid)
+	CreatePolicyTable($out)
 EndFunc
 
 Func GetPolicySupp()
-If $is24H2 = True Then
-	Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.PolicyID -ne $_.BasePolicyID} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,VersionString,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property FriendlyName | FL"
-Else
-	Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.PolicyID -ne $_.BasePolicyID} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property FriendlyName | FL"
-	; Pre-24H2 Simulation using older CiTool
-	;Local $o_CmdString1 = " (.\CiTool\22621\CiTool.exe -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.PolicyID -ne $_.BasePolicyID} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property FriendlyName | FL"
-EndIf
+	If $is24H2 = True Then
+		Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.PolicyID -ne $_.BasePolicyID} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,VersionString,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property FriendlyName | FL"
+	Else
+		Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.PolicyID -ne $_.BasePolicyID} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property FriendlyName | FL"
+		; Pre-24H2 Simulation using older CiTool
+		;Local $o_CmdString1 = " (.\CiTool\22621\CiTool.exe -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.PolicyID -ne $_.BasePolicyID} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property FriendlyName | FL"
+	EndIf
 
-Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
-ProcessWaitCloseEx($o_Pid)
-$out = StdoutRead($o_Pid)
-CreatePolicyTable($out)
+	Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
+	ProcessWaitCloseEx($o_Pid)
+	$out = StdoutRead($o_Pid)
+	CreatePolicyTable($out)
 EndFunc
 
 Func GetPolicySigned()
@@ -269,779 +268,152 @@ Func GetPolicySigned()
 EndFunc
 
 Func GetPolicySystem()
-If $is24H2 = True Then
-	Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.IsSystemPolicy -eq 'True'} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,VersionString,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
-Else
-	Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.IsSystemPolicy -eq 'True'} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
-	; Pre-24H2 Simulation using older CiTool
-	;Local $o_CmdString1 = " (.\CiTool\22621\CiTool.exe -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.IsSystemPolicy -eq 'True'} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
-EndIf
+	If $is24H2 = True Then
+		Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.IsSystemPolicy -eq 'True'} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,VersionString,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
+	Else
+		Local $o_CmdString1 = " (CiTool -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.IsSystemPolicy -eq 'True'} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
+		; Pre-24H2 Simulation using older CiTool
+		;Local $o_CmdString1 = " (.\CiTool\22621\CiTool.exe -lp -json | ConvertFrom-Json).Policies | Where-Object {$_.IsSystemPolicy -eq 'True'} | Select-Object -Property IsEnforced,FriendlyName,PolicyID,BasePolicyID,Version,IsOnDisk,IsSignedPolicy,IsSystemPolicy,IsAuthorized,PolicyOptions | Sort-Object -Descending -Property IsEnforced | Sort-Object -Property BasePolicyID,FriendlyName | FL"
+	EndIf
 
-Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
-ProcessWaitCloseEx($o_Pid)
-$out = StdoutRead($o_Pid)
-CreatePolicyTable($out)
+	Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
+	ProcessWaitCloseEx($o_Pid)
+	$out = StdoutRead($o_Pid)
+	CreatePolicyTable($out)
 EndFunc
 
 Func CreatePolicyTable($out_passed)
+	If $is24H2 = True Then
+
+		Local $string0 = StringStripWS($out_passed, $STR_STRIPSPACES + $STR_STRIPLEADING + $STR_STRIPTRAILING)
+		Local $string1 = StringReplace($string0, "FriendlyName : ", "")
+		Local $string2 = StringReplace($string1, "BasePolicyID : ", "")
+		Local $string3 = StringReplace($string2, "PolicyID : ", "")
+		Local $string4 = StringReplace($string3, "VersionString : ", "")
+		Local $string5 = StringReplace($string4, "IsEnforced : ", "")
+		Local $string6 = StringReplace($string5, "IsOnDisk : ", "")
+		Local $string7 = StringReplace($string6, "IsSignedPolicy : ", "")
+		Local $string8 = StringReplace($string7, "IsSystemPolicy : ", "")
+		Local $string9 = StringReplace($string8, "IsAuthorized : ", "")
+		Local $string10 = StringReplace($string9, "PolicyOptions : ", "")
+		Local $string11 = StringReplace($string10, "[32;1m", "")
+		Local $string12 = StringReplace($string11, "[0m", "")
+		Local $string13 = StringReplace($string12, "{", "")
+		Local $string14 = StringReplace($string13, "}", "")
+		Local $string15 = StringReplace($string14, "Version : ", "")
+		Local $string16 = StringReplace($string15, "...", "")
+		Local $string17 = StringReplace($string16, "Default Policy.", "Default Policy")
+		Local $string18 = StringReplace($string17, "Integrity Policy.", "Integrity Policy")
+		Local $string19 = StringReplace($string18, "Supplemental Policies.", "Supplemental Policies")
+		Local $string20 = StringReplace($string19, "Code Trust.", "Code Trust")
+		Local $string21 = StringReplace($string20, "Rule Protection.", "Rule Protection")
+		Local $finalparse = $string21
+
+	Else
+
+		;Local $string0 = StringStripWS($out_passed, $STR_STRIPSPACES + $STR_STRIPLEADING + $STR_STRIPTRAILING)
+		Local $string0 = StringStripWS($out_passed, $STR_STRIPLEADING + $STR_STRIPTRAILING)
+		Local $string1 = StringReplace($string0, "FriendlyName   : ", "")
+		Local $string2 = StringReplace($string1, "BasePolicyID   : ", "")
+		Local $string3 = StringReplace($string2, "PolicyID       : ", "")
+		Local $string4 = StringReplace($string3, "VersionString  : ", "*")
+		Local $string5 = StringReplace($string4, "IsEnforced     : ", "")
+		Local $string6 = StringReplace($string5, "IsOnDisk       : ", "")
+		Local $string7 = StringReplace($string6, "IsSignedPolicy : ", "*")
+		Local $string8 = StringReplace($string7, "IsSystemPolicy : ", "")
+		Local $string9 = StringReplace($string8, "IsAuthorized   : ", "")
+		Local $string10 = StringReplace($string9, "PolicyOptions  : ", "*")
+		Local $string11 = StringReplace($string10, "[32;1m", "")
+		Local $string12 = StringReplace($string11, "[0m", "")
+		Local $string13 = StringReplace($string12, "{", "")
+		Local $string14 = StringReplace($string13, "}", "")
+		Local $string15 = StringReplace($string14, "Version        : ", "")
+		Local $string16 = StringStripWS($string15, $STR_STRIPSPACES)
+		Local $string17 = StringReplace($string16, "PolicyOptions :", "*")
+		Local $string18 = StringReplace($string17, "...", "")
+		Local $string19 = StringReplace($string18, "Default Policy.", "Default Policy")
+		Local $string20 = StringReplace($string19, "Integrity Policy.", "Integrity Policy")
+		Local $string21 = StringReplace($string20, "Supplemental Policies.", "Supplemental Policies")
+		Local $string22 = StringReplace($string21, "Code Trust.", "Code Trust")
+		Local $string23 = StringReplace($string22, "Rule Protection.", "Rule Protection")
+		Local $finalparse = $string23
+
+	EndIf
+
+
+	;MsgBox($MB_SYSTEMMODAL, "Title", "Final parse = " & $finalparse)
+
+	;;;
+
+	; Testing in case of parsing issues
+
+	;Local Const $sFilePath = @DesktopDir & "\test-output.txt"
+	;Local $hFileOpen = FileOpen($sFilePath, $FO_OVERWRITE)
+	;FileWrite($hFileOpen, $out_passed)
+	;FileClose($hFileOpen)
+
+	;Local Const $sFilePath2 = @DesktopDir & "\test-parsed.txt"
+	;Local $hFileOpen2 = FileOpen($sFilePath2, $FO_OVERWRITE)
+	;FileWrite($hFileOpen2, $finalparse)
+	;FileClose($hFileOpen2)
+
+	;;;
+
+	If $finalparse = "" Then
+		Global $policycount = 0
+	Else
+		$arpol = stringsplit($finalparse, @CR , 0)
+
+		;_ArrayDisplay($arpol, "test")
+
+		Global $policyoutput = UBound ($arpol, $UBOUND_ROWS)
+		Global $policycorrect = $policyoutput - 1
+		Global $policycount = $policycorrect / 10
+	EndIf
+
+	; create policy array (pixelsearch)
+	; support more policies by increasing $policycount <= 64
+	Select
+		Case $policycount = 0
+			Global $aWords[1][11]
+		Case IsInt($policycount) And $policycount >= 1 And $policycount <= 64
+			Global $aWords[$policycount][11]
+			For $i = 0 To $policycount - 1
+				For $j = 1 To 10
+					$aWords[$i][$j] = $arpol[$i*10 + $j]
+				Next
+			Next
+		Case Else
+			Global $aWords[1][11] = [["", "Error:", "Error " & $policycorrect & " &" & " Error " & $policycount, "", "", "", "", "", "", "", ""]]
+	EndSelect
 
-If $is24H2 = True Then
 
-	Local $string0 = StringStripWS($out_passed, $STR_STRIPSPACES + $STR_STRIPLEADING + $STR_STRIPTRAILING)
-	Local $string1 = StringReplace($string0, "FriendlyName : ", "")
-	Local $string2 = StringReplace($string1, "BasePolicyID : ", "")
-	Local $string3 = StringReplace($string2, "PolicyID : ", "")
-	Local $string4 = StringReplace($string3, "VersionString : ", "")
-	Local $string5 = StringReplace($string4, "IsEnforced : ", "")
-	Local $string6 = StringReplace($string5, "IsOnDisk : ", "")
-	Local $string7 = StringReplace($string6, "IsSignedPolicy : ", "")
-	Local $string8 = StringReplace($string7, "IsSystemPolicy : ", "")
-	Local $string9 = StringReplace($string8, "IsAuthorized : ", "")
-	Local $string10 = StringReplace($string9, "PolicyOptions : ", "")
-	Local $string11 = StringReplace($string10, "[32;1m", "")
-	Local $string12 = StringReplace($string11, "[0m", "")
-	Local $string13 = StringReplace($string12, "{", "")
-	Local $string14 = StringReplace($string13, "}", "")
-	Local $string15 = StringReplace($string14, "Version : ", "")
-	Local $string16 = StringReplace($string15, "...", "")
-	Local $string17 = StringReplace($string16, "Default Policy.", "Default Policy")
-	Local $string18 = StringReplace($string17, "Integrity Policy.", "Integrity Policy")
-	Local $string19 = StringReplace($string18, "Supplemental Policies.", "Supplemental Policies")
-	Local $string20 = StringReplace($string19, "Code Trust.", "Code Trust")
-	Local $string21 = StringReplace($string20, "Rule Protection.", "Rule Protection")
-	Local $finalparse = $string21
+	If $is24H2 = False Then
+		For $i = 0 To UBound($aWords) -1
+			$iVersion = $aWords[$i][5]
+			Local $tUInt64  = DllStructCreate("uint64 value;"), _
+				$tVersion = DllStructCreate("word revision; word build; word minor; word major", DllStructGetPtr($tUInt64))
 
-Else
+			$tUInt64.value = $iVersion
 
-	;Local $string0 = StringStripWS($out_passed, $STR_STRIPSPACES + $STR_STRIPLEADING + $STR_STRIPTRAILING)
-	Local $string0 = StringStripWS($out_passed, $STR_STRIPLEADING + $STR_STRIPTRAILING)
-	Local $string1 = StringReplace($string0, "FriendlyName   : ", "")
-	Local $string2 = StringReplace($string1, "BasePolicyID   : ", "")
-	Local $string3 = StringReplace($string2, "PolicyID       : ", "")
-	Local $string4 = StringReplace($string3, "VersionString  : ", "*")
-	Local $string5 = StringReplace($string4, "IsEnforced     : ", "")
-	Local $string6 = StringReplace($string5, "IsOnDisk       : ", "")
-	Local $string7 = StringReplace($string6, "IsSignedPolicy : ", "*")
-	Local $string8 = StringReplace($string7, "IsSystemPolicy : ", "")
-	Local $string9 = StringReplace($string8, "IsAuthorized   : ", "")
-	Local $string10 = StringReplace($string9, "PolicyOptions  : ", "*")
-	Local $string11 = StringReplace($string10, "[32;1m", "")
-	Local $string12 = StringReplace($string11, "[0m", "")
-	Local $string13 = StringReplace($string12, "{", "")
-	Local $string14 = StringReplace($string13, "}", "")
-	Local $string15 = StringReplace($string14, "Version        : ", "")
-	Local $string16 = StringStripWS($string15, $STR_STRIPSPACES)
-	Local $string17 = StringReplace($string16, "PolicyOptions :", "*")
-	Local $string18 = StringReplace($string17, "...", "")
-	Local $string19 = StringReplace($string18, "Default Policy.", "Default Policy")
-	Local $string20 = StringReplace($string19, "Integrity Policy.", "Integrity Policy")
-	Local $string21 = StringReplace($string20, "Supplemental Policies.", "Supplemental Policies")
-	Local $string22 = StringReplace($string21, "Code Trust.", "Code Trust")
-	Local $string23 = StringReplace($string22, "Rule Protection.", "Rule Protection")
-	Local $finalparse = $string23
+			Local $iVersionString = StringFormat('%i.%i.%i.%i', $tVersion.major, $tVersion.minor, $tVersion.build, $tVersion.revision)
 
-EndIf
-
-
-;MsgBox($MB_SYSTEMMODAL, "Title", "Final parse = " & $finalparse)
-
-;;;
-
-; Testing in case of parsing issues
-
-;Local Const $sFilePath = @DesktopDir & "\test-output.txt"
-;Local $hFileOpen = FileOpen($sFilePath, $FO_OVERWRITE)
-;FileWrite($hFileOpen, $out_passed)
-;FileClose($hFileOpen)
-
-;Local Const $sFilePath2 = @DesktopDir & "\test-parsed.txt"
-;Local $hFileOpen2 = FileOpen($sFilePath2, $FO_OVERWRITE)
-;FileWrite($hFileOpen2, $finalparse)
-;FileClose($hFileOpen2)
-
-;;;
-
-If $finalparse = "" Then
-Global $policycount = 0
-Else
-
-$arpol = stringsplit($finalparse, @CR , 0)
-
-;_ArrayDisplay($arpol, "test")
-
-Global $policyoutput = UBound ($arpol, $UBOUND_ROWS)
-Global $policycorrect = $policyoutput - 1
-Global $policycount = $policycorrect / 10
-
-EndIf
-
-If $policycount = 0 Then
-Global $aWords[1][11] = [["", "", "", "", "", "", "", "", "", "", ""]]
-
-
-ElseIf $policycount = 1 Then
-Global $aWords[1][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]]]
-
-
-ElseIf $policycount = 2 Then
-Global $aWords[2][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]]]
-
-
-ElseIf $policycount = 3 Then
-Global $aWords[3][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]]]
-
-
-ElseIf $policycount = 4 Then
-Global $aWords[4][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]]]
-
-
-ElseIf $policycount = 5 Then
-Global $aWords[5][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]] _
-		, ["", $arpol[41], $arpol[42], $arpol[43], $arpol[44], $arpol[45], $arpol[46], $arpol[47], $arpol[48], $arpol[49], $arpol[50]]]
-
-
-ElseIf $policycount = 6 Then
-Global $aWords[6][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]] _
-		, ["", $arpol[41], $arpol[42], $arpol[43], $arpol[44], $arpol[45], $arpol[46], $arpol[47], $arpol[48], $arpol[49], $arpol[50]] _
-		, ["", $arpol[51], $arpol[52], $arpol[53], $arpol[54], $arpol[55], $arpol[56], $arpol[57], $arpol[58], $arpol[59], $arpol[60]]]
-
-
-ElseIf $policycount = 7 Then
-Global $aWords[7][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]] _
-		, ["", $arpol[41], $arpol[42], $arpol[43], $arpol[44], $arpol[45], $arpol[46], $arpol[47], $arpol[48], $arpol[49], $arpol[50]] _
-		, ["", $arpol[51], $arpol[52], $arpol[53], $arpol[54], $arpol[55], $arpol[56], $arpol[57], $arpol[58], $arpol[59], $arpol[60]] _
-		, ["", $arpol[61], $arpol[62], $arpol[63], $arpol[64], $arpol[65], $arpol[66], $arpol[67], $arpol[68], $arpol[69], $arpol[70]]]
-
-
-ElseIf $policycount = 8 Then
-Global $aWords[8][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]] _
-		, ["", $arpol[41], $arpol[42], $arpol[43], $arpol[44], $arpol[45], $arpol[46], $arpol[47], $arpol[48], $arpol[49], $arpol[50]] _
-		, ["", $arpol[51], $arpol[52], $arpol[53], $arpol[54], $arpol[55], $arpol[56], $arpol[57], $arpol[58], $arpol[59], $arpol[60]] _
-		, ["", $arpol[61], $arpol[62], $arpol[63], $arpol[64], $arpol[65], $arpol[66], $arpol[67], $arpol[68], $arpol[69], $arpol[70]] _
-		, ["", $arpol[71], $arpol[72], $arpol[73], $arpol[74], $arpol[75], $arpol[76], $arpol[77], $arpol[78], $arpol[79], $arpol[80]]]
-
-
-ElseIf $policycount = 9 Then
-Global $aWords[9][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]] _
-		, ["", $arpol[41], $arpol[42], $arpol[43], $arpol[44], $arpol[45], $arpol[46], $arpol[47], $arpol[48], $arpol[49], $arpol[50]] _
-		, ["", $arpol[51], $arpol[52], $arpol[53], $arpol[54], $arpol[55], $arpol[56], $arpol[57], $arpol[58], $arpol[59], $arpol[60]] _
-		, ["", $arpol[61], $arpol[62], $arpol[63], $arpol[64], $arpol[65], $arpol[66], $arpol[67], $arpol[68], $arpol[69], $arpol[70]] _
-		, ["", $arpol[71], $arpol[72], $arpol[73], $arpol[74], $arpol[75], $arpol[76], $arpol[77], $arpol[78], $arpol[79], $arpol[80]] _
-		, ["", $arpol[81], $arpol[82], $arpol[83], $arpol[84], $arpol[85], $arpol[86], $arpol[87], $arpol[88], $arpol[89], $arpol[90]]]
-
-
-ElseIf $policycount = 10 Then
-Global $aWords[10][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]] _
-		, ["", $arpol[41], $arpol[42], $arpol[43], $arpol[44], $arpol[45], $arpol[46], $arpol[47], $arpol[48], $arpol[49], $arpol[50]] _
-		, ["", $arpol[51], $arpol[52], $arpol[53], $arpol[54], $arpol[55], $arpol[56], $arpol[57], $arpol[58], $arpol[59], $arpol[60]] _
-		, ["", $arpol[61], $arpol[62], $arpol[63], $arpol[64], $arpol[65], $arpol[66], $arpol[67], $arpol[68], $arpol[69], $arpol[70]] _
-		, ["", $arpol[71], $arpol[72], $arpol[73], $arpol[74], $arpol[75], $arpol[76], $arpol[77], $arpol[78], $arpol[79], $arpol[80]] _
-		, ["", $arpol[81], $arpol[82], $arpol[83], $arpol[84], $arpol[85], $arpol[86], $arpol[87], $arpol[88], $arpol[89], $arpol[90]] _
-		, ["", $arpol[91], $arpol[92], $arpol[93], $arpol[94], $arpol[95], $arpol[96], $arpol[97], $arpol[98], $arpol[99], $arpol[100]]]
-
-
-ElseIf $policycount = 11 Then
-Global $aWords[11][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]] _
-		, ["", $arpol[41], $arpol[42], $arpol[43], $arpol[44], $arpol[45], $arpol[46], $arpol[47], $arpol[48], $arpol[49], $arpol[50]] _
-		, ["", $arpol[51], $arpol[52], $arpol[53], $arpol[54], $arpol[55], $arpol[56], $arpol[57], $arpol[58], $arpol[59], $arpol[60]] _
-		, ["", $arpol[61], $arpol[62], $arpol[63], $arpol[64], $arpol[65], $arpol[66], $arpol[67], $arpol[68], $arpol[69], $arpol[70]] _
-		, ["", $arpol[71], $arpol[72], $arpol[73], $arpol[74], $arpol[75], $arpol[76], $arpol[77], $arpol[78], $arpol[79], $arpol[80]] _
-		, ["", $arpol[81], $arpol[82], $arpol[83], $arpol[84], $arpol[85], $arpol[86], $arpol[87], $arpol[88], $arpol[89], $arpol[90]] _
-		, ["", $arpol[91], $arpol[92], $arpol[93], $arpol[94], $arpol[95], $arpol[96], $arpol[97], $arpol[98], $arpol[99], $arpol[100]] _
-		, ["", $arpol[101], $arpol[102], $arpol[103], $arpol[104], $arpol[105], $arpol[106], $arpol[107], $arpol[108], $arpol[109], $arpol[110]]]
-
-
-ElseIf $policycount = 12 Then
-Global $aWords[12][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]] _
-		, ["", $arpol[41], $arpol[42], $arpol[43], $arpol[44], $arpol[45], $arpol[46], $arpol[47], $arpol[48], $arpol[49], $arpol[50]] _
-		, ["", $arpol[51], $arpol[52], $arpol[53], $arpol[54], $arpol[55], $arpol[56], $arpol[57], $arpol[58], $arpol[59], $arpol[60]] _
-		, ["", $arpol[61], $arpol[62], $arpol[63], $arpol[64], $arpol[65], $arpol[66], $arpol[67], $arpol[68], $arpol[69], $arpol[70]] _
-		, ["", $arpol[71], $arpol[72], $arpol[73], $arpol[74], $arpol[75], $arpol[76], $arpol[77], $arpol[78], $arpol[79], $arpol[80]] _
-		, ["", $arpol[81], $arpol[82], $arpol[83], $arpol[84], $arpol[85], $arpol[86], $arpol[87], $arpol[88], $arpol[89], $arpol[90]] _
-		, ["", $arpol[91], $arpol[92], $arpol[93], $arpol[94], $arpol[95], $arpol[96], $arpol[97], $arpol[98], $arpol[99], $arpol[100]] _
-		, ["", $arpol[101], $arpol[102], $arpol[103], $arpol[104], $arpol[105], $arpol[106], $arpol[107], $arpol[108], $arpol[109], $arpol[110]] _
-		, ["", $arpol[111], $arpol[112], $arpol[113], $arpol[114], $arpol[115], $arpol[116], $arpol[117], $arpol[118], $arpol[119], $arpol[120]]]
-
-
-ElseIf $policycount = 13 Then
-Global $aWords[13][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]] _
-		, ["", $arpol[41], $arpol[42], $arpol[43], $arpol[44], $arpol[45], $arpol[46], $arpol[47], $arpol[48], $arpol[49], $arpol[50]] _
-		, ["", $arpol[51], $arpol[52], $arpol[53], $arpol[54], $arpol[55], $arpol[56], $arpol[57], $arpol[58], $arpol[59], $arpol[60]] _
-		, ["", $arpol[61], $arpol[62], $arpol[63], $arpol[64], $arpol[65], $arpol[66], $arpol[67], $arpol[68], $arpol[69], $arpol[70]] _
-		, ["", $arpol[71], $arpol[72], $arpol[73], $arpol[74], $arpol[75], $arpol[76], $arpol[77], $arpol[78], $arpol[79], $arpol[80]] _
-		, ["", $arpol[81], $arpol[82], $arpol[83], $arpol[84], $arpol[85], $arpol[86], $arpol[87], $arpol[88], $arpol[89], $arpol[90]] _
-		, ["", $arpol[91], $arpol[92], $arpol[93], $arpol[94], $arpol[95], $arpol[96], $arpol[97], $arpol[98], $arpol[99], $arpol[100]] _
-		, ["", $arpol[101], $arpol[102], $arpol[103], $arpol[104], $arpol[105], $arpol[106], $arpol[107], $arpol[108], $arpol[109], $arpol[110]] _
-		, ["", $arpol[111], $arpol[112], $arpol[113], $arpol[114], $arpol[115], $arpol[116], $arpol[117], $arpol[118], $arpol[119], $arpol[120]] _
-		, ["", $arpol[121], $arpol[122], $arpol[123], $arpol[124], $arpol[125], $arpol[126], $arpol[127], $arpol[128], $arpol[129], $arpol[130]]]
-
-
-ElseIf $policycount = 14 Then
-Global $aWords[14][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]] _
-		, ["", $arpol[41], $arpol[42], $arpol[43], $arpol[44], $arpol[45], $arpol[46], $arpol[47], $arpol[48], $arpol[49], $arpol[50]] _
-		, ["", $arpol[51], $arpol[52], $arpol[53], $arpol[54], $arpol[55], $arpol[56], $arpol[57], $arpol[58], $arpol[59], $arpol[60]] _
-		, ["", $arpol[61], $arpol[62], $arpol[63], $arpol[64], $arpol[65], $arpol[66], $arpol[67], $arpol[68], $arpol[69], $arpol[70]] _
-		, ["", $arpol[71], $arpol[72], $arpol[73], $arpol[74], $arpol[75], $arpol[76], $arpol[77], $arpol[78], $arpol[79], $arpol[80]] _
-		, ["", $arpol[81], $arpol[82], $arpol[83], $arpol[84], $arpol[85], $arpol[86], $arpol[87], $arpol[88], $arpol[89], $arpol[90]] _
-		, ["", $arpol[91], $arpol[92], $arpol[93], $arpol[94], $arpol[95], $arpol[96], $arpol[97], $arpol[98], $arpol[99], $arpol[100]] _
-		, ["", $arpol[101], $arpol[102], $arpol[103], $arpol[104], $arpol[105], $arpol[106], $arpol[107], $arpol[108], $arpol[109], $arpol[110]] _
-		, ["", $arpol[111], $arpol[112], $arpol[113], $arpol[114], $arpol[115], $arpol[116], $arpol[117], $arpol[118], $arpol[119], $arpol[120]] _
-		, ["", $arpol[121], $arpol[122], $arpol[123], $arpol[124], $arpol[125], $arpol[126], $arpol[127], $arpol[128], $arpol[129], $arpol[130]] _
-		, ["", $arpol[131], $arpol[132], $arpol[133], $arpol[134], $arpol[135], $arpol[136], $arpol[137], $arpol[138], $arpol[139], $arpol[140]]]
-
-
-ElseIf $policycount = 15 Then
-Global $aWords[15][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]] _
-		, ["", $arpol[41], $arpol[42], $arpol[43], $arpol[44], $arpol[45], $arpol[46], $arpol[47], $arpol[48], $arpol[49], $arpol[50]] _
-		, ["", $arpol[51], $arpol[52], $arpol[53], $arpol[54], $arpol[55], $arpol[56], $arpol[57], $arpol[58], $arpol[59], $arpol[60]] _
-		, ["", $arpol[61], $arpol[62], $arpol[63], $arpol[64], $arpol[65], $arpol[66], $arpol[67], $arpol[68], $arpol[69], $arpol[70]] _
-		, ["", $arpol[71], $arpol[72], $arpol[73], $arpol[74], $arpol[75], $arpol[76], $arpol[77], $arpol[78], $arpol[79], $arpol[80]] _
-		, ["", $arpol[81], $arpol[82], $arpol[83], $arpol[84], $arpol[85], $arpol[86], $arpol[87], $arpol[88], $arpol[89], $arpol[90]] _
-		, ["", $arpol[91], $arpol[92], $arpol[93], $arpol[94], $arpol[95], $arpol[96], $arpol[97], $arpol[98], $arpol[99], $arpol[100]] _
-		, ["", $arpol[101], $arpol[102], $arpol[103], $arpol[104], $arpol[105], $arpol[106], $arpol[107], $arpol[108], $arpol[109], $arpol[110]] _
-		, ["", $arpol[111], $arpol[112], $arpol[113], $arpol[114], $arpol[115], $arpol[116], $arpol[117], $arpol[118], $arpol[119], $arpol[120]] _
-		, ["", $arpol[121], $arpol[122], $arpol[123], $arpol[124], $arpol[125], $arpol[126], $arpol[127], $arpol[128], $arpol[129], $arpol[130]] _
-		, ["", $arpol[131], $arpol[132], $arpol[133], $arpol[134], $arpol[135], $arpol[136], $arpol[137], $arpol[138], $arpol[139], $arpol[140]] _
-		, ["", $arpol[141], $arpol[142], $arpol[143], $arpol[144], $arpol[145], $arpol[146], $arpol[147], $arpol[148], $arpol[149], $arpol[150]]]
-
-
-ElseIf $policycount = 16 Then
-Global $aWords[16][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]] _
-		, ["", $arpol[41], $arpol[42], $arpol[43], $arpol[44], $arpol[45], $arpol[46], $arpol[47], $arpol[48], $arpol[49], $arpol[50]] _
-		, ["", $arpol[51], $arpol[52], $arpol[53], $arpol[54], $arpol[55], $arpol[56], $arpol[57], $arpol[58], $arpol[59], $arpol[60]] _
-		, ["", $arpol[61], $arpol[62], $arpol[63], $arpol[64], $arpol[65], $arpol[66], $arpol[67], $arpol[68], $arpol[69], $arpol[70]] _
-		, ["", $arpol[71], $arpol[72], $arpol[73], $arpol[74], $arpol[75], $arpol[76], $arpol[77], $arpol[78], $arpol[79], $arpol[80]] _
-		, ["", $arpol[81], $arpol[82], $arpol[83], $arpol[84], $arpol[85], $arpol[86], $arpol[87], $arpol[88], $arpol[89], $arpol[90]] _
-		, ["", $arpol[91], $arpol[92], $arpol[93], $arpol[94], $arpol[95], $arpol[96], $arpol[97], $arpol[98], $arpol[99], $arpol[100]] _
-		, ["", $arpol[101], $arpol[102], $arpol[103], $arpol[104], $arpol[105], $arpol[106], $arpol[107], $arpol[108], $arpol[109], $arpol[110]] _
-		, ["", $arpol[111], $arpol[112], $arpol[113], $arpol[114], $arpol[115], $arpol[116], $arpol[117], $arpol[118], $arpol[119], $arpol[120]] _
-		, ["", $arpol[121], $arpol[122], $arpol[123], $arpol[124], $arpol[125], $arpol[126], $arpol[127], $arpol[128], $arpol[129], $arpol[130]] _
-		, ["", $arpol[131], $arpol[132], $arpol[133], $arpol[134], $arpol[135], $arpol[136], $arpol[137], $arpol[138], $arpol[139], $arpol[140]] _
-		, ["", $arpol[141], $arpol[142], $arpol[143], $arpol[144], $arpol[145], $arpol[146], $arpol[147], $arpol[148], $arpol[149], $arpol[150]] _
-		, ["", $arpol[151], $arpol[152], $arpol[153], $arpol[154], $arpol[155], $arpol[156], $arpol[157], $arpol[158], $arpol[159], $arpol[160]]]
-
-
-ElseIf $policycount = 17 Then
-Global $aWords[17][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]] _
-		, ["", $arpol[41], $arpol[42], $arpol[43], $arpol[44], $arpol[45], $arpol[46], $arpol[47], $arpol[48], $arpol[49], $arpol[50]] _
-		, ["", $arpol[51], $arpol[52], $arpol[53], $arpol[54], $arpol[55], $arpol[56], $arpol[57], $arpol[58], $arpol[59], $arpol[60]] _
-		, ["", $arpol[61], $arpol[62], $arpol[63], $arpol[64], $arpol[65], $arpol[66], $arpol[67], $arpol[68], $arpol[69], $arpol[70]] _
-		, ["", $arpol[71], $arpol[72], $arpol[73], $arpol[74], $arpol[75], $arpol[76], $arpol[77], $arpol[78], $arpol[79], $arpol[80]] _
-		, ["", $arpol[81], $arpol[82], $arpol[83], $arpol[84], $arpol[85], $arpol[86], $arpol[87], $arpol[88], $arpol[89], $arpol[90]] _
-		, ["", $arpol[91], $arpol[92], $arpol[93], $arpol[94], $arpol[95], $arpol[96], $arpol[97], $arpol[98], $arpol[99], $arpol[100]] _
-		, ["", $arpol[101], $arpol[102], $arpol[103], $arpol[104], $arpol[105], $arpol[106], $arpol[107], $arpol[108], $arpol[109], $arpol[110]] _
-		, ["", $arpol[111], $arpol[112], $arpol[113], $arpol[114], $arpol[115], $arpol[116], $arpol[117], $arpol[118], $arpol[119], $arpol[120]] _
-		, ["", $arpol[121], $arpol[122], $arpol[123], $arpol[124], $arpol[125], $arpol[126], $arpol[127], $arpol[128], $arpol[129], $arpol[130]] _
-		, ["", $arpol[131], $arpol[132], $arpol[133], $arpol[134], $arpol[135], $arpol[136], $arpol[137], $arpol[138], $arpol[139], $arpol[140]] _
-		, ["", $arpol[141], $arpol[142], $arpol[143], $arpol[144], $arpol[145], $arpol[146], $arpol[147], $arpol[148], $arpol[149], $arpol[150]] _
-		, ["", $arpol[151], $arpol[152], $arpol[153], $arpol[154], $arpol[155], $arpol[156], $arpol[157], $arpol[158], $arpol[159], $arpol[160]] _
-		, ["", $arpol[161], $arpol[162], $arpol[163], $arpol[164], $arpol[165], $arpol[166], $arpol[167], $arpol[168], $arpol[169], $arpol[170]]]
-
-
-ElseIf $policycount = 18 Then
-Global $aWords[18][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]] _
-		, ["", $arpol[41], $arpol[42], $arpol[43], $arpol[44], $arpol[45], $arpol[46], $arpol[47], $arpol[48], $arpol[49], $arpol[50]] _
-		, ["", $arpol[51], $arpol[52], $arpol[53], $arpol[54], $arpol[55], $arpol[56], $arpol[57], $arpol[58], $arpol[59], $arpol[60]] _
-		, ["", $arpol[61], $arpol[62], $arpol[63], $arpol[64], $arpol[65], $arpol[66], $arpol[67], $arpol[68], $arpol[69], $arpol[70]] _
-		, ["", $arpol[71], $arpol[72], $arpol[73], $arpol[74], $arpol[75], $arpol[76], $arpol[77], $arpol[78], $arpol[79], $arpol[80]] _
-		, ["", $arpol[81], $arpol[82], $arpol[83], $arpol[84], $arpol[85], $arpol[86], $arpol[87], $arpol[88], $arpol[89], $arpol[90]] _
-		, ["", $arpol[91], $arpol[92], $arpol[93], $arpol[94], $arpol[95], $arpol[96], $arpol[97], $arpol[98], $arpol[99], $arpol[100]] _
-		, ["", $arpol[101], $arpol[102], $arpol[103], $arpol[104], $arpol[105], $arpol[106], $arpol[107], $arpol[108], $arpol[109], $arpol[110]] _
-		, ["", $arpol[111], $arpol[112], $arpol[113], $arpol[114], $arpol[115], $arpol[116], $arpol[117], $arpol[118], $arpol[119], $arpol[120]] _
-		, ["", $arpol[121], $arpol[122], $arpol[123], $arpol[124], $arpol[125], $arpol[126], $arpol[127], $arpol[128], $arpol[129], $arpol[130]] _
-		, ["", $arpol[131], $arpol[132], $arpol[133], $arpol[134], $arpol[135], $arpol[136], $arpol[137], $arpol[138], $arpol[139], $arpol[140]] _
-		, ["", $arpol[141], $arpol[142], $arpol[143], $arpol[144], $arpol[145], $arpol[146], $arpol[147], $arpol[148], $arpol[149], $arpol[150]] _
-		, ["", $arpol[151], $arpol[152], $arpol[153], $arpol[154], $arpol[155], $arpol[156], $arpol[157], $arpol[158], $arpol[159], $arpol[160]] _
-		, ["", $arpol[161], $arpol[162], $arpol[163], $arpol[164], $arpol[165], $arpol[166], $arpol[167], $arpol[168], $arpol[169], $arpol[170]] _
-		, ["", $arpol[171], $arpol[172], $arpol[173], $arpol[174], $arpol[175], $arpol[176], $arpol[177], $arpol[178], $arpol[179], $arpol[180]]]
-
-
-ElseIf $policycount = 19 Then
-Global $aWords[19][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]] _
-		, ["", $arpol[41], $arpol[42], $arpol[43], $arpol[44], $arpol[45], $arpol[46], $arpol[47], $arpol[48], $arpol[49], $arpol[50]] _
-		, ["", $arpol[51], $arpol[52], $arpol[53], $arpol[54], $arpol[55], $arpol[56], $arpol[57], $arpol[58], $arpol[59], $arpol[60]] _
-		, ["", $arpol[61], $arpol[62], $arpol[63], $arpol[64], $arpol[65], $arpol[66], $arpol[67], $arpol[68], $arpol[69], $arpol[70]] _
-		, ["", $arpol[71], $arpol[72], $arpol[73], $arpol[74], $arpol[75], $arpol[76], $arpol[77], $arpol[78], $arpol[79], $arpol[80]] _
-		, ["", $arpol[81], $arpol[82], $arpol[83], $arpol[84], $arpol[85], $arpol[86], $arpol[87], $arpol[88], $arpol[89], $arpol[90]] _
-		, ["", $arpol[91], $arpol[92], $arpol[93], $arpol[94], $arpol[95], $arpol[96], $arpol[97], $arpol[98], $arpol[99], $arpol[100]] _
-		, ["", $arpol[101], $arpol[102], $arpol[103], $arpol[104], $arpol[105], $arpol[106], $arpol[107], $arpol[108], $arpol[109], $arpol[110]] _
-		, ["", $arpol[111], $arpol[112], $arpol[113], $arpol[114], $arpol[115], $arpol[116], $arpol[117], $arpol[118], $arpol[119], $arpol[120]] _
-		, ["", $arpol[121], $arpol[122], $arpol[123], $arpol[124], $arpol[125], $arpol[126], $arpol[127], $arpol[128], $arpol[129], $arpol[130]] _
-		, ["", $arpol[131], $arpol[132], $arpol[133], $arpol[134], $arpol[135], $arpol[136], $arpol[137], $arpol[138], $arpol[139], $arpol[140]] _
-		, ["", $arpol[141], $arpol[142], $arpol[143], $arpol[144], $arpol[145], $arpol[146], $arpol[147], $arpol[148], $arpol[149], $arpol[150]] _
-		, ["", $arpol[151], $arpol[152], $arpol[153], $arpol[154], $arpol[155], $arpol[156], $arpol[157], $arpol[158], $arpol[159], $arpol[160]] _
-		, ["", $arpol[161], $arpol[162], $arpol[163], $arpol[164], $arpol[165], $arpol[166], $arpol[167], $arpol[168], $arpol[169], $arpol[170]] _
-		, ["", $arpol[171], $arpol[172], $arpol[173], $arpol[174], $arpol[175], $arpol[176], $arpol[177], $arpol[178], $arpol[179], $arpol[180]] _
-		, ["", $arpol[181], $arpol[182], $arpol[183], $arpol[184], $arpol[185], $arpol[186], $arpol[187], $arpol[188], $arpol[189], $arpol[190]]]
-
-
-ElseIf $policycount = 20 Then
-Global $aWords[20][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]] _
-		, ["", $arpol[41], $arpol[42], $arpol[43], $arpol[44], $arpol[45], $arpol[46], $arpol[47], $arpol[48], $arpol[49], $arpol[50]] _
-		, ["", $arpol[51], $arpol[52], $arpol[53], $arpol[54], $arpol[55], $arpol[56], $arpol[57], $arpol[58], $arpol[59], $arpol[60]] _
-		, ["", $arpol[61], $arpol[62], $arpol[63], $arpol[64], $arpol[65], $arpol[66], $arpol[67], $arpol[68], $arpol[69], $arpol[70]] _
-		, ["", $arpol[71], $arpol[72], $arpol[73], $arpol[74], $arpol[75], $arpol[76], $arpol[77], $arpol[78], $arpol[79], $arpol[80]] _
-		, ["", $arpol[81], $arpol[82], $arpol[83], $arpol[84], $arpol[85], $arpol[86], $arpol[87], $arpol[88], $arpol[89], $arpol[90]] _
-		, ["", $arpol[91], $arpol[92], $arpol[93], $arpol[94], $arpol[95], $arpol[96], $arpol[97], $arpol[98], $arpol[99], $arpol[100]] _
-		, ["", $arpol[101], $arpol[102], $arpol[103], $arpol[104], $arpol[105], $arpol[106], $arpol[107], $arpol[108], $arpol[109], $arpol[110]] _
-		, ["", $arpol[111], $arpol[112], $arpol[113], $arpol[114], $arpol[115], $arpol[116], $arpol[117], $arpol[118], $arpol[119], $arpol[120]] _
-		, ["", $arpol[121], $arpol[122], $arpol[123], $arpol[124], $arpol[125], $arpol[126], $arpol[127], $arpol[128], $arpol[129], $arpol[130]] _
-		, ["", $arpol[131], $arpol[132], $arpol[133], $arpol[134], $arpol[135], $arpol[136], $arpol[137], $arpol[138], $arpol[139], $arpol[140]] _
-		, ["", $arpol[141], $arpol[142], $arpol[143], $arpol[144], $arpol[145], $arpol[146], $arpol[147], $arpol[148], $arpol[149], $arpol[150]] _
-		, ["", $arpol[151], $arpol[152], $arpol[153], $arpol[154], $arpol[155], $arpol[156], $arpol[157], $arpol[158], $arpol[159], $arpol[160]] _
-		, ["", $arpol[161], $arpol[162], $arpol[163], $arpol[164], $arpol[165], $arpol[166], $arpol[167], $arpol[168], $arpol[169], $arpol[170]] _
-		, ["", $arpol[171], $arpol[172], $arpol[173], $arpol[174], $arpol[175], $arpol[176], $arpol[177], $arpol[178], $arpol[179], $arpol[180]] _
-		, ["", $arpol[181], $arpol[182], $arpol[183], $arpol[184], $arpol[185], $arpol[186], $arpol[187], $arpol[188], $arpol[189], $arpol[190]] _
-		, ["", $arpol[191], $arpol[192], $arpol[193], $arpol[194], $arpol[195], $arpol[196], $arpol[197], $arpol[198], $arpol[199], $arpol[200]]]
-
-
-ElseIf $policycount = 21 Then
-Global $aWords[21][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]] _
-		, ["", $arpol[41], $arpol[42], $arpol[43], $arpol[44], $arpol[45], $arpol[46], $arpol[47], $arpol[48], $arpol[49], $arpol[50]] _
-		, ["", $arpol[51], $arpol[52], $arpol[53], $arpol[54], $arpol[55], $arpol[56], $arpol[57], $arpol[58], $arpol[59], $arpol[60]] _
-		, ["", $arpol[61], $arpol[62], $arpol[63], $arpol[64], $arpol[65], $arpol[66], $arpol[67], $arpol[68], $arpol[69], $arpol[70]] _
-		, ["", $arpol[71], $arpol[72], $arpol[73], $arpol[74], $arpol[75], $arpol[76], $arpol[77], $arpol[78], $arpol[79], $arpol[80]] _
-		, ["", $arpol[81], $arpol[82], $arpol[83], $arpol[84], $arpol[85], $arpol[86], $arpol[87], $arpol[88], $arpol[89], $arpol[90]] _
-		, ["", $arpol[91], $arpol[92], $arpol[93], $arpol[94], $arpol[95], $arpol[96], $arpol[97], $arpol[98], $arpol[99], $arpol[100]] _
-		, ["", $arpol[101], $arpol[102], $arpol[103], $arpol[104], $arpol[105], $arpol[106], $arpol[107], $arpol[108], $arpol[109], $arpol[110]] _
-		, ["", $arpol[111], $arpol[112], $arpol[113], $arpol[114], $arpol[115], $arpol[116], $arpol[117], $arpol[118], $arpol[119], $arpol[120]] _
-		, ["", $arpol[121], $arpol[122], $arpol[123], $arpol[124], $arpol[125], $arpol[126], $arpol[127], $arpol[128], $arpol[129], $arpol[130]] _
-		, ["", $arpol[131], $arpol[132], $arpol[133], $arpol[134], $arpol[135], $arpol[136], $arpol[137], $arpol[138], $arpol[139], $arpol[140]] _
-		, ["", $arpol[141], $arpol[142], $arpol[143], $arpol[144], $arpol[145], $arpol[146], $arpol[147], $arpol[148], $arpol[149], $arpol[150]] _
-		, ["", $arpol[151], $arpol[152], $arpol[153], $arpol[154], $arpol[155], $arpol[156], $arpol[157], $arpol[158], $arpol[159], $arpol[160]] _
-		, ["", $arpol[161], $arpol[162], $arpol[163], $arpol[164], $arpol[165], $arpol[166], $arpol[167], $arpol[168], $arpol[169], $arpol[170]] _
-		, ["", $arpol[171], $arpol[172], $arpol[173], $arpol[174], $arpol[175], $arpol[176], $arpol[177], $arpol[178], $arpol[179], $arpol[180]] _
-		, ["", $arpol[181], $arpol[182], $arpol[183], $arpol[184], $arpol[185], $arpol[186], $arpol[187], $arpol[188], $arpol[189], $arpol[190]] _
-		, ["", $arpol[191], $arpol[192], $arpol[193], $arpol[194], $arpol[195], $arpol[196], $arpol[197], $arpol[198], $arpol[199], $arpol[200]] _
-		, ["", $arpol[201], $arpol[202], $arpol[203], $arpol[204], $arpol[205], $arpol[206], $arpol[207], $arpol[208], $arpol[209], $arpol[210]]]
-
-
-ElseIf $policycount = 22 Then
-Global $aWords[22][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]] _
-		, ["", $arpol[41], $arpol[42], $arpol[43], $arpol[44], $arpol[45], $arpol[46], $arpol[47], $arpol[48], $arpol[49], $arpol[50]] _
-		, ["", $arpol[51], $arpol[52], $arpol[53], $arpol[54], $arpol[55], $arpol[56], $arpol[57], $arpol[58], $arpol[59], $arpol[60]] _
-		, ["", $arpol[61], $arpol[62], $arpol[63], $arpol[64], $arpol[65], $arpol[66], $arpol[67], $arpol[68], $arpol[69], $arpol[70]] _
-		, ["", $arpol[71], $arpol[72], $arpol[73], $arpol[74], $arpol[75], $arpol[76], $arpol[77], $arpol[78], $arpol[79], $arpol[80]] _
-		, ["", $arpol[81], $arpol[82], $arpol[83], $arpol[84], $arpol[85], $arpol[86], $arpol[87], $arpol[88], $arpol[89], $arpol[90]] _
-		, ["", $arpol[91], $arpol[92], $arpol[93], $arpol[94], $arpol[95], $arpol[96], $arpol[97], $arpol[98], $arpol[99], $arpol[100]] _
-		, ["", $arpol[101], $arpol[102], $arpol[103], $arpol[104], $arpol[105], $arpol[106], $arpol[107], $arpol[108], $arpol[109], $arpol[110]] _
-		, ["", $arpol[111], $arpol[112], $arpol[113], $arpol[114], $arpol[115], $arpol[116], $arpol[117], $arpol[118], $arpol[119], $arpol[120]] _
-		, ["", $arpol[121], $arpol[122], $arpol[123], $arpol[124], $arpol[125], $arpol[126], $arpol[127], $arpol[128], $arpol[129], $arpol[130]] _
-		, ["", $arpol[131], $arpol[132], $arpol[133], $arpol[134], $arpol[135], $arpol[136], $arpol[137], $arpol[138], $arpol[139], $arpol[140]] _
-		, ["", $arpol[141], $arpol[142], $arpol[143], $arpol[144], $arpol[145], $arpol[146], $arpol[147], $arpol[148], $arpol[149], $arpol[150]] _
-		, ["", $arpol[151], $arpol[152], $arpol[153], $arpol[154], $arpol[155], $arpol[156], $arpol[157], $arpol[158], $arpol[159], $arpol[160]] _
-		, ["", $arpol[161], $arpol[162], $arpol[163], $arpol[164], $arpol[165], $arpol[166], $arpol[167], $arpol[168], $arpol[169], $arpol[170]] _
-		, ["", $arpol[171], $arpol[172], $arpol[173], $arpol[174], $arpol[175], $arpol[176], $arpol[177], $arpol[178], $arpol[179], $arpol[180]] _
-		, ["", $arpol[181], $arpol[182], $arpol[183], $arpol[184], $arpol[185], $arpol[186], $arpol[187], $arpol[188], $arpol[189], $arpol[190]] _
-		, ["", $arpol[191], $arpol[192], $arpol[193], $arpol[194], $arpol[195], $arpol[196], $arpol[197], $arpol[198], $arpol[199], $arpol[200]] _
-		, ["", $arpol[201], $arpol[202], $arpol[203], $arpol[204], $arpol[205], $arpol[206], $arpol[207], $arpol[208], $arpol[209], $arpol[210]] _
-		, ["", $arpol[211], $arpol[212], $arpol[213], $arpol[214], $arpol[215], $arpol[216], $arpol[217], $arpol[218], $arpol[219], $arpol[220]]]
-
-
-ElseIf $policycount = 23 Then
-Global $aWords[23][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]] _
-		, ["", $arpol[41], $arpol[42], $arpol[43], $arpol[44], $arpol[45], $arpol[46], $arpol[47], $arpol[48], $arpol[49], $arpol[50]] _
-		, ["", $arpol[51], $arpol[52], $arpol[53], $arpol[54], $arpol[55], $arpol[56], $arpol[57], $arpol[58], $arpol[59], $arpol[60]] _
-		, ["", $arpol[61], $arpol[62], $arpol[63], $arpol[64], $arpol[65], $arpol[66], $arpol[67], $arpol[68], $arpol[69], $arpol[70]] _
-		, ["", $arpol[71], $arpol[72], $arpol[73], $arpol[74], $arpol[75], $arpol[76], $arpol[77], $arpol[78], $arpol[79], $arpol[80]] _
-		, ["", $arpol[81], $arpol[82], $arpol[83], $arpol[84], $arpol[85], $arpol[86], $arpol[87], $arpol[88], $arpol[89], $arpol[90]] _
-		, ["", $arpol[91], $arpol[92], $arpol[93], $arpol[94], $arpol[95], $arpol[96], $arpol[97], $arpol[98], $arpol[99], $arpol[100]] _
-		, ["", $arpol[101], $arpol[102], $arpol[103], $arpol[104], $arpol[105], $arpol[106], $arpol[107], $arpol[108], $arpol[109], $arpol[110]] _
-		, ["", $arpol[111], $arpol[112], $arpol[113], $arpol[114], $arpol[115], $arpol[116], $arpol[117], $arpol[118], $arpol[119], $arpol[120]] _
-		, ["", $arpol[121], $arpol[122], $arpol[123], $arpol[124], $arpol[125], $arpol[126], $arpol[127], $arpol[128], $arpol[129], $arpol[130]] _
-		, ["", $arpol[131], $arpol[132], $arpol[133], $arpol[134], $arpol[135], $arpol[136], $arpol[137], $arpol[138], $arpol[139], $arpol[140]] _
-		, ["", $arpol[141], $arpol[142], $arpol[143], $arpol[144], $arpol[145], $arpol[146], $arpol[147], $arpol[148], $arpol[149], $arpol[150]] _
-		, ["", $arpol[151], $arpol[152], $arpol[153], $arpol[154], $arpol[155], $arpol[156], $arpol[157], $arpol[158], $arpol[159], $arpol[160]] _
-		, ["", $arpol[161], $arpol[162], $arpol[163], $arpol[164], $arpol[165], $arpol[166], $arpol[167], $arpol[168], $arpol[169], $arpol[170]] _
-		, ["", $arpol[171], $arpol[172], $arpol[173], $arpol[174], $arpol[175], $arpol[176], $arpol[177], $arpol[178], $arpol[179], $arpol[180]] _
-		, ["", $arpol[181], $arpol[182], $arpol[183], $arpol[184], $arpol[185], $arpol[186], $arpol[187], $arpol[188], $arpol[189], $arpol[190]] _
-		, ["", $arpol[191], $arpol[192], $arpol[193], $arpol[194], $arpol[195], $arpol[196], $arpol[197], $arpol[198], $arpol[199], $arpol[200]] _
-		, ["", $arpol[201], $arpol[202], $arpol[203], $arpol[204], $arpol[205], $arpol[206], $arpol[207], $arpol[208], $arpol[209], $arpol[210]] _
-		, ["", $arpol[211], $arpol[212], $arpol[213], $arpol[214], $arpol[215], $arpol[216], $arpol[217], $arpol[218], $arpol[219], $arpol[220]] _
-		, ["", $arpol[221], $arpol[222], $arpol[223], $arpol[224], $arpol[225], $arpol[226], $arpol[227], $arpol[228], $arpol[229], $arpol[230]]]
-
-
-ElseIf $policycount = 24 Then
-Global $aWords[24][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]] _
-		, ["", $arpol[41], $arpol[42], $arpol[43], $arpol[44], $arpol[45], $arpol[46], $arpol[47], $arpol[48], $arpol[49], $arpol[50]] _
-		, ["", $arpol[51], $arpol[52], $arpol[53], $arpol[54], $arpol[55], $arpol[56], $arpol[57], $arpol[58], $arpol[59], $arpol[60]] _
-		, ["", $arpol[61], $arpol[62], $arpol[63], $arpol[64], $arpol[65], $arpol[66], $arpol[67], $arpol[68], $arpol[69], $arpol[70]] _
-		, ["", $arpol[71], $arpol[72], $arpol[73], $arpol[74], $arpol[75], $arpol[76], $arpol[77], $arpol[78], $arpol[79], $arpol[80]] _
-		, ["", $arpol[81], $arpol[82], $arpol[83], $arpol[84], $arpol[85], $arpol[86], $arpol[87], $arpol[88], $arpol[89], $arpol[90]] _
-		, ["", $arpol[91], $arpol[92], $arpol[93], $arpol[94], $arpol[95], $arpol[96], $arpol[97], $arpol[98], $arpol[99], $arpol[100]] _
-		, ["", $arpol[101], $arpol[102], $arpol[103], $arpol[104], $arpol[105], $arpol[106], $arpol[107], $arpol[108], $arpol[109], $arpol[110]] _
-		, ["", $arpol[111], $arpol[112], $arpol[113], $arpol[114], $arpol[115], $arpol[116], $arpol[117], $arpol[118], $arpol[119], $arpol[120]] _
-		, ["", $arpol[121], $arpol[122], $arpol[123], $arpol[124], $arpol[125], $arpol[126], $arpol[127], $arpol[128], $arpol[129], $arpol[130]] _
-		, ["", $arpol[131], $arpol[132], $arpol[133], $arpol[134], $arpol[135], $arpol[136], $arpol[137], $arpol[138], $arpol[139], $arpol[140]] _
-		, ["", $arpol[141], $arpol[142], $arpol[143], $arpol[144], $arpol[145], $arpol[146], $arpol[147], $arpol[148], $arpol[149], $arpol[150]] _
-		, ["", $arpol[151], $arpol[152], $arpol[153], $arpol[154], $arpol[155], $arpol[156], $arpol[157], $arpol[158], $arpol[159], $arpol[160]] _
-		, ["", $arpol[161], $arpol[162], $arpol[163], $arpol[164], $arpol[165], $arpol[166], $arpol[167], $arpol[168], $arpol[169], $arpol[170]] _
-		, ["", $arpol[171], $arpol[172], $arpol[173], $arpol[174], $arpol[175], $arpol[176], $arpol[177], $arpol[178], $arpol[179], $arpol[180]] _
-		, ["", $arpol[181], $arpol[182], $arpol[183], $arpol[184], $arpol[185], $arpol[186], $arpol[187], $arpol[188], $arpol[189], $arpol[190]] _
-		, ["", $arpol[191], $arpol[192], $arpol[193], $arpol[194], $arpol[195], $arpol[196], $arpol[197], $arpol[198], $arpol[199], $arpol[200]] _
-		, ["", $arpol[201], $arpol[202], $arpol[203], $arpol[204], $arpol[205], $arpol[206], $arpol[207], $arpol[208], $arpol[209], $arpol[210]] _
-		, ["", $arpol[211], $arpol[212], $arpol[213], $arpol[214], $arpol[215], $arpol[216], $arpol[217], $arpol[218], $arpol[219], $arpol[220]] _
-		, ["", $arpol[221], $arpol[222], $arpol[223], $arpol[224], $arpol[225], $arpol[226], $arpol[227], $arpol[228], $arpol[229], $arpol[230]] _
-		, ["", $arpol[231], $arpol[232], $arpol[233], $arpol[234], $arpol[235], $arpol[236], $arpol[237], $arpol[238], $arpol[239], $arpol[240]]]
-
-
-ElseIf $policycount = 25 Then
-Global $aWords[25][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]] _
-		, ["", $arpol[41], $arpol[42], $arpol[43], $arpol[44], $arpol[45], $arpol[46], $arpol[47], $arpol[48], $arpol[49], $arpol[50]] _
-		, ["", $arpol[51], $arpol[52], $arpol[53], $arpol[54], $arpol[55], $arpol[56], $arpol[57], $arpol[58], $arpol[59], $arpol[60]] _
-		, ["", $arpol[61], $arpol[62], $arpol[63], $arpol[64], $arpol[65], $arpol[66], $arpol[67], $arpol[68], $arpol[69], $arpol[70]] _
-		, ["", $arpol[71], $arpol[72], $arpol[73], $arpol[74], $arpol[75], $arpol[76], $arpol[77], $arpol[78], $arpol[79], $arpol[80]] _
-		, ["", $arpol[81], $arpol[82], $arpol[83], $arpol[84], $arpol[85], $arpol[86], $arpol[87], $arpol[88], $arpol[89], $arpol[90]] _
-		, ["", $arpol[91], $arpol[92], $arpol[93], $arpol[94], $arpol[95], $arpol[96], $arpol[97], $arpol[98], $arpol[99], $arpol[100]] _
-		, ["", $arpol[101], $arpol[102], $arpol[103], $arpol[104], $arpol[105], $arpol[106], $arpol[107], $arpol[108], $arpol[109], $arpol[110]] _
-		, ["", $arpol[111], $arpol[112], $arpol[113], $arpol[114], $arpol[115], $arpol[116], $arpol[117], $arpol[118], $arpol[119], $arpol[120]] _
-		, ["", $arpol[121], $arpol[122], $arpol[123], $arpol[124], $arpol[125], $arpol[126], $arpol[127], $arpol[128], $arpol[129], $arpol[130]] _
-		, ["", $arpol[131], $arpol[132], $arpol[133], $arpol[134], $arpol[135], $arpol[136], $arpol[137], $arpol[138], $arpol[139], $arpol[140]] _
-		, ["", $arpol[141], $arpol[142], $arpol[143], $arpol[144], $arpol[145], $arpol[146], $arpol[147], $arpol[148], $arpol[149], $arpol[150]] _
-		, ["", $arpol[151], $arpol[152], $arpol[153], $arpol[154], $arpol[155], $arpol[156], $arpol[157], $arpol[158], $arpol[159], $arpol[160]] _
-		, ["", $arpol[161], $arpol[162], $arpol[163], $arpol[164], $arpol[165], $arpol[166], $arpol[167], $arpol[168], $arpol[169], $arpol[170]] _
-		, ["", $arpol[171], $arpol[172], $arpol[173], $arpol[174], $arpol[175], $arpol[176], $arpol[177], $arpol[178], $arpol[179], $arpol[180]] _
-		, ["", $arpol[181], $arpol[182], $arpol[183], $arpol[184], $arpol[185], $arpol[186], $arpol[187], $arpol[188], $arpol[189], $arpol[190]] _
-		, ["", $arpol[191], $arpol[192], $arpol[193], $arpol[194], $arpol[195], $arpol[196], $arpol[197], $arpol[198], $arpol[199], $arpol[200]] _
-		, ["", $arpol[201], $arpol[202], $arpol[203], $arpol[204], $arpol[205], $arpol[206], $arpol[207], $arpol[208], $arpol[209], $arpol[210]] _
-		, ["", $arpol[211], $arpol[212], $arpol[213], $arpol[214], $arpol[215], $arpol[216], $arpol[217], $arpol[218], $arpol[219], $arpol[220]] _
-		, ["", $arpol[221], $arpol[222], $arpol[223], $arpol[224], $arpol[225], $arpol[226], $arpol[227], $arpol[228], $arpol[229], $arpol[230]] _
-		, ["", $arpol[231], $arpol[232], $arpol[233], $arpol[234], $arpol[235], $arpol[236], $arpol[237], $arpol[238], $arpol[239], $arpol[240]] _
-		, ["", $arpol[241], $arpol[242], $arpol[243], $arpol[244], $arpol[245], $arpol[246], $arpol[247], $arpol[248], $arpol[249], $arpol[250]]]
-
-
-ElseIf $policycount = 26 Then
-Global $aWords[26][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]] _
-		, ["", $arpol[41], $arpol[42], $arpol[43], $arpol[44], $arpol[45], $arpol[46], $arpol[47], $arpol[48], $arpol[49], $arpol[50]] _
-		, ["", $arpol[51], $arpol[52], $arpol[53], $arpol[54], $arpol[55], $arpol[56], $arpol[57], $arpol[58], $arpol[59], $arpol[60]] _
-		, ["", $arpol[61], $arpol[62], $arpol[63], $arpol[64], $arpol[65], $arpol[66], $arpol[67], $arpol[68], $arpol[69], $arpol[70]] _
-		, ["", $arpol[71], $arpol[72], $arpol[73], $arpol[74], $arpol[75], $arpol[76], $arpol[77], $arpol[78], $arpol[79], $arpol[80]] _
-		, ["", $arpol[81], $arpol[82], $arpol[83], $arpol[84], $arpol[85], $arpol[86], $arpol[87], $arpol[88], $arpol[89], $arpol[90]] _
-		, ["", $arpol[91], $arpol[92], $arpol[93], $arpol[94], $arpol[95], $arpol[96], $arpol[97], $arpol[98], $arpol[99], $arpol[100]] _
-		, ["", $arpol[101], $arpol[102], $arpol[103], $arpol[104], $arpol[105], $arpol[106], $arpol[107], $arpol[108], $arpol[109], $arpol[110]] _
-		, ["", $arpol[111], $arpol[112], $arpol[113], $arpol[114], $arpol[115], $arpol[116], $arpol[117], $arpol[118], $arpol[119], $arpol[120]] _
-		, ["", $arpol[121], $arpol[122], $arpol[123], $arpol[124], $arpol[125], $arpol[126], $arpol[127], $arpol[128], $arpol[129], $arpol[130]] _
-		, ["", $arpol[131], $arpol[132], $arpol[133], $arpol[134], $arpol[135], $arpol[136], $arpol[137], $arpol[138], $arpol[139], $arpol[140]] _
-		, ["", $arpol[141], $arpol[142], $arpol[143], $arpol[144], $arpol[145], $arpol[146], $arpol[147], $arpol[148], $arpol[149], $arpol[150]] _
-		, ["", $arpol[151], $arpol[152], $arpol[153], $arpol[154], $arpol[155], $arpol[156], $arpol[157], $arpol[158], $arpol[159], $arpol[160]] _
-		, ["", $arpol[161], $arpol[162], $arpol[163], $arpol[164], $arpol[165], $arpol[166], $arpol[167], $arpol[168], $arpol[169], $arpol[170]] _
-		, ["", $arpol[171], $arpol[172], $arpol[173], $arpol[174], $arpol[175], $arpol[176], $arpol[177], $arpol[178], $arpol[179], $arpol[180]] _
-		, ["", $arpol[181], $arpol[182], $arpol[183], $arpol[184], $arpol[185], $arpol[186], $arpol[187], $arpol[188], $arpol[189], $arpol[190]] _
-		, ["", $arpol[191], $arpol[192], $arpol[193], $arpol[194], $arpol[195], $arpol[196], $arpol[197], $arpol[198], $arpol[199], $arpol[200]] _
-		, ["", $arpol[201], $arpol[202], $arpol[203], $arpol[204], $arpol[205], $arpol[206], $arpol[207], $arpol[208], $arpol[209], $arpol[210]] _
-		, ["", $arpol[211], $arpol[212], $arpol[213], $arpol[214], $arpol[215], $arpol[216], $arpol[217], $arpol[218], $arpol[219], $arpol[220]] _
-		, ["", $arpol[221], $arpol[222], $arpol[223], $arpol[224], $arpol[225], $arpol[226], $arpol[227], $arpol[228], $arpol[229], $arpol[230]] _
-		, ["", $arpol[231], $arpol[232], $arpol[233], $arpol[234], $arpol[235], $arpol[236], $arpol[237], $arpol[238], $arpol[239], $arpol[240]] _
-		, ["", $arpol[241], $arpol[242], $arpol[243], $arpol[244], $arpol[245], $arpol[246], $arpol[247], $arpol[248], $arpol[249], $arpol[250]] _
-		, ["", $arpol[251], $arpol[252], $arpol[253], $arpol[254], $arpol[255], $arpol[256], $arpol[257], $arpol[258], $arpol[259], $arpol[260]]]
-
-
-ElseIf $policycount = 27 Then
-Global $aWords[27][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]] _
-		, ["", $arpol[41], $arpol[42], $arpol[43], $arpol[44], $arpol[45], $arpol[46], $arpol[47], $arpol[48], $arpol[49], $arpol[50]] _
-		, ["", $arpol[51], $arpol[52], $arpol[53], $arpol[54], $arpol[55], $arpol[56], $arpol[57], $arpol[58], $arpol[59], $arpol[60]] _
-		, ["", $arpol[61], $arpol[62], $arpol[63], $arpol[64], $arpol[65], $arpol[66], $arpol[67], $arpol[68], $arpol[69], $arpol[70]] _
-		, ["", $arpol[71], $arpol[72], $arpol[73], $arpol[74], $arpol[75], $arpol[76], $arpol[77], $arpol[78], $arpol[79], $arpol[80]] _
-		, ["", $arpol[81], $arpol[82], $arpol[83], $arpol[84], $arpol[85], $arpol[86], $arpol[87], $arpol[88], $arpol[89], $arpol[90]] _
-		, ["", $arpol[91], $arpol[92], $arpol[93], $arpol[94], $arpol[95], $arpol[96], $arpol[97], $arpol[98], $arpol[99], $arpol[100]] _
-		, ["", $arpol[101], $arpol[102], $arpol[103], $arpol[104], $arpol[105], $arpol[106], $arpol[107], $arpol[108], $arpol[109], $arpol[110]] _
-		, ["", $arpol[111], $arpol[112], $arpol[113], $arpol[114], $arpol[115], $arpol[116], $arpol[117], $arpol[118], $arpol[119], $arpol[120]] _
-		, ["", $arpol[121], $arpol[122], $arpol[123], $arpol[124], $arpol[125], $arpol[126], $arpol[127], $arpol[128], $arpol[129], $arpol[130]] _
-		, ["", $arpol[131], $arpol[132], $arpol[133], $arpol[134], $arpol[135], $arpol[136], $arpol[137], $arpol[138], $arpol[139], $arpol[140]] _
-		, ["", $arpol[141], $arpol[142], $arpol[143], $arpol[144], $arpol[145], $arpol[146], $arpol[147], $arpol[148], $arpol[149], $arpol[150]] _
-		, ["", $arpol[151], $arpol[152], $arpol[153], $arpol[154], $arpol[155], $arpol[156], $arpol[157], $arpol[158], $arpol[159], $arpol[160]] _
-		, ["", $arpol[161], $arpol[162], $arpol[163], $arpol[164], $arpol[165], $arpol[166], $arpol[167], $arpol[168], $arpol[169], $arpol[170]] _
-		, ["", $arpol[171], $arpol[172], $arpol[173], $arpol[174], $arpol[175], $arpol[176], $arpol[177], $arpol[178], $arpol[179], $arpol[180]] _
-		, ["", $arpol[181], $arpol[182], $arpol[183], $arpol[184], $arpol[185], $arpol[186], $arpol[187], $arpol[188], $arpol[189], $arpol[190]] _
-		, ["", $arpol[191], $arpol[192], $arpol[193], $arpol[194], $arpol[195], $arpol[196], $arpol[197], $arpol[198], $arpol[199], $arpol[200]] _
-		, ["", $arpol[201], $arpol[202], $arpol[203], $arpol[204], $arpol[205], $arpol[206], $arpol[207], $arpol[208], $arpol[209], $arpol[210]] _
-		, ["", $arpol[211], $arpol[212], $arpol[213], $arpol[214], $arpol[215], $arpol[216], $arpol[217], $arpol[218], $arpol[219], $arpol[220]] _
-		, ["", $arpol[221], $arpol[222], $arpol[223], $arpol[224], $arpol[225], $arpol[226], $arpol[227], $arpol[228], $arpol[229], $arpol[230]] _
-		, ["", $arpol[231], $arpol[232], $arpol[233], $arpol[234], $arpol[235], $arpol[236], $arpol[237], $arpol[238], $arpol[239], $arpol[240]] _
-		, ["", $arpol[241], $arpol[242], $arpol[243], $arpol[244], $arpol[245], $arpol[246], $arpol[247], $arpol[248], $arpol[249], $arpol[250]] _
-		, ["", $arpol[251], $arpol[252], $arpol[253], $arpol[254], $arpol[255], $arpol[256], $arpol[257], $arpol[258], $arpol[259], $arpol[260]] _
-		, ["", $arpol[261], $arpol[262], $arpol[263], $arpol[264], $arpol[265], $arpol[266], $arpol[267], $arpol[268], $arpol[269], $arpol[270]]]
-
-
-ElseIf $policycount = 28 Then
-Global $aWords[28][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]] _
-		, ["", $arpol[41], $arpol[42], $arpol[43], $arpol[44], $arpol[45], $arpol[46], $arpol[47], $arpol[48], $arpol[49], $arpol[50]] _
-		, ["", $arpol[51], $arpol[52], $arpol[53], $arpol[54], $arpol[55], $arpol[56], $arpol[57], $arpol[58], $arpol[59], $arpol[60]] _
-		, ["", $arpol[61], $arpol[62], $arpol[63], $arpol[64], $arpol[65], $arpol[66], $arpol[67], $arpol[68], $arpol[69], $arpol[70]] _
-		, ["", $arpol[71], $arpol[72], $arpol[73], $arpol[74], $arpol[75], $arpol[76], $arpol[77], $arpol[78], $arpol[79], $arpol[80]] _
-		, ["", $arpol[81], $arpol[82], $arpol[83], $arpol[84], $arpol[85], $arpol[86], $arpol[87], $arpol[88], $arpol[89], $arpol[90]] _
-		, ["", $arpol[91], $arpol[92], $arpol[93], $arpol[94], $arpol[95], $arpol[96], $arpol[97], $arpol[98], $arpol[99], $arpol[100]] _
-		, ["", $arpol[101], $arpol[102], $arpol[103], $arpol[104], $arpol[105], $arpol[106], $arpol[107], $arpol[108], $arpol[109], $arpol[110]] _
-		, ["", $arpol[111], $arpol[112], $arpol[113], $arpol[114], $arpol[115], $arpol[116], $arpol[117], $arpol[118], $arpol[119], $arpol[120]] _
-		, ["", $arpol[121], $arpol[122], $arpol[123], $arpol[124], $arpol[125], $arpol[126], $arpol[127], $arpol[128], $arpol[129], $arpol[130]] _
-		, ["", $arpol[131], $arpol[132], $arpol[133], $arpol[134], $arpol[135], $arpol[136], $arpol[137], $arpol[138], $arpol[139], $arpol[140]] _
-		, ["", $arpol[141], $arpol[142], $arpol[143], $arpol[144], $arpol[145], $arpol[146], $arpol[147], $arpol[148], $arpol[149], $arpol[150]] _
-		, ["", $arpol[151], $arpol[152], $arpol[153], $arpol[154], $arpol[155], $arpol[156], $arpol[157], $arpol[158], $arpol[159], $arpol[160]] _
-		, ["", $arpol[161], $arpol[162], $arpol[163], $arpol[164], $arpol[165], $arpol[166], $arpol[167], $arpol[168], $arpol[169], $arpol[170]] _
-		, ["", $arpol[171], $arpol[172], $arpol[173], $arpol[174], $arpol[175], $arpol[176], $arpol[177], $arpol[178], $arpol[179], $arpol[180]] _
-		, ["", $arpol[181], $arpol[182], $arpol[183], $arpol[184], $arpol[185], $arpol[186], $arpol[187], $arpol[188], $arpol[189], $arpol[190]] _
-		, ["", $arpol[191], $arpol[192], $arpol[193], $arpol[194], $arpol[195], $arpol[196], $arpol[197], $arpol[198], $arpol[199], $arpol[200]] _
-		, ["", $arpol[201], $arpol[202], $arpol[203], $arpol[204], $arpol[205], $arpol[206], $arpol[207], $arpol[208], $arpol[209], $arpol[210]] _
-		, ["", $arpol[211], $arpol[212], $arpol[213], $arpol[214], $arpol[215], $arpol[216], $arpol[217], $arpol[218], $arpol[219], $arpol[220]] _
-		, ["", $arpol[221], $arpol[222], $arpol[223], $arpol[224], $arpol[225], $arpol[226], $arpol[227], $arpol[228], $arpol[229], $arpol[230]] _
-		, ["", $arpol[231], $arpol[232], $arpol[233], $arpol[234], $arpol[235], $arpol[236], $arpol[237], $arpol[238], $arpol[239], $arpol[240]] _
-		, ["", $arpol[241], $arpol[242], $arpol[243], $arpol[244], $arpol[245], $arpol[246], $arpol[247], $arpol[248], $arpol[249], $arpol[250]] _
-		, ["", $arpol[251], $arpol[252], $arpol[253], $arpol[254], $arpol[255], $arpol[256], $arpol[257], $arpol[258], $arpol[259], $arpol[260]] _
-		, ["", $arpol[261], $arpol[262], $arpol[263], $arpol[264], $arpol[265], $arpol[266], $arpol[267], $arpol[268], $arpol[269], $arpol[270]] _
-		, ["", $arpol[271], $arpol[272], $arpol[273], $arpol[274], $arpol[275], $arpol[276], $arpol[277], $arpol[278], $arpol[279], $arpol[280]]]
-
-
-ElseIf $policycount = 29 Then
-Global $aWords[29][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]] _
-		, ["", $arpol[41], $arpol[42], $arpol[43], $arpol[44], $arpol[45], $arpol[46], $arpol[47], $arpol[48], $arpol[49], $arpol[50]] _
-		, ["", $arpol[51], $arpol[52], $arpol[53], $arpol[54], $arpol[55], $arpol[56], $arpol[57], $arpol[58], $arpol[59], $arpol[60]] _
-		, ["", $arpol[61], $arpol[62], $arpol[63], $arpol[64], $arpol[65], $arpol[66], $arpol[67], $arpol[68], $arpol[69], $arpol[70]] _
-		, ["", $arpol[71], $arpol[72], $arpol[73], $arpol[74], $arpol[75], $arpol[76], $arpol[77], $arpol[78], $arpol[79], $arpol[80]] _
-		, ["", $arpol[81], $arpol[82], $arpol[83], $arpol[84], $arpol[85], $arpol[86], $arpol[87], $arpol[88], $arpol[89], $arpol[90]] _
-		, ["", $arpol[91], $arpol[92], $arpol[93], $arpol[94], $arpol[95], $arpol[96], $arpol[97], $arpol[98], $arpol[99], $arpol[100]] _
-		, ["", $arpol[101], $arpol[102], $arpol[103], $arpol[104], $arpol[105], $arpol[106], $arpol[107], $arpol[108], $arpol[109], $arpol[110]] _
-		, ["", $arpol[111], $arpol[112], $arpol[113], $arpol[114], $arpol[115], $arpol[116], $arpol[117], $arpol[118], $arpol[119], $arpol[120]] _
-		, ["", $arpol[121], $arpol[122], $arpol[123], $arpol[124], $arpol[125], $arpol[126], $arpol[127], $arpol[128], $arpol[129], $arpol[130]] _
-		, ["", $arpol[131], $arpol[132], $arpol[133], $arpol[134], $arpol[135], $arpol[136], $arpol[137], $arpol[138], $arpol[139], $arpol[140]] _
-		, ["", $arpol[141], $arpol[142], $arpol[143], $arpol[144], $arpol[145], $arpol[146], $arpol[147], $arpol[148], $arpol[149], $arpol[150]] _
-		, ["", $arpol[151], $arpol[152], $arpol[153], $arpol[154], $arpol[155], $arpol[156], $arpol[157], $arpol[158], $arpol[159], $arpol[160]] _
-		, ["", $arpol[161], $arpol[162], $arpol[163], $arpol[164], $arpol[165], $arpol[166], $arpol[167], $arpol[168], $arpol[169], $arpol[170]] _
-		, ["", $arpol[171], $arpol[172], $arpol[173], $arpol[174], $arpol[175], $arpol[176], $arpol[177], $arpol[178], $arpol[179], $arpol[180]] _
-		, ["", $arpol[181], $arpol[182], $arpol[183], $arpol[184], $arpol[185], $arpol[186], $arpol[187], $arpol[188], $arpol[189], $arpol[190]] _
-		, ["", $arpol[191], $arpol[192], $arpol[193], $arpol[194], $arpol[195], $arpol[196], $arpol[197], $arpol[198], $arpol[199], $arpol[200]] _
-		, ["", $arpol[201], $arpol[202], $arpol[203], $arpol[204], $arpol[205], $arpol[206], $arpol[207], $arpol[208], $arpol[209], $arpol[210]] _
-		, ["", $arpol[211], $arpol[212], $arpol[213], $arpol[214], $arpol[215], $arpol[216], $arpol[217], $arpol[218], $arpol[219], $arpol[220]] _
-		, ["", $arpol[221], $arpol[222], $arpol[223], $arpol[224], $arpol[225], $arpol[226], $arpol[227], $arpol[228], $arpol[229], $arpol[230]] _
-		, ["", $arpol[231], $arpol[232], $arpol[233], $arpol[234], $arpol[235], $arpol[236], $arpol[237], $arpol[238], $arpol[239], $arpol[240]] _
-		, ["", $arpol[241], $arpol[242], $arpol[243], $arpol[244], $arpol[245], $arpol[246], $arpol[247], $arpol[248], $arpol[249], $arpol[250]] _
-		, ["", $arpol[251], $arpol[252], $arpol[253], $arpol[254], $arpol[255], $arpol[256], $arpol[257], $arpol[258], $arpol[259], $arpol[260]] _
-		, ["", $arpol[261], $arpol[262], $arpol[263], $arpol[264], $arpol[265], $arpol[266], $arpol[267], $arpol[268], $arpol[269], $arpol[270]] _
-		, ["", $arpol[271], $arpol[272], $arpol[273], $arpol[274], $arpol[275], $arpol[276], $arpol[277], $arpol[278], $arpol[279], $arpol[280]] _
-		, ["", $arpol[281], $arpol[282], $arpol[283], $arpol[284], $arpol[285], $arpol[286], $arpol[287], $arpol[288], $arpol[289], $arpol[290]]]
-
-
-ElseIf $policycount = 30 Then
-Global $aWords[30][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]] _
-		, ["", $arpol[41], $arpol[42], $arpol[43], $arpol[44], $arpol[45], $arpol[46], $arpol[47], $arpol[48], $arpol[49], $arpol[50]] _
-		, ["", $arpol[51], $arpol[52], $arpol[53], $arpol[54], $arpol[55], $arpol[56], $arpol[57], $arpol[58], $arpol[59], $arpol[60]] _
-		, ["", $arpol[61], $arpol[62], $arpol[63], $arpol[64], $arpol[65], $arpol[66], $arpol[67], $arpol[68], $arpol[69], $arpol[70]] _
-		, ["", $arpol[71], $arpol[72], $arpol[73], $arpol[74], $arpol[75], $arpol[76], $arpol[77], $arpol[78], $arpol[79], $arpol[80]] _
-		, ["", $arpol[81], $arpol[82], $arpol[83], $arpol[84], $arpol[85], $arpol[86], $arpol[87], $arpol[88], $arpol[89], $arpol[90]] _
-		, ["", $arpol[91], $arpol[92], $arpol[93], $arpol[94], $arpol[95], $arpol[96], $arpol[97], $arpol[98], $arpol[99], $arpol[100]] _
-		, ["", $arpol[101], $arpol[102], $arpol[103], $arpol[104], $arpol[105], $arpol[106], $arpol[107], $arpol[108], $arpol[109], $arpol[110]] _
-		, ["", $arpol[111], $arpol[112], $arpol[113], $arpol[114], $arpol[115], $arpol[116], $arpol[117], $arpol[118], $arpol[119], $arpol[120]] _
-		, ["", $arpol[121], $arpol[122], $arpol[123], $arpol[124], $arpol[125], $arpol[126], $arpol[127], $arpol[128], $arpol[129], $arpol[130]] _
-		, ["", $arpol[131], $arpol[132], $arpol[133], $arpol[134], $arpol[135], $arpol[136], $arpol[137], $arpol[138], $arpol[139], $arpol[140]] _
-		, ["", $arpol[141], $arpol[142], $arpol[143], $arpol[144], $arpol[145], $arpol[146], $arpol[147], $arpol[148], $arpol[149], $arpol[150]] _
-		, ["", $arpol[151], $arpol[152], $arpol[153], $arpol[154], $arpol[155], $arpol[156], $arpol[157], $arpol[158], $arpol[159], $arpol[160]] _
-		, ["", $arpol[161], $arpol[162], $arpol[163], $arpol[164], $arpol[165], $arpol[166], $arpol[167], $arpol[168], $arpol[169], $arpol[170]] _
-		, ["", $arpol[171], $arpol[172], $arpol[173], $arpol[174], $arpol[175], $arpol[176], $arpol[177], $arpol[178], $arpol[179], $arpol[180]] _
-		, ["", $arpol[181], $arpol[182], $arpol[183], $arpol[184], $arpol[185], $arpol[186], $arpol[187], $arpol[188], $arpol[189], $arpol[190]] _
-		, ["", $arpol[191], $arpol[192], $arpol[193], $arpol[194], $arpol[195], $arpol[196], $arpol[197], $arpol[198], $arpol[199], $arpol[200]] _
-		, ["", $arpol[201], $arpol[202], $arpol[203], $arpol[204], $arpol[205], $arpol[206], $arpol[207], $arpol[208], $arpol[209], $arpol[210]] _
-		, ["", $arpol[211], $arpol[212], $arpol[213], $arpol[214], $arpol[215], $arpol[216], $arpol[217], $arpol[218], $arpol[219], $arpol[220]] _
-		, ["", $arpol[221], $arpol[222], $arpol[223], $arpol[224], $arpol[225], $arpol[226], $arpol[227], $arpol[228], $arpol[229], $arpol[230]] _
-		, ["", $arpol[231], $arpol[232], $arpol[233], $arpol[234], $arpol[235], $arpol[236], $arpol[237], $arpol[238], $arpol[239], $arpol[240]] _
-		, ["", $arpol[241], $arpol[242], $arpol[243], $arpol[244], $arpol[245], $arpol[246], $arpol[247], $arpol[248], $arpol[249], $arpol[250]] _
-		, ["", $arpol[251], $arpol[252], $arpol[253], $arpol[254], $arpol[255], $arpol[256], $arpol[257], $arpol[258], $arpol[259], $arpol[260]] _
-		, ["", $arpol[261], $arpol[262], $arpol[263], $arpol[264], $arpol[265], $arpol[266], $arpol[267], $arpol[268], $arpol[269], $arpol[270]] _
-		, ["", $arpol[271], $arpol[272], $arpol[273], $arpol[274], $arpol[275], $arpol[276], $arpol[277], $arpol[278], $arpol[279], $arpol[280]] _
-		, ["", $arpol[281], $arpol[282], $arpol[283], $arpol[284], $arpol[285], $arpol[286], $arpol[287], $arpol[288], $arpol[289], $arpol[290]] _
-		, ["", $arpol[291], $arpol[292], $arpol[293], $arpol[294], $arpol[295], $arpol[296], $arpol[297], $arpol[298], $arpol[299], $arpol[300]]]
-
-
-ElseIf $policycount = 31 Then
-Global $aWords[31][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]] _
-		, ["", $arpol[41], $arpol[42], $arpol[43], $arpol[44], $arpol[45], $arpol[46], $arpol[47], $arpol[48], $arpol[49], $arpol[50]] _
-		, ["", $arpol[51], $arpol[52], $arpol[53], $arpol[54], $arpol[55], $arpol[56], $arpol[57], $arpol[58], $arpol[59], $arpol[60]] _
-		, ["", $arpol[61], $arpol[62], $arpol[63], $arpol[64], $arpol[65], $arpol[66], $arpol[67], $arpol[68], $arpol[69], $arpol[70]] _
-		, ["", $arpol[71], $arpol[72], $arpol[73], $arpol[74], $arpol[75], $arpol[76], $arpol[77], $arpol[78], $arpol[79], $arpol[80]] _
-		, ["", $arpol[81], $arpol[82], $arpol[83], $arpol[84], $arpol[85], $arpol[86], $arpol[87], $arpol[88], $arpol[89], $arpol[90]] _
-		, ["", $arpol[91], $arpol[92], $arpol[93], $arpol[94], $arpol[95], $arpol[96], $arpol[97], $arpol[98], $arpol[99], $arpol[100]] _
-		, ["", $arpol[101], $arpol[102], $arpol[103], $arpol[104], $arpol[105], $arpol[106], $arpol[107], $arpol[108], $arpol[109], $arpol[110]] _
-		, ["", $arpol[111], $arpol[112], $arpol[113], $arpol[114], $arpol[115], $arpol[116], $arpol[117], $arpol[118], $arpol[119], $arpol[120]] _
-		, ["", $arpol[121], $arpol[122], $arpol[123], $arpol[124], $arpol[125], $arpol[126], $arpol[127], $arpol[128], $arpol[129], $arpol[130]] _
-		, ["", $arpol[131], $arpol[132], $arpol[133], $arpol[134], $arpol[135], $arpol[136], $arpol[137], $arpol[138], $arpol[139], $arpol[140]] _
-		, ["", $arpol[141], $arpol[142], $arpol[143], $arpol[144], $arpol[145], $arpol[146], $arpol[147], $arpol[148], $arpol[149], $arpol[150]] _
-		, ["", $arpol[151], $arpol[152], $arpol[153], $arpol[154], $arpol[155], $arpol[156], $arpol[157], $arpol[158], $arpol[159], $arpol[160]] _
-		, ["", $arpol[161], $arpol[162], $arpol[163], $arpol[164], $arpol[165], $arpol[166], $arpol[167], $arpol[168], $arpol[169], $arpol[170]] _
-		, ["", $arpol[171], $arpol[172], $arpol[173], $arpol[174], $arpol[175], $arpol[176], $arpol[177], $arpol[178], $arpol[179], $arpol[180]] _
-		, ["", $arpol[181], $arpol[182], $arpol[183], $arpol[184], $arpol[185], $arpol[186], $arpol[187], $arpol[188], $arpol[189], $arpol[190]] _
-		, ["", $arpol[191], $arpol[192], $arpol[193], $arpol[194], $arpol[195], $arpol[196], $arpol[197], $arpol[198], $arpol[199], $arpol[200]] _
-		, ["", $arpol[201], $arpol[202], $arpol[203], $arpol[204], $arpol[205], $arpol[206], $arpol[207], $arpol[208], $arpol[209], $arpol[210]] _
-		, ["", $arpol[211], $arpol[212], $arpol[213], $arpol[214], $arpol[215], $arpol[216], $arpol[217], $arpol[218], $arpol[219], $arpol[220]] _
-		, ["", $arpol[221], $arpol[222], $arpol[223], $arpol[224], $arpol[225], $arpol[226], $arpol[227], $arpol[228], $arpol[229], $arpol[230]] _
-		, ["", $arpol[231], $arpol[232], $arpol[233], $arpol[234], $arpol[235], $arpol[236], $arpol[237], $arpol[238], $arpol[239], $arpol[240]] _
-		, ["", $arpol[241], $arpol[242], $arpol[243], $arpol[244], $arpol[245], $arpol[246], $arpol[247], $arpol[248], $arpol[249], $arpol[250]] _
-		, ["", $arpol[251], $arpol[252], $arpol[253], $arpol[254], $arpol[255], $arpol[256], $arpol[257], $arpol[258], $arpol[259], $arpol[260]] _
-		, ["", $arpol[261], $arpol[262], $arpol[263], $arpol[264], $arpol[265], $arpol[266], $arpol[267], $arpol[268], $arpol[269], $arpol[270]] _
-		, ["", $arpol[271], $arpol[272], $arpol[273], $arpol[274], $arpol[275], $arpol[276], $arpol[277], $arpol[278], $arpol[279], $arpol[280]] _
-		, ["", $arpol[281], $arpol[282], $arpol[283], $arpol[284], $arpol[285], $arpol[286], $arpol[287], $arpol[288], $arpol[289], $arpol[290]] _
-		, ["", $arpol[291], $arpol[292], $arpol[293], $arpol[294], $arpol[295], $arpol[296], $arpol[297], $arpol[298], $arpol[299], $arpol[300]] _
-		, ["", $arpol[301], $arpol[302], $arpol[303], $arpol[304], $arpol[305], $arpol[306], $arpol[307], $arpol[308], $arpol[309], $arpol[310]]]
-
-
-ElseIf $policycount = 32 Then
-Global $aWords[32][11] = [["", $arpol[1], $arpol[2], $arpol[3], $arpol[4], $arpol[5], $arpol[6], $arpol[7], $arpol[8], $arpol[9], $arpol[10]] _
-		, ["", $arpol[11], $arpol[12], $arpol[13], $arpol[14], $arpol[15], $arpol[16], $arpol[17], $arpol[18], $arpol[19], $arpol[20]] _
-		, ["", $arpol[21], $arpol[22], $arpol[23], $arpol[24], $arpol[25], $arpol[26], $arpol[27], $arpol[28], $arpol[29], $arpol[30]] _
-		, ["", $arpol[31], $arpol[32], $arpol[33], $arpol[34], $arpol[35], $arpol[36], $arpol[37], $arpol[38], $arpol[39], $arpol[40]] _
-		, ["", $arpol[41], $arpol[42], $arpol[43], $arpol[44], $arpol[45], $arpol[46], $arpol[47], $arpol[48], $arpol[49], $arpol[50]] _
-		, ["", $arpol[51], $arpol[52], $arpol[53], $arpol[54], $arpol[55], $arpol[56], $arpol[57], $arpol[58], $arpol[59], $arpol[60]] _
-		, ["", $arpol[61], $arpol[62], $arpol[63], $arpol[64], $arpol[65], $arpol[66], $arpol[67], $arpol[68], $arpol[69], $arpol[70]] _
-		, ["", $arpol[71], $arpol[72], $arpol[73], $arpol[74], $arpol[75], $arpol[76], $arpol[77], $arpol[78], $arpol[79], $arpol[80]] _
-		, ["", $arpol[81], $arpol[82], $arpol[83], $arpol[84], $arpol[85], $arpol[86], $arpol[87], $arpol[88], $arpol[89], $arpol[90]] _
-		, ["", $arpol[91], $arpol[92], $arpol[93], $arpol[94], $arpol[95], $arpol[96], $arpol[97], $arpol[98], $arpol[99], $arpol[100]] _
-		, ["", $arpol[101], $arpol[102], $arpol[103], $arpol[104], $arpol[105], $arpol[106], $arpol[107], $arpol[108], $arpol[109], $arpol[110]] _
-		, ["", $arpol[111], $arpol[112], $arpol[113], $arpol[114], $arpol[115], $arpol[116], $arpol[117], $arpol[118], $arpol[119], $arpol[120]] _
-		, ["", $arpol[121], $arpol[122], $arpol[123], $arpol[124], $arpol[125], $arpol[126], $arpol[127], $arpol[128], $arpol[129], $arpol[130]] _
-		, ["", $arpol[131], $arpol[132], $arpol[133], $arpol[134], $arpol[135], $arpol[136], $arpol[137], $arpol[138], $arpol[139], $arpol[140]] _
-		, ["", $arpol[141], $arpol[142], $arpol[143], $arpol[144], $arpol[145], $arpol[146], $arpol[147], $arpol[148], $arpol[149], $arpol[150]] _
-		, ["", $arpol[151], $arpol[152], $arpol[153], $arpol[154], $arpol[155], $arpol[156], $arpol[157], $arpol[158], $arpol[159], $arpol[160]] _
-		, ["", $arpol[161], $arpol[162], $arpol[163], $arpol[164], $arpol[165], $arpol[166], $arpol[167], $arpol[168], $arpol[169], $arpol[170]] _
-		, ["", $arpol[171], $arpol[172], $arpol[173], $arpol[174], $arpol[175], $arpol[176], $arpol[177], $arpol[178], $arpol[179], $arpol[180]] _
-		, ["", $arpol[181], $arpol[182], $arpol[183], $arpol[184], $arpol[185], $arpol[186], $arpol[187], $arpol[188], $arpol[189], $arpol[190]] _
-		, ["", $arpol[191], $arpol[192], $arpol[193], $arpol[194], $arpol[195], $arpol[196], $arpol[197], $arpol[198], $arpol[199], $arpol[200]] _
-		, ["", $arpol[201], $arpol[202], $arpol[203], $arpol[204], $arpol[205], $arpol[206], $arpol[207], $arpol[208], $arpol[209], $arpol[210]] _
-		, ["", $arpol[211], $arpol[212], $arpol[213], $arpol[214], $arpol[215], $arpol[216], $arpol[217], $arpol[218], $arpol[219], $arpol[220]] _
-		, ["", $arpol[221], $arpol[222], $arpol[223], $arpol[224], $arpol[225], $arpol[226], $arpol[227], $arpol[228], $arpol[229], $arpol[230]] _
-		, ["", $arpol[231], $arpol[232], $arpol[233], $arpol[234], $arpol[235], $arpol[236], $arpol[237], $arpol[238], $arpol[239], $arpol[240]] _
-		, ["", $arpol[241], $arpol[242], $arpol[243], $arpol[244], $arpol[245], $arpol[246], $arpol[247], $arpol[248], $arpol[249], $arpol[250]] _
-		, ["", $arpol[251], $arpol[252], $arpol[253], $arpol[254], $arpol[255], $arpol[256], $arpol[257], $arpol[258], $arpol[259], $arpol[260]] _
-		, ["", $arpol[261], $arpol[262], $arpol[263], $arpol[264], $arpol[265], $arpol[266], $arpol[267], $arpol[268], $arpol[269], $arpol[270]] _
-		, ["", $arpol[271], $arpol[272], $arpol[273], $arpol[274], $arpol[275], $arpol[276], $arpol[277], $arpol[278], $arpol[279], $arpol[280]] _
-		, ["", $arpol[281], $arpol[282], $arpol[283], $arpol[284], $arpol[285], $arpol[286], $arpol[287], $arpol[288], $arpol[289], $arpol[290]] _
-		, ["", $arpol[291], $arpol[292], $arpol[293], $arpol[294], $arpol[295], $arpol[296], $arpol[297], $arpol[298], $arpol[299], $arpol[300]] _
-		, ["", $arpol[301], $arpol[302], $arpol[303], $arpol[304], $arpol[305], $arpol[306], $arpol[307], $arpol[308], $arpol[309], $arpol[310]] _
-		, ["", $arpol[311], $arpol[312], $arpol[313], $arpol[314], $arpol[315], $arpol[316], $arpol[317], $arpol[318], $arpol[319], $arpol[320]]]
-
-
-Else
-
-Global $aWords[1][11] = [["", "Error:", "Error " & $policycorrect & " &" & " Error " & $policycount, "", "", "", "", "", "", "", ""]]
-
-EndIf
-
-; TODO: Add more policy arrays later
-
-If $is24H2 = False Then
-
-For $i = 0 To UBound($aWords) -1
-	$iVersion = $aWords[$i][5]
-    Local $tUInt64  = DllStructCreate("uint64 value;"), _
-          $tVersion = DllStructCreate("word revision; word build; word minor; word major", DllStructGetPtr($tUInt64))
-
-    $tUInt64.value = $iVersion
-
-    Local $iVersionString = StringFormat('%i.%i.%i.%i', $tVersion.major, $tVersion.minor, $tVersion.build, $tVersion.revision)
-
-	$aWords[$i][5] = $iVersionString
-
-Next
-
-EndIf
-
+			$aWords[$i][5] = $iVersionString
+		Next
+	EndIf
 Endfunc
 
 
 VulnerableDriver()
 Func VulnerableDriver()
-Local $sVulnDriver = RegRead("HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\CI\Config", "VulnerableDriverBlocklistEnable")
-If $sVulnDriver = '1' Then
-	Global $sVulnDrivermsg = " Vulnerable Driver Blocklist  : Enabled"
-ElseIf $sVulnDriver = '0' Then
-	Global $sVulnDrivermsg = " Vulnerable Driver Blocklist  : Disabled"
-Else
-	Global $sVulnDrivermsg = " Vulnerable Driver Blocklist  : Unknown"
-EndIf
-
+	Local $sVulnDriver = RegRead("HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\CI\Config", "VulnerableDriverBlocklistEnable")
+	If $sVulnDriver = '1' Then
+		Global $sVulnDrivermsg = " Vulnerable Driver Blocklist  : Enabled"
+	ElseIf $sVulnDriver = '0' Then
+		Global $sVulnDrivermsg = " Vulnerable Driver Blocklist  : Disabled"
+	Else
+		Global $sVulnDrivermsg = " Vulnerable Driver Blocklist  : Unknown"
+	EndIf
 Endfunc
 
 
@@ -1104,23 +476,22 @@ Endfunc
 
 
 Func GetPolicyStatus_old()
-Local $o_CmdString1 = " Get-CimInstance -ClassName Win32_DeviceGuard -Namespace root\Microsoft\Windows\DeviceGuard | FL *codeintegrity*"
-Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
-ProcessWaitCloseEx($o_Pid)
-$out = StdoutRead($o_Pid)
+	Local $o_CmdString1 = " Get-CimInstance -ClassName Win32_DeviceGuard -Namespace root\Microsoft\Windows\DeviceGuard | FL *codeintegrity*"
+	Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
+	ProcessWaitCloseEx($o_Pid)
+	$out = StdoutRead($o_Pid)
 
-Local $topstatus1 = StringReplace($out, "[32;1m", "")
-Local $topstatus2 = StringReplace($topstatus1, "[0m", "")
-Local $topstatus3 = StringReplace($topstatus2, "UsermodeCodeIntegrityPolicyEnforcementStatus : 0", " App Control user mode policy : " & "Not Configured ")
-Local $topstatus4 = StringReplace($topstatus3, "UsermodeCodeIntegrityPolicyEnforcementStatus : 1", " App Control user mode policy : " & "Audit Mode     ")
-Local $topstatus5 = StringReplace($topstatus4, "UsermodeCodeIntegrityPolicyEnforcementStatus : 2", " App Control user mode policy : " & "Enforced Mode  ")
-Local $topstatus6 = StringReplace($topstatus5, "CodeIntegrityPolicyEnforcementStatus         : 0", "App Control policy           : " & "Not Configured ")
-Local $topstatus7 = StringReplace($topstatus6, "CodeIntegrityPolicyEnforcementStatus         : 1", "App Control policy           : " & "Audit Mode     ")
-Local $topstatus8 = StringReplace($topstatus7, "CodeIntegrityPolicyEnforcementStatus         : 2", "App Control policy           : " & "Enforced Mode  ")
-Global $topstatus9 = StringStripWS($topstatus8, $STR_STRIPLEADING + $STR_STRIPTRAILING)
+	Local $topstatus1 = StringReplace($out, "[32;1m", "")
+	Local $topstatus2 = StringReplace($topstatus1, "[0m", "")
+	Local $topstatus3 = StringReplace($topstatus2, "UsermodeCodeIntegrityPolicyEnforcementStatus : 0", " App Control user mode policy : " & "Not Configured ")
+	Local $topstatus4 = StringReplace($topstatus3, "UsermodeCodeIntegrityPolicyEnforcementStatus : 1", " App Control user mode policy : " & "Audit Mode     ")
+	Local $topstatus5 = StringReplace($topstatus4, "UsermodeCodeIntegrityPolicyEnforcementStatus : 2", " App Control user mode policy : " & "Enforced Mode  ")
+	Local $topstatus6 = StringReplace($topstatus5, "CodeIntegrityPolicyEnforcementStatus         : 0", "App Control policy           : " & "Not Configured ")
+	Local $topstatus7 = StringReplace($topstatus6, "CodeIntegrityPolicyEnforcementStatus         : 1", "App Control policy           : " & "Audit Mode     ")
+	Local $topstatus8 = StringReplace($topstatus7, "CodeIntegrityPolicyEnforcementStatus         : 2", "App Control policy           : " & "Enforced Mode  ")
+	Global $topstatus9 = StringStripWS($topstatus8, $STR_STRIPLEADING + $STR_STRIPTRAILING)
 
-;MsgBox($MB_SYSTEMMODAL, "Title", $topstatus9)
-
+	;MsgBox($MB_SYSTEMMODAL, "Title", $topstatus9)
 Endfunc
 
 
@@ -1179,13 +550,13 @@ $iCaptionHeight = $aGUI_Pos[3] - $aGUI_ClientSize[1]
 
 
 If $isDarkMode = True Then
-	_SetMenuBkColor(0x202020)
-	_SetMenuTextColor(0xe0e0e0)
-	_SetMenuSelectTextColor(0xe0e0e0)
+	_SetMenuBkColor(0x2c2c2c)
+	_SetMenuTextColor(0xffffff)
+	_SetMenuSelectTextColor(0xffffff)
 	_SetMenuSelectBkColor(0x404040)
 	_SetMenuSelectRectColor(0x404040)
-	_SetMenuIconBkColor(0x202020)
-	_SetMenuIconBkGrdColor(0x202020)
+	_SetMenuIconBkColor(0x2c2c2c)
+	_SetMenuIconBkGrdColor(0x2c2c2c)
 Else
 	_SetMenuBkColor($idLightBk)
 	_SetMenuTextColor(0x000000)
@@ -1196,41 +567,63 @@ Else
 	_SetMenuIconBkGrdColor($idLightBk)
 EndIf
 
+
 Local $iFileMenu5 = _GUICtrlCreateODTopMenu( "&File", $hGui )
 Local $iFileMenu4 = _GUICtrlCreateODTopMenu( "&Logs", $hGui )
 Local $iFileMenu3 = _GUICtrlCreateODTopMenu( "&Tools", $hGui )
-;Local $iFileMenu6 = _GUICtrlCreateODTopMenu( "&Status", $hGui )
 Local $iFileMenu = _GUICtrlCreateODTopMenu( "&Policy Actions", $hGui )
 Local $iFileMenu2 = _GUICtrlCreateODTopMenu( "&Filtering Options", $hGui )
 
-;Local $iFileMenu3 = _GUICtrlCreateODTopMenu( "&Tools", $hGui )
-;Local $iFileMenu4 = _GUICtrlCreateODTopMenu( "&Logs", $hGui )
-;_GUIMenuBarSetBkColor($hGui, 0x202020)
 
-$menuPolicyAddUpdate = _GUICtrlCreateODMenuItem( "Add or Update Policies", $iFileMenu)
-$menuPolicyRemove = _GUICtrlCreateODMenuItem( "Remove Checked Policies", $iFileMenu)
-$menuPolicyConvert = _GUICtrlCreateODMenuItem( "Convert XML to Binary", $iFileMenu)
-$menuPolicyRefresh = _GUICtrlCreateODMenuItem( "Refresh Policy List", $iFileMenu)
+If $isDarkMode = True Then
+	$menuPolicyAddUpdate = GUICtrlCreateMenuItem( "Add or Update Policies", $iFileMenu)
+	$menuPolicyRemove = GUICtrlCreateMenuItem( "Remove Checked Policies", $iFileMenu)
+	$menuPolicyConvert = GUICtrlCreateMenuItem( "Convert XML to Binary", $iFileMenu)
+	$menuPolicyRefresh = GUICtrlCreateMenuItem( "Refresh Policy List", $iFileMenu)
 
-$menuFilterEnforced = _GUICtrlCreateODMenuItem( "Enforced Policies", $iFileMenu2)
-$menuFilterBase = _GUICtrlCreateODMenuItem( "Base Policies", $iFileMenu2)
-$menuFilterSupp = _GUICtrlCreateODMenuItem( "Supplemental Policies", $iFileMenu2)
-$menuFilterSigned = _GUICtrlCreateODMenuItem( "Signed Policies", $iFileMenu2)
-; disable filtering by Signed policies on pre-24H2 systems
-If $is24H2 = False Then GUICtrlSetState($menuFilterSigned, $GUI_DISABLE)
-$menuFilterSystem = _GUICtrlCreateODMenuItem( "System Policies", $iFileMenu2)
-$menuEFIPartition = _GUICtrlCreateODMenuItem( "EFI Partition", $iFileMenu2)
-$menuFilterReset = _GUICtrlCreateODMenuItem( "Reset", $iFileMenu2)
+	$menuFilterEnforced = GUICtrlCreateMenuItem( "Enforced Policies", $iFileMenu2)
+	$menuFilterBase = GUICtrlCreateMenuItem( "Base Policies", $iFileMenu2)
+	$menuFilterSupp = GUICtrlCreateMenuItem( "Supplemental Policies", $iFileMenu2)
+	$menuFilterSigned = GUICtrlCreateMenuItem( "Signed Policies", $iFileMenu2)
+	; disable filtering by Signed policies on pre-24H2 systems
+	If $is24H2 = False Then GUICtrlSetState($menuFilterSigned, $GUI_DISABLE)
+	$menuFilterSystem = GUICtrlCreateMenuItem( "System Policies", $iFileMenu2)
+	$menuEFIPartition = GUICtrlCreateMenuItem( "EFI Partition", $iFileMenu2)
+	$menuFilterReset = GUICtrlCreateMenuItem( "Reset", $iFileMenu2)
 
-$menuAppWizard = _GUICtrlCreateODMenuItem( "App Control Wizard", $iFileMenu3)
-$menuMsInfo32 = _GUICtrlCreateODMenuItem( "System Information", $iFileMenu3)
+	$menuAppWizard = GUICtrlCreateMenuItem( "App Control Wizard", $iFileMenu3)
+	$menuMsInfo32 = GUICtrlCreateMenuItem( "System Information", $iFileMenu3)
 
-$menuLogsCI = _GUICtrlCreateODMenuItem( "Code Integrity", $iFileMenu4)
-$menuLogsScript = _GUICtrlCreateODMenuItem( "MSI and Script", $iFileMenu4)
+	$menuLogsCI = GUICtrlCreateMenuItem( "Code Integrity", $iFileMenu4)
+	$menuLogsScript = GUICtrlCreateMenuItem( "MSI and Script", $iFileMenu4)
 
-$menuExportCSV = _GUICtrlCreateODMenuItem( "Export as CSV", $iFileMenu5)
-$menuFileExit = _GUICtrlCreateODMenuItem( "Exit", $iFileMenu5)
+	$menuExportCSV = GUICtrlCreateMenuItem( "Export as CSV", $iFileMenu5)
+	$menuFileExit = GUICtrlCreateMenuItem( "Exit", $iFileMenu5)
+Else
+	$menuPolicyAddUpdate = _GUICtrlCreateODMenuItem( "Add or Update Policies", $iFileMenu)
+	$menuPolicyRemove = _GUICtrlCreateODMenuItem( "Remove Checked Policies", $iFileMenu)
+	$menuPolicyConvert = _GUICtrlCreateODMenuItem( "Convert XML to Binary", $iFileMenu)
+	$menuPolicyRefresh = _GUICtrlCreateODMenuItem( "Refresh Policy List", $iFileMenu)
 
+	$menuFilterEnforced = _GUICtrlCreateODMenuItem( "Enforced Policies", $iFileMenu2)
+	$menuFilterBase = _GUICtrlCreateODMenuItem( "Base Policies", $iFileMenu2)
+	$menuFilterSupp = _GUICtrlCreateODMenuItem( "Supplemental Policies", $iFileMenu2)
+	$menuFilterSigned = _GUICtrlCreateODMenuItem( "Signed Policies", $iFileMenu2)
+	; disable filtering by Signed policies on pre-24H2 systems
+	If $is24H2 = False Then GUICtrlSetState($menuFilterSigned, $GUI_DISABLE)
+	$menuFilterSystem = _GUICtrlCreateODMenuItem( "System Policies", $iFileMenu2)
+	$menuEFIPartition = _GUICtrlCreateODMenuItem( "EFI Partition", $iFileMenu2)
+	$menuFilterReset = _GUICtrlCreateODMenuItem( "Reset", $iFileMenu2)
+
+	$menuAppWizard = _GUICtrlCreateODMenuItem( "App Control Wizard", $iFileMenu3)
+	$menuMsInfo32 = _GUICtrlCreateODMenuItem( "System Information", $iFileMenu3)
+
+	$menuLogsCI = _GUICtrlCreateODMenuItem( "Code Integrity", $iFileMenu4)
+	$menuLogsScript = _GUICtrlCreateODMenuItem( "MSI and Script", $iFileMenu4)
+
+	$menuExportCSV = _GUICtrlCreateODMenuItem( "Export as CSV", $iFileMenu5)
+	$menuFileExit = _GUICtrlCreateODMenuItem( "Exit", $iFileMenu5)
+EndIf
 
 $aGUI_ClientSizeLV = WinGetClientSize($hGUI)
 
@@ -1275,19 +668,19 @@ _GUICtrlListView_AddArray($hListView,$aWords)
 
 HeaderFix()
 Func HeaderFix()
-If $isDarkMode = True Then
-;get handle to child SysHeader32 control of ListView
-Global $hHeader = HWnd(GUICtrlSendMsg($cListView, $LVM_GETHEADER, 0, 0))
-;Turn off theme for header
-DllCall("uxtheme.dll", "int", "SetWindowTheme", "hwnd", $hHeader, "wstr", "", "wstr", "")
-;subclass ListView to get at NM_CUSTOMDRAW notification sent to ListView
-Global $wProcNew = DllCallbackRegister("_LVWndProc", "ptr", "hwnd;uint;wparam;lparam")
-Global $wProcOld = _WinAPI_SetWindowLong($hListView, $GWL_WNDPROC, DllCallbackGetPtr($wProcNew))
+	If $isDarkMode = True Then
+		;get handle to child SysHeader32 control of ListView
+		Global $hHeader = HWnd(GUICtrlSendMsg($cListView, $LVM_GETHEADER, 0, 0))
+		;Turn off theme for header
+		DllCall("uxtheme.dll", "int", "SetWindowTheme", "hwnd", $hHeader, "wstr", "", "wstr", "")
+		;subclass ListView to get at NM_CUSTOMDRAW notification sent to ListView
+		Global $wProcNew = DllCallbackRegister("_LVWndProc", "ptr", "hwnd;uint;wparam;lparam")
+		Global $wProcOld = _WinAPI_SetWindowLong($hListView, $GWL_WNDPROC, DllCallbackGetPtr($wProcNew))
 
-;Optional: Flat Header - remove header 3D button effect
-Global $iStyle = _WinAPI_GetWindowLong($hHeader, $GWL_STYLE)
-_WinAPI_SetWindowLong($hHeader, $GWL_STYLE, BitOR($iStyle, $HDS_FLAT))
-EndIf
+		;Optional: Flat Header - remove header 3D button effect
+		Global $iStyle = _WinAPI_GetWindowLong($hHeader, $GWL_STYLE)
+		_WinAPI_SetWindowLong($hHeader, $GWL_STYLE, BitOR($iStyle, $HDS_FLAT))
+	EndIf
 Endfunc
 
 CountTotal()
@@ -1312,7 +705,7 @@ Endfunc
 
 ;UpdatePolicyStatus()
 Func UpdatePolicyStatus()
-Global $PolicyStatusInfo = " " & $topstatus9 & @CRLF & @CRLF & $sVulnDrivermsg & @CRLF & @CRLF & " Policies (total)      : " & $CountTotal & @CRLF & " Policies (enforced)   : " & $CountEnforced
+	Global $PolicyStatusInfo = " " & $topstatus9 & @CRLF & @CRLF & $sVulnDrivermsg & @CRLF & @CRLF & " Policies (total)      : " & $CountTotal & @CRLF & " Policies (enforced)   : " & $CountEnforced
 EndFunc
 
 $PolicyStatus = GUICtrlCreateLabel($PolicyStatusInfo, 100, 100, -1, -1, $WS_BORDER + $SS_LEFTNOWORDWRAP)
@@ -1391,6 +784,7 @@ GUIRegisterMsg($WM_MOVE, "WM_MOVE")
 GUIRegisterMsg($WM_DRAWITEM, "WM_DRAWITEM")
 
 GetPolicyStatus()
+
 
 GUISetState()
 
@@ -1577,7 +971,7 @@ Func LogsScript()
 Endfunc
 
 Func About()
-_ExtMsgBox (0 & ";" & @ScriptDir & "\AppControlManager.exe", 0, "App Control Policy Manager", " Version: " & $programversion & @CRLF & _
+	_ExtMsgBox (0 & ";" & @ScriptDir & "\AppControlManager.exe", 0, "App Control Policy Manager", " Version: " & $programversion & @CRLF & _
                             " Created by: " & "WildByDesign" & @CRLF & @CRLF & _
                             " This program is free and open source. " & @CRLF)
 Endfunc
@@ -1801,7 +1195,6 @@ Func UnmountEFI()
 	Else
 		DirRemove($sFilePath2)
 	EndIf
-
 Endfunc
 
 
@@ -1835,7 +1228,7 @@ Func EFIPartition()
 	EndIf
 
 
-; list EFI multi-policy
+	; list EFI multi-policy
 
 	Local $o_CmdString1 = " $MountPoint = $env:SystemDrive+'\EFIMount'; $MultiPolicyDir = $MountPoint+'\EFI\Microsoft\Boot\CiPolicies\Active'; $CIPFiles = Get-ChildItem $MultiPolicyDir\*.cip -Name; $CIPFiles"
 
@@ -1874,7 +1267,7 @@ Func EFIPartition()
 	Next
 
 
-; list EFI single policy
+	; list EFI single policy
 
 	Local $o_CmdString1 = " $MountPoint = $env:SystemDrive+'\EFIMount'; $SinglePolicyDir = $MountPoint+'\EFI\Microsoft\Boot'; $p7bFiles = Get-ChildItem $SinglePolicyDir\*.p7b -Name; $p7bFiles"
 
@@ -1914,7 +1307,7 @@ Func EFIPartition()
 	Next
 
 
-; EFI listview
+	; EFI listview
 
 	_GUICtrlListView_AddArray($hListView,$EFIarray)
 
