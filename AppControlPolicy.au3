@@ -6,14 +6,16 @@
 #AutoIt3Wrapper_Outfile_x64=AppControlPolicy.exe
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Policy Manager
-#AutoIt3Wrapper_Res_Fileversion=6.0.1.0
+#AutoIt3Wrapper_Res_Fileversion=6.0.2
 #AutoIt3Wrapper_Res_ProductName=AppControlPolicyManager
-#AutoIt3Wrapper_Res_ProductVersion=6.0.1
+#AutoIt3Wrapper_Res_ProductVersion=6.0.2
 #AutoIt3Wrapper_Res_LegalCopyright=@ 2025 WildByDesign
 #AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_Res_requestedExecutionLevel=requireAdministrator
 #AutoIt3Wrapper_Res_HiDpi=P
 #AutoIt3Wrapper_Res_Icon_Add=AppControl-App.ico
+#AutoIt3Wrapper_Res_Icon_Add=unchecked.ico
+#AutoIt3Wrapper_Res_Icon_Add=checked.ico
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 
 ; *** Start added Standard Include files by AutoIt3Wrapper ***
@@ -717,6 +719,11 @@ GUICtrlSetState($PolicyStatus, $GUI_HIDE)
 $aContent = _GUIListViewEx_ReadToArray($cListView)
 
 
+If $isDarkMode = True Then
+	;$hImageList = _GUICtrlListView_GetImageList($hListView, 2)
+EndIf
+
+
 ApplyThemeColor()
 Func ApplyThemeColor()
 	If $isDarkMode = True Then
@@ -726,6 +733,20 @@ Func ApplyThemeColor()
 		GuiLightmodeApply($hGUI)
 	EndIf
 Endfunc
+
+
+If $isDarkMode = True Then
+	$hImageList = _GUICtrlListView_GetImageList($hListView, 2)
+	_GUIImageList_Remove($hImageList)
+
+	If @Compiled = 0 Then
+		_GUIImageList_AddIcon($hImageList, "unchecked.ico")
+		_GUIImageList_AddIcon($hImageList, "checked.ico")
+	Else
+		_GUIImageList_AddIcon($hImageList, @ScriptFullPath, 3)
+		_GUIImageList_AddIcon($hImageList, @ScriptFullPath, 4)
+	EndIf
+EndIf
 
 
 ; Initiate ListView
