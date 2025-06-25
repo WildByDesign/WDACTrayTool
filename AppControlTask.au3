@@ -31,14 +31,16 @@
 #AutoIt3Wrapper_Icon=AppControl.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Task Manager
-#AutoIt3Wrapper_Res_Fileversion=6.0.0.0
-#AutoIt3Wrapper_Res_ProductVersion=6.0.0
+#AutoIt3Wrapper_Res_Fileversion=6.0.3
+#AutoIt3Wrapper_Res_ProductVersion=6.0.3
 #AutoIt3Wrapper_Res_ProductName=AppControlTaskManager
 #AutoIt3Wrapper_Outfile_x64=AppControlTask.exe
 #AutoIt3Wrapper_Res_LegalCopyright=@ 2025 WildByDesign
 #AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_Res_HiDpi=P
 #AutoIt3Wrapper_Res_Icon_Add=AppControl.ico
+#AutoIt3Wrapper_UseUpx=N
+#AutoIt3Wrapper_Compression=0
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 $sTitle = "AppControlTaskHelper"
 

@@ -4,8 +4,8 @@
 #AutoIt3Wrapper_Icon=AppControl.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Tray Tool
-#AutoIt3Wrapper_Res_Fileversion=6.0.0.0
-#AutoIt3Wrapper_Res_ProductVersion=6.0.0
+#AutoIt3Wrapper_Res_Fileversion=6.0.3
+#AutoIt3Wrapper_Res_ProductVersion=6.0.3
 #AutoIt3Wrapper_Res_ProductName=AppControlTrayTool
 #AutoIt3Wrapper_Outfile_x64=AppControlTray.exe
 #AutoIt3Wrapper_Res_LegalCopyright=@ 2025 WildByDesign
@@ -15,6 +15,8 @@
 #AutoIt3Wrapper_Res_Icon_Add=AppControl-Audit.ico
 #AutoIt3Wrapper_Res_Icon_Add=AppControl-Disabled.ico
 #AutoIt3Wrapper_Res_Icon_Add=AppControl-Blocked.ico
+#AutoIt3Wrapper_UseUpx=N
+#AutoIt3Wrapper_Compression=0
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #Region
 
@@ -28,11 +30,8 @@
 #include <StringConstants.au3>
 #EndRegion
 
-#include "includes\ExtMsgBox.au3"
-
-#include "includes\GuiCtrls_HiDpi.au3"
 #include "includes\GUIDarkMode_v0.02mod.au3"
-
+#include "includes\ExtMsgBox.au3"
 #include "includes\TaskScheduler.au3"
 
 If @Compiled = 0 Then
@@ -46,7 +45,7 @@ Opt("TrayMenuMode", 3)
 Opt("TrayAutoPause", 0)
 Opt("TrayOnEventMode", 1)
 
-Global $programVersion = "6.0"
+Global $programVersion = "6.0.3"
 ;Global $softName = "App Control Tray Tool"
 Global $trayIcon = "AppControl.ico"
 Global $idRegTitleKey = "App Control Tray Tool"
@@ -92,23 +91,27 @@ Else
 EndIf
 
 
+_ExtMsgBoxSet(Default)
+_ExtMsgBoxSet(1, 4, -1, -1, 10, $MainFont, 800)
+
+
 initial_set_theme()
 
 Func initial_set_theme()
     ;$isDarkMode = regread('HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize', 'AppsUseLightTheme') == 0 ? True : False
 	Local $isDarkMode = _WinAPI_ShouldAppsUseDarkMode()
 If $isDarkMode = True Then
-	_ExtMsgBoxSet(Default)
-	_ExtMsgBoxSet(1, 4, 0x202020, 0xFFFFFF, 10, $MainFont, 800)
+	;_ExtMsgBoxSet(Default)
+	;_ExtMsgBoxSet(1, 4, 0x202020, 0xFFFFFF, 10, $MainFont, 800)
 	$LastTheme = "Dark"
-	Local $hGUI = _HiDpi_GUICreate("Tray Tool", 100, 100)
+	Local $hGUI = GUICreate("Tray Tool", 100, 100)
     GuiDarkmodeApply($hGUI)
 Else
-	_ExtMsgBoxSet(Default)
-	_ExtMsgBoxSet(1, 4, -1, -1, 10, $MainFont, 800)
+	;_ExtMsgBoxSet(Default)
+	;_ExtMsgBoxSet(1, 4, -1, -1, 10, $MainFont, 800)
 	$LastTheme = "Light"
-	Local $hGUI = _HiDpi_GUICreate("Tray Tool", 100, 100)
-	Local $bEnableDarkTheme = False
+	Local $hGUI = GUICreate("Tray Tool", 100, 100)
+	;Local $bEnableDarkTheme = False
     GuiLightmodeApply($hGUI)
 EndIf
 Endfunc
@@ -141,19 +144,17 @@ Func query_theme_changes()
     $isDarkMode = regread('HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize', 'AppsUseLightTheme') == 0 ? True : False
 	;Local $isDarkMode = _WinAPI_ShouldAppsUseDarkMode() ; can't get this method working for subsequent theme changes
 If $isDarkMode = True And $LastTheme = "Light" Then
-	_ExtMsgBoxSet(Default)
-	;_ExtMsgBoxSet(1, 4, -1, -1, -1, "Consolas", 800, 800)
-	_ExtMsgBoxSet(1, 4, 0x202020, 0xFFFFFF, 10, "Cascadia Mono", 800)
+	;_ExtMsgBoxSet(Default)
+	;_ExtMsgBoxSet(1, 4, 0x202020, 0xFFFFFF, 10, "Cascadia Mono", 800)
 	$LastTheme = "Dark"
-	Local $hGUI = _HiDpi_GUICreate("Tray Tool", 100, 100)
+	Local $hGUI = GUICreate("Tray Tool", 100, 100)
     GuiDarkmodeApply($hGUI)
 ElseIf $isDarkMode <> True And $LastTheme = "Dark" Then
-	_ExtMsgBoxSet(Default)
-	;_ExtMsgBoxSet(1, 4, -1, -1, -1, "Consolas", 800, 800)
-	_ExtMsgBoxSet(1, 4, -1, -1, 10, "Cascadia Mono", 800)
+	;_ExtMsgBoxSet(Default)
+	;_ExtMsgBoxSet(1, 4, -1, -1, 10, "Cascadia Mono", 800)
 	$LastTheme = "Light"
-	Local $hGUI = _HiDpi_GUICreate("Tray Tool", 100, 100)
-	Local $bEnableDarkTheme = False
+	Local $hGUI = GUICreate("Tray Tool", 100, 100)
+	;Local $bEnableDarkTheme = False
     GuiLightmodeApply($hGUI)
 EndIf
 Endfunc

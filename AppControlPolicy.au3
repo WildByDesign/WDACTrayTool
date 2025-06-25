@@ -6,9 +6,9 @@
 #AutoIt3Wrapper_Outfile_x64=AppControlPolicy.exe
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Policy Manager
-#AutoIt3Wrapper_Res_Fileversion=6.0.2
+#AutoIt3Wrapper_Res_Fileversion=6.0.3
+#AutoIt3Wrapper_Res_ProductVersion=6.0.3
 #AutoIt3Wrapper_Res_ProductName=AppControlPolicyManager
-#AutoIt3Wrapper_Res_ProductVersion=6.0.2
 #AutoIt3Wrapper_Res_LegalCopyright=@ 2025 WildByDesign
 #AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_Res_requestedExecutionLevel=requireAdministrator
@@ -16,6 +16,8 @@
 #AutoIt3Wrapper_Res_Icon_Add=AppControl-App.ico
 #AutoIt3Wrapper_Res_Icon_Add=unchecked.ico
 #AutoIt3Wrapper_Res_Icon_Add=checked.ico
+#AutoIt3Wrapper_UseUpx=N
+#AutoIt3Wrapper_Compression=0
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 
 ; *** Start added Standard Include files by AutoIt3Wrapper ***
