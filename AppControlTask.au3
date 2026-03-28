@@ -1,47 +1,29 @@
+DllCall("user32.dll", "bool", "SetProcessDpiAwarenessContext", @AutoItX64 ? "int64" : "int", -2)
 
-; *** Start added Standard Include files by AutoIt3Wrapper ***
-#include <Date.au3>
-#include <FontConstants.au3>
-#include <WinAPISysInternals.au3>
-#include <WinAPIInternals.au3>
-#include <WindowsConstants.au3>
 #include <WinAPIFiles.au3>
-#include <AutoItConstants.au3>
-; *** End added Standard Include files by AutoIt3Wrapper ***
-#Region
-#include <MsgBoxConstants.au3>
-#include <String.au3>
-#include <Array.au3>
 #include <File.au3>
-#include <FileConstants.au3>
-#include <MsgBoxConstants.au3>
 #include <String.au3>
-#include <StringConstants.au3>
-#include <APISysConstants.au3>
-#EndRegion
-
 #include "includes\TaskScheduler.au3"
-
 #include "includes\libnotif.au3"
-#include "includes\GUIDarkMode_v0.02mod.au3"
+#include "includes\GUIDarkTheme.au3"
 
 #NoTrayIcon
 
-#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=AppControl.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Task Manager
-#AutoIt3Wrapper_Res_Fileversion=6.0.3
-#AutoIt3Wrapper_Res_ProductVersion=6.0.3
+#AutoIt3Wrapper_Res_Fileversion=6.1.0
+#AutoIt3Wrapper_Res_ProductVersion=6.1.0
 #AutoIt3Wrapper_Res_ProductName=AppControlTaskManager
 #AutoIt3Wrapper_Outfile_x64=AppControlTask.exe
-#AutoIt3Wrapper_Res_LegalCopyright=@ 2025 WildByDesign
+#AutoIt3Wrapper_Res_LegalCopyright=@ 2026 WildByDesign
 #AutoIt3Wrapper_Res_Language=1033
-#AutoIt3Wrapper_Res_HiDpi=P
+#AutoIt3Wrapper_Res_HiDpi=N
 #AutoIt3Wrapper_Res_Icon_Add=AppControl.ico
 #AutoIt3Wrapper_UseUpx=N
 #AutoIt3Wrapper_Compression=0
-#EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
+#AutoIt3Wrapper_Run_Au3Stripper=y
+
 $sTitle = "AppControlTaskHelper"
 
 
@@ -53,15 +35,6 @@ If $ifPS7Exists Then
 Else
 	Global $o_powershell = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -Command"
 EndIf
-
-
-If @Compiled = 0 Then
-	; System aware DPI awareness
-	;DllCall("User32.dll", "bool", "SetProcessDPIAware")
-	; Per-monitor V2 DPI awareness
-	DllCall("User32.dll", "bool", "SetProcessDpiAwarenessContext" , "HWND", "DPI_AWARENESS_CONTEXT" -4)
-EndIf
-
 
 Local Const $sSegUIVar = @WindowsDir & "\fonts\SegUIVar.ttf"
 Local $SegUIVarExists = FileExists($sSegUIVar)
@@ -91,7 +64,7 @@ _LibNotif_Config($LIBNOTIF_CFG_CLOSEBUTTON, True)
 
 $idLightBk = _WinAPI_SwitchColor(_WinAPI_GetSysColor($COLOR_BTNFACE))
 
-If $isDarkMode = True Then
+If __WinAPI_ShouldAppsUseDarkMode() = True Then
 	_LibNotif_Config($LIBNOTIF_CFG_BKCOLOR, 0x202020)
 	_LibNotif_Config($LIBNOTIF_CFG_TEXTCOLOR, 0xe0e0e0)
 Else
@@ -469,6 +442,7 @@ If $CmdLine[1] = "audit" Then
 EndIf
 
 If $CmdLine[1] = "refresh" Then
+	$iRegWrite = RegWrite("HKEY_CURRENT_USER\Software\AppControlTray", "Refresh", "REG_DWORD", "1")
 	$sText = "Your App Control policies have been refreshed." & @CRLF & @CRLF & "Code Integrity policy refresh finished successfully."
 	_LibNotif_Notif($sText)
 

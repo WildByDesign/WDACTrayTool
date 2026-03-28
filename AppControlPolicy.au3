@@ -1,76 +1,39 @@
+DllCall("user32.dll", "bool", "SetProcessDpiAwarenessContext", @AutoItX64 ? "int64" : "int", -2)
+
+#include <File.au3>
+#include <String.au3>
+#include "includes\ExtMsgBox.au3"
+#include "includes\GUIListViewEx.au3"
+#include "includes\XML.au3"
+#include "includes\_GUICtrlListView_SaveCSV.au3"
+#include "includes\libnotif.au3"
+#include "includes\GUIDarkTheme.au3"
+#include "includes\MsgBoxEx.au3"
+
 #NoTrayIcon
 #RequireAdmin
 
-#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=AppControl-App.ico
 #AutoIt3Wrapper_Outfile_x64=AppControlPolicy.exe
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Policy Manager
-#AutoIt3Wrapper_Res_Fileversion=6.0.3
-#AutoIt3Wrapper_Res_ProductVersion=6.0.3
+#AutoIt3Wrapper_Res_Fileversion=6.1.0
+#AutoIt3Wrapper_Res_ProductVersion=6.1.0
 #AutoIt3Wrapper_Res_ProductName=AppControlPolicyManager
-#AutoIt3Wrapper_Res_LegalCopyright=@ 2025 WildByDesign
+#AutoIt3Wrapper_Res_LegalCopyright=@ 2026 WildByDesign
 #AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_Res_requestedExecutionLevel=requireAdministrator
-#AutoIt3Wrapper_Res_HiDpi=P
+#AutoIt3Wrapper_Res_HiDpi=N
 #AutoIt3Wrapper_Res_Icon_Add=AppControl-App.ico
-#AutoIt3Wrapper_Res_Icon_Add=unchecked.ico
-#AutoIt3Wrapper_Res_Icon_Add=checked.ico
 #AutoIt3Wrapper_UseUpx=N
 #AutoIt3Wrapper_Compression=0
-#EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
+#AutoIt3Wrapper_Run_Au3Stripper=y
 
-; *** Start added Standard Include files by AutoIt3Wrapper ***
-#include <Array.au3>
-#include <GDIPlus.au3>
-#include <GuiListView.au3>
-#include <GuiStatusBar.au3>
-#include <GuiToolTip.au3>
-#include <File.au3>
-#include <String.au3>
-#include <WinAPIGdi.au3>
-#include <WinAPISysWin.au3>
-#include <WinAPISysInternals.au3>
-#include <WinAPIRes.au3>
-#include <WinAPIGdiDC.au3>
-#include <WinAPIInternals.au3>
-#include <WinAPIGdiInternals.au3>
-#include <WinAPITheme.au3>
-#include <APIResConstants.au3>
-#include <AutoItConstants.au3>
-#include <FileConstants.au3>
-#include <FontConstants.au3>
-#include <GUIConstantsEx.au3>
-#include <HeaderConstants.au3>
-#include <ListViewConstants.au3>
-#include <StaticConstants.au3>
-#include <StatusBarConstants.au3>
-#include <StringConstants.au3>
-#include <StructureConstants.au3>
-#include <WindowsConstants.au3>
-; *** End added Standard Include files by AutoIt3Wrapper ***
-
-#include "includes\ExtMsgBox.au3"
-#include "includes\GUIDarkMode_v0.02mod.au3"
-#include "includes\GUIListViewEx.au3"
-#include "includes\XML.au3"
-#include "includes\ModernMenuRaw.au3"
-#include "includes\_GUICtrlListView_SaveCSV.au3"
-#include "includes\libnotif.au3"
-
-Global $programversion = "6.0.1"
-
-If @Compiled = 0 Then
-	; System aware DPI awareness
-	;DllCall("User32.dll", "bool", "SetProcessDPIAware")
-	; Per-monitor V2 DPI awareness
-	DllCall("User32.dll", "bool", "SetProcessDpiAwarenessContext" , "HWND", "DPI_AWARENESS_CONTEXT" -4)
-EndIf
-
+Global $programversion = "6.1.0"
 
 isDarkMode()
 Func isDarkMode()
-	Global $isDarkMode = _WinAPI_ShouldAppsUseDarkMode()
+	Global $isDarkMode = __WinAPI_ShouldAppsUseDarkMode()
 Endfunc
 
 If $isDarkMode = True Then
@@ -98,7 +61,7 @@ Else
 	Global $g_iBkColor = $idLightBk, $g_iTextColor = 0x000000
 EndIf
 
-Global $g_hSizebox, $g_hOldProc, $g_hStatus, $g_iHeight, $g_aText, $g_aRatioW, $g_hDots
+Global $hStatus, $aText, $aRatioW
 
 
 Local Const $sSegUIVar = @WindowsDir & "\fonts\SegUIVar.ttf"
@@ -442,7 +405,7 @@ Func GetPolicyStatus()
 		$sVDriverStatus = "Vulnerable Driver Blocklist (Enabled)"
 	Else
 		$sVDriverStatus = "Vulnerable Driver Blocklist (undetermined)"
-	EndIf	
+	EndIf
 
 	Local $o_CmdString1 = " Get-CimInstance -ClassName Win32_DeviceGuard -Namespace root\Microsoft\Windows\DeviceGuard | FL *codeintegrity*"
 	Local $o_Pid = Run($o_powershell & $o_CmdString1 , "", @SW_Hide, $STDOUT_CHILD)
@@ -465,16 +428,17 @@ Func GetPolicyStatus()
 	; update status bar parts with current info
 	;
 	; update smart app control status
-	$g_aText[0] = $sSACStatus
+	$aText[0] = $sSACStatus
+	_GUICtrlStatusBar_SetText($hStatus, $aText[0], 0)
 	; update vulnerable driver blocklist status
-	$g_aText[1] = $sVDriverStatus
+	$aText[1] = $sVDriverStatus
+	_GUICtrlStatusBar_SetText($hStatus, $aText[1], 1)
 	; update user mode code integrity status
-	$g_aText[2] = $aPolicyStatus[2]
+	$aText[2] = $aPolicyStatus[2]
+	_GUICtrlStatusBar_SetText($hStatus, $aText[2], 2)
 	; update kernel mode code integrity status
-	$g_aText[3] = $aPolicyStatus[1]
-
-	; redraw status bar to update values
-	_WinAPI_RedrawWindow($g_hStatus)
+	$aText[3] = $aPolicyStatus[1]
+	_GUICtrlStatusBar_SetText($hStatus, $aText[3], 3)
 	
 Endfunc
 
@@ -498,51 +462,32 @@ Func GetPolicyStatus_old()
 	;MsgBox($MB_SYSTEMMODAL, "Title", $topstatus9)
 Endfunc
 
-
-_GDIPlus_Startup()
-
 ;Global $iW = @DesktopWidth - 420, $iH = $hGUIHeight + 200
 Global $iW = @DesktopWidth / 1.5, $iH = @DesktopHeight / 2
 $hGUI = GUICreate("App Control Policy Manager", $iW, $iH, -1, -1, $WS_SIZEBOX + $WS_SYSMENU + $WS_MINIMIZEBOX + $WS_MAXIMIZEBOX)
+GUISetFont(10)
 
 $aWinSize = WinGetClientSize($hGUI)
 GUISetIcon(@ScriptFullPath, 201)
 
 $SBARPartSize = $iW / 4
 
-;GUISetBkColor($g_iBkColor)
-
 ;-----------------
-; Create a sizebox window (Scrollbar class) BEFORE creating the StatusBar control
-$g_hSizebox = _WinAPI_CreateWindowEx(0, "Scrollbar", "", $WS_CHILD + $WS_VISIBLE + $SBS_SIZEBOX, _
-0, 0, 0, 0, $hGUI) ; $SBS_SIZEBOX or $SBS_SIZEGRIP
-
-; Subclass the sizebox (by changing the window procedure associated with the Scrollbar class)
-Local $hProc = DllCallbackRegister('ScrollbarProc', 'lresult', 'hwnd;uint;wparam;lparam')
-$g_hOldProc = _WinAPI_SetWindowLong($g_hSizebox, $GWL_WNDPROC, DllCallbackGetPtr($hProc))
-
-Local $hCursor = _WinAPI_LoadCursor(0, $OCR_SIZENWSE)
-_WinAPI_SetClassLongEx($g_hSizebox, -12, $hCursor) ; $GCL_HCURSOR = -12
-
-;$g_hBrush = _WinAPI_CreateSolidBrush($g_iBkColor)
-
-;-----------------
-$g_hStatus = _GUICtrlStatusBar_Create($hGUI, -1, "", $WS_CLIPSIBLINGS) ; ClipSiblings style +++
+$hStatus = _GUICtrlStatusBar_Create($hGUI, -1, "", $WS_CLIPSIBLINGS) ; ClipSiblings style +++
 Local $aParts[4] = [$SBARPartSize - 50, ($SBARPartSize * 2) - 50, ($SBARPartSize * 3) - 20, -1]
 If $aParts[Ubound($aParts) - 1] = -1 Then $aParts[Ubound($aParts) - 1] = $iW ; client width size
-_MyGUICtrlStatusBar_SetParts($g_hStatus, $aParts)
+_GUICtrlStatusBar_SetParts($hStatus, $aParts)
 
-Dim $g_aText[Ubound($aParts)] = ["  Smart App Control ()", "Vulnerable Driver Blocklist ()", "User Mode Code Integrity ()", "Kernel Mode Code Integrity ()"]
-Dim $g_aRatioW[Ubound($aParts)]
-For $i = 0 To UBound($g_aText) - 1
-_GUICtrlStatusBar_SetText($g_hStatus, "", $i, $SBT_OWNERDRAW + $SBT_NOBORDERS)
-; _GUICtrlStatusBar_SetText($g_hStatus, "", $i, $SBT_OWNERDRAW + $SBT_NOBORDERS) ; interesting ?
-$g_aRatioW[$i] = $aParts[$i] / $iW
+Dim $aText[Ubound($aParts)] = ["  Smart App Control ()", "Vulnerable Driver Blocklist ()", "User Mode Code Integrity ()", "Kernel Mode Code Integrity ()"]
+Dim $aRatioW[Ubound($aParts)]
+For $i = 0 To UBound($aText) - 1
+_GUICtrlStatusBar_SetText($hStatus, $aText[$i], $i)
+; _GUICtrlStatusBar_SetText($hStatus, "", $i, $SBT_OWNERDRAW + $SBT_NOBORDERS) ; interesting ?
+$aRatioW[$i] = $aParts[$i] / $iW
 Next
 
-
 ; get status bar height for GUI and listview height
-$StatusBarCtrlID = _WinAPI_GetDlgCtrlID($g_hStatus)
+$StatusBarCtrlID = _WinAPI_GetDlgCtrlID($hStatus)
 $aPos = ControlGetPos($hGUI, "", $StatusBarCtrlID)
 $StatusBarCtrlIDV = $aPos[1]
 $StatusBarCtrlIDHeight = $aPos[3]
@@ -553,81 +498,38 @@ $aGUI_ClientSize = WinGetClientSize($hGUI)
 $iCaptionHeight = $aGUI_Pos[3] - $aGUI_ClientSize[1]
 
 
-If $isDarkMode = True Then
-	_SetMenuBkColor(0x2c2c2c)
-	_SetMenuTextColor(0xffffff)
-	_SetMenuSelectTextColor(0xffffff)
-	_SetMenuSelectBkColor(0x404040)
-	_SetMenuSelectRectColor(0x404040)
-	_SetMenuIconBkColor(0x2c2c2c)
-	_SetMenuIconBkGrdColor(0x2c2c2c)
-Else
-	_SetMenuBkColor($idLightBk)
-	_SetMenuTextColor(0x000000)
-	_SetMenuSelectTextColor(0x000000)
-	_SetMenuSelectBkColor(0xf5cba7)
-	_SetMenuSelectRectColor(0xf5cba7)
-	_SetMenuIconBkColor($idLightBk)
-	_SetMenuIconBkGrdColor($idLightBk)
-EndIf
+Local $iFileMenu5 = GUICtrlCreateMenu("&File")
+Local $iFileMenu4 = GUICtrlCreateMenu("&Logs")
+Local $iFileMenu3 = GUICtrlCreateMenu("&Tools")
+Local $iFileMenu = GUICtrlCreateMenu("&Policy Actions")
+Local $iFileMenu2 = GUICtrlCreateMenu("&Filtering Options")
+Local $iFileMenu6 = GUICtrlCreateMenu("&Help")
 
+$menuPolicyAddUpdate = GUICtrlCreateMenuItem( "Add or Update Policies", $iFileMenu)
+$menuPolicyRemove = GUICtrlCreateMenuItem( "Remove Checked Policies", $iFileMenu)
+$menuPolicyConvert = GUICtrlCreateMenuItem( "Convert XML to Binary", $iFileMenu)
+$menuPolicyRefresh = GUICtrlCreateMenuItem( "Refresh Policy List", $iFileMenu)
 
-Local $iFileMenu5 = _GUICtrlCreateODTopMenu( "&File", $hGui )
-Local $iFileMenu4 = _GUICtrlCreateODTopMenu( "&Logs", $hGui )
-Local $iFileMenu3 = _GUICtrlCreateODTopMenu( "&Tools", $hGui )
-Local $iFileMenu = _GUICtrlCreateODTopMenu( "&Policy Actions", $hGui )
-Local $iFileMenu2 = _GUICtrlCreateODTopMenu( "&Filtering Options", $hGui )
+$menuFilterEnforced = GUICtrlCreateMenuItem( "Enforced Policies", $iFileMenu2)
+$menuFilterBase = GUICtrlCreateMenuItem( "Base Policies", $iFileMenu2)
+$menuFilterSupp = GUICtrlCreateMenuItem( "Supplemental Policies", $iFileMenu2)
+$menuFilterSigned = GUICtrlCreateMenuItem( "Signed Policies", $iFileMenu2)
+; disable filtering by Signed policies on pre-24H2 systems
+If $is24H2 = False Then GUICtrlSetState($menuFilterSigned, $GUI_DISABLE)
+$menuFilterSystem = GUICtrlCreateMenuItem( "System Policies", $iFileMenu2)
+$menuEFIPartition = GUICtrlCreateMenuItem( "EFI Partition", $iFileMenu2)
+$menuFilterReset = GUICtrlCreateMenuItem( "Reset", $iFileMenu2)
 
+$menuAppWizard = GUICtrlCreateMenuItem( "App Control Wizard", $iFileMenu3)
+$menuMsInfo32 = GUICtrlCreateMenuItem( "System Information", $iFileMenu3)
 
-If $isDarkMode = True Then
-	$menuPolicyAddUpdate = GUICtrlCreateMenuItem( "Add or Update Policies", $iFileMenu)
-	$menuPolicyRemove = GUICtrlCreateMenuItem( "Remove Checked Policies", $iFileMenu)
-	$menuPolicyConvert = GUICtrlCreateMenuItem( "Convert XML to Binary", $iFileMenu)
-	$menuPolicyRefresh = GUICtrlCreateMenuItem( "Refresh Policy List", $iFileMenu)
+$menuLogsCI = GUICtrlCreateMenuItem( "Code Integrity", $iFileMenu4)
+$menuLogsScript = GUICtrlCreateMenuItem( "MSI and Script", $iFileMenu4)
 
-	$menuFilterEnforced = GUICtrlCreateMenuItem( "Enforced Policies", $iFileMenu2)
-	$menuFilterBase = GUICtrlCreateMenuItem( "Base Policies", $iFileMenu2)
-	$menuFilterSupp = GUICtrlCreateMenuItem( "Supplemental Policies", $iFileMenu2)
-	$menuFilterSigned = GUICtrlCreateMenuItem( "Signed Policies", $iFileMenu2)
-	; disable filtering by Signed policies on pre-24H2 systems
-	If $is24H2 = False Then GUICtrlSetState($menuFilterSigned, $GUI_DISABLE)
-	$menuFilterSystem = GUICtrlCreateMenuItem( "System Policies", $iFileMenu2)
-	$menuEFIPartition = GUICtrlCreateMenuItem( "EFI Partition", $iFileMenu2)
-	$menuFilterReset = GUICtrlCreateMenuItem( "Reset", $iFileMenu2)
+$menuExportCSV = GUICtrlCreateMenuItem( "Export as CSV", $iFileMenu5)
+$menuFileExit = GUICtrlCreateMenuItem( "Exit", $iFileMenu5)
 
-	$menuAppWizard = GUICtrlCreateMenuItem( "App Control Wizard", $iFileMenu3)
-	$menuMsInfo32 = GUICtrlCreateMenuItem( "System Information", $iFileMenu3)
-
-	$menuLogsCI = GUICtrlCreateMenuItem( "Code Integrity", $iFileMenu4)
-	$menuLogsScript = GUICtrlCreateMenuItem( "MSI and Script", $iFileMenu4)
-
-	$menuExportCSV = GUICtrlCreateMenuItem( "Export as CSV", $iFileMenu5)
-	$menuFileExit = GUICtrlCreateMenuItem( "Exit", $iFileMenu5)
-Else
-	$menuPolicyAddUpdate = _GUICtrlCreateODMenuItem( "Add or Update Policies", $iFileMenu)
-	$menuPolicyRemove = _GUICtrlCreateODMenuItem( "Remove Checked Policies", $iFileMenu)
-	$menuPolicyConvert = _GUICtrlCreateODMenuItem( "Convert XML to Binary", $iFileMenu)
-	$menuPolicyRefresh = _GUICtrlCreateODMenuItem( "Refresh Policy List", $iFileMenu)
-
-	$menuFilterEnforced = _GUICtrlCreateODMenuItem( "Enforced Policies", $iFileMenu2)
-	$menuFilterBase = _GUICtrlCreateODMenuItem( "Base Policies", $iFileMenu2)
-	$menuFilterSupp = _GUICtrlCreateODMenuItem( "Supplemental Policies", $iFileMenu2)
-	$menuFilterSigned = _GUICtrlCreateODMenuItem( "Signed Policies", $iFileMenu2)
-	; disable filtering by Signed policies on pre-24H2 systems
-	If $is24H2 = False Then GUICtrlSetState($menuFilterSigned, $GUI_DISABLE)
-	$menuFilterSystem = _GUICtrlCreateODMenuItem( "System Policies", $iFileMenu2)
-	$menuEFIPartition = _GUICtrlCreateODMenuItem( "EFI Partition", $iFileMenu2)
-	$menuFilterReset = _GUICtrlCreateODMenuItem( "Reset", $iFileMenu2)
-
-	$menuAppWizard = _GUICtrlCreateODMenuItem( "App Control Wizard", $iFileMenu3)
-	$menuMsInfo32 = _GUICtrlCreateODMenuItem( "System Information", $iFileMenu3)
-
-	$menuLogsCI = _GUICtrlCreateODMenuItem( "Code Integrity", $iFileMenu4)
-	$menuLogsScript = _GUICtrlCreateODMenuItem( "MSI and Script", $iFileMenu4)
-
-	$menuExportCSV = _GUICtrlCreateODMenuItem( "Export as CSV", $iFileMenu5)
-	$menuFileExit = _GUICtrlCreateODMenuItem( "Exit", $iFileMenu5)
-EndIf
+$menuHelpAbout = GUICtrlCreateMenuItem( "About", $iFileMenu6)
 
 $aGUI_ClientSizeLV = WinGetClientSize($hGUI)
 
@@ -641,23 +543,6 @@ Else
 	GUISetFont(10, $FW_NORMAL, -1, "Consolas")
 EndIf
 
-
-Local $hToolTip2 = _GUIToolTip_Create(0)
-;_GUIToolTip_SetMaxTipWidth($hToolTip2, 400)
-
-If $isDarkMode = True Then
-	_WinAPI_SetWindowTheme($hToolTip2, "", "")
-	_GUIToolTip_SetTipBkColor($hToolTip2, 0x202020)
-	_GUIToolTip_SetTipTextColor($hToolTip2, 0xe0e0e0)
-Else
-	_WinAPI_SetWindowTheme($hToolTip2, "", "")
-	_GUIToolTip_SetTipBkColor($hToolTip2, 0xffffff)
-	_GUIToolTip_SetTipTextColor($hToolTip2, 0x000000)
-EndIf
-
-_GUIToolTip_SetMaxTipWidth($hToolTip2, 260)
-
-
 Local $exStyles = BitOR($LVS_EX_FULLROWSELECT, $LVS_EX_CHECKBOXES, $LVS_EX_DOUBLEBUFFER), $cListView
 $cListView = GUICtrlCreateListView("|Enforced|Policy Name|Policy ID|Base Policy ID|Version|On Disk|Signed Policy|System Policy|Authorized|Policy Options", 0, 0, $aWinSize[0], $aGUI_ClientSizeLV[1] - $StatusBarCtrlIDHeight)
 GUICtrlSetResizing(-1, $GUI_DOCKBORDERS)
@@ -666,26 +551,6 @@ $hListView = GUICtrlGetHandle($cListView)
 _GUICtrlListView_SetExtendedListViewStyle($hListView, $exStyles)
 
 _GUICtrlListView_AddArray($hListView,$aWords)
-
-
-; header text fix for dark mode
-
-HeaderFix()
-Func HeaderFix()
-	If $isDarkMode = True Then
-		;get handle to child SysHeader32 control of ListView
-		Global $hHeader = HWnd(GUICtrlSendMsg($cListView, $LVM_GETHEADER, 0, 0))
-		;Turn off theme for header
-		DllCall("uxtheme.dll", "int", "SetWindowTheme", "hwnd", $hHeader, "wstr", "", "wstr", "")
-		;subclass ListView to get at NM_CUSTOMDRAW notification sent to ListView
-		Global $wProcNew = DllCallbackRegister("_LVWndProc", "ptr", "hwnd;uint;wparam;lparam")
-		Global $wProcOld = _WinAPI_SetWindowLong($hListView, $GWL_WNDPROC, DllCallbackGetPtr($wProcNew))
-
-		;Optional: Flat Header - remove header 3D button effect
-		Global $iStyle = _WinAPI_GetWindowLong($hHeader, $GWL_STYLE)
-		_WinAPI_SetWindowLong($hHeader, $GWL_STYLE, BitOR($iStyle, $HDS_FLAT))
-	EndIf
-Endfunc
 
 CountTotal()
 Func CountTotal()
@@ -716,40 +581,18 @@ $PolicyStatus = GUICtrlCreateLabel($PolicyStatusInfo, 100, 100, -1, -1, $WS_BORD
 GUICtrlSetResizing(-1, $GUI_DOCKBOTTOM + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT + $GUI_DOCKLEFT)
 GUICtrlSetState($PolicyStatus, $GUI_HIDE)
 
-
 ; Read ListView content into an array
 $aContent = _GUIListViewEx_ReadToArray($cListView)
-
-
-If $isDarkMode = True Then
-	;$hImageList = _GUICtrlListView_GetImageList($hListView, 2)
-EndIf
-
 
 ApplyThemeColor()
 Func ApplyThemeColor()
 	If $isDarkMode = True Then
-		GuiDarkmodeApply($hGUI)
+		_GUIDarkTheme_ApplyDark($hGUI, False)
 	Else
 		Local $bEnableDarkTheme = False
-		GuiLightmodeApply($hGUI)
+		_GUIDarkTheme_ApplyLight($hGUI)
 	EndIf
 Endfunc
-
-
-If $isDarkMode = True Then
-	$hImageList = _GUICtrlListView_GetImageList($hListView, 2)
-	_GUIImageList_Remove($hImageList)
-
-	If @Compiled = 0 Then
-		_GUIImageList_AddIcon($hImageList, "unchecked.ico")
-		_GUIImageList_AddIcon($hImageList, "checked.ico")
-	Else
-		_GUIImageList_AddIcon($hImageList, @ScriptFullPath, 3)
-		_GUIImageList_AddIcon($hImageList, @ScriptFullPath, 4)
-	EndIf
-EndIf
-
 
 ; Initiate ListView
 $iLV_Index = _GUIListViewEx_Init($cListView, $aContent, 0, Default, False, 1)
@@ -790,97 +633,11 @@ Func hListViewRefreshColWidth()
 	GUICtrlSendMsg( $cListView, $WM_CHANGEUISTATE, 65537, 0 )
 EndFunc
 
-
-
-; to allow the setting of StatusBar BkColor at least under Windows 10
-_WinAPI_SetWindowTheme($g_hStatus, "", "")
-
-; Set status bar background color
-_GUICtrlStatusBar_SetBkColor($g_hStatus, $g_iBkColor)
-
-;$g_iHeight = _GUICtrlStatusBar_GetHeight($g_hStatus) + 3 ; change the constant (+3) if necessary
-$g_iHeight = $StatusBarCtrlIDHeight
-$g_hDots = CreateDots($g_iHeight, $g_iHeight, 0xFF000000 + $g_iBkColor, 0xFF000000 + $g_iTextColor)
-
-GUIRegisterMsg($WM_SIZE, "WM_SIZE")
-GUIRegisterMsg($WM_MOVE, "WM_MOVE")
-GUIRegisterMsg($WM_DRAWITEM, "WM_DRAWITEM")
-
 GetPolicyStatus()
-
 
 GUISetState()
 
-
-Example()
-
-Func Example()
-        Local $aWindow_Size = WinGetPos($hGUI)
-		ConsoleWrite('X position    = ' & $aWindow_Size[0] & @CRLF)
-		ConsoleWrite('Y position    = ' & $aWindow_Size[1] & @CRLF)
-        ConsoleWrite('Window Width  = ' & $aWindow_Size[2] & @CRLF)
-        ConsoleWrite('Window Height = ' & $aWindow_Size[3] & @CRLF)
-        Local $aWindowClientArea_Size = WinGetClientSize($hGUI)
-        ConsoleWrite('Window Client Area Width  = ' & $aWindowClientArea_Size[0] & @CRLF)
-        ConsoleWrite('Window Client Area Height = ' & $aWindowClientArea_Size[1] & @CRLF)
-EndFunc   ;==>Example
-
-#cs
-WinMove($hGUI,'',(@Desktopwidth - WinGetPos($hGUI)[2]) / 2,(@Desktopheight - WinGetPos($hGUI)[3]) / 2, @DesktopWidth - 420 + 6, $GUIHeightMeasured + 6)
-
-;Sleep(500)
-
-;GUISetState()
-
-GUISetStyle($GUI_SS_DEFAULT_GUI, -1)
-
-WinMove($hGUI,'', (@Desktopwidth - WinGetPos($hGUI)[2]) / 2,(@Desktopheight - WinGetPos($hGUI)[3]) / 2)
-
-GUISetState(@SW_SHOWMINIMIZED)
-GUISetState(@SW_RESTORE)
-
-WinSetOnTop($hGUI, "", $WINDOWS_ONTOP)
-WinSetOnTop($hGUI, "", $WINDOWS_NOONTOP)
-#ce
 WDACWizardExists()
-;GUISetState(@SW_SHOW)
-
-
-
-Func _LVWndProc($hWnd, $iMsg, $wParam, $lParam)
-    #forceref $hWnd, $iMsg, $wParam
-    If $iMsg = $WM_NOTIFY Then
-        Local $tNMHDR, $hWndFrom, $iCode, $iItem, $hDC
-        $tNMHDR = DllStructCreate($tagNMHDR, $lParam)
-        $hWndFrom = HWnd(DllStructGetData($tNMHDR, "hWndFrom"))
-        $iCode = DllStructGetData($tNMHDR, "Code")
-        ;Local $IDFrom = DllStructGetData($tNMHDR, "IDFrom")
-
-        Switch $hWndFrom
-            Case $hHeader
-                Switch $iCode
-                    Case $NM_CUSTOMDRAW
-                        Local $tCustDraw = DllStructCreate($tagNMLVCUSTOMDRAW, $lParam)
-                        Switch DllStructGetData($tCustDraw, "dwDrawStage")
-                            Case $CDDS_PREPAINT
-                                Return $CDRF_NOTIFYITEMDRAW
-                            Case $CDDS_ITEMPREPAINT
-                                $hDC = DllStructGetData($tCustDraw, "hDC")
-                                $iItem = DllStructGetData($tCustDraw, "dwItemSpec")
-                                DllCall($iDllGDI, "int", "SetTextColor", "handle", $hDC, "dword", $aCol[$iItem][0])
-                                DllCall($iDllGDI, "int", "SetBkColor", "handle", $hDC, "dword", $aCol[$iItem][1])
-                                Return $CDRF_NEWFONT
-                                Return $CDRF_SKIPDEFAULT
-                        EndSwitch
-                EndSwitch
-        EndSwitch
-    EndIf
-    ;pass the unhandled messages to default WindowProc
-    Local $aResult = DllCall($iDllUSER32, "lresult", "CallWindowProcW", "ptr", $wProcOld, _
-            "hwnd", $hWnd, "uint", $iMsg, "wparam", $wParam, "lparam", $lParam)
-    If @error Then Return -1
-    Return $aResult[0]
-EndFunc   ;==>_LVWndProc
 
 Func _BGR2RGB($iColor)
     ;Author: Wraithdu
@@ -994,10 +751,15 @@ Func LogsScript()
 Endfunc
 
 Func About()
-	_ExtMsgBox (0 & ";" & @ScriptDir & "\AppControlManager.exe", 0, "App Control Policy Manager", " Version: " & $programversion & @CRLF & _
-                            " Created by: " & "WildByDesign" & @CRLF & @CRLF & _
-                            " This program is free and open source. " & @CRLF)
-Endfunc
+	Local $sMsg
+	;_ExtMsgBox (0 & ";" & @ScriptDir & "\AppControlTray.exe", 0, "About App Control Tray Tool", " Version: " & $programVersion & @CRLF & _
+    ;                        " Created by: " & $createdBy & @CRLF & @CRLF & _
+    ;                        " This program is free and open source. " & @CRLF)
+	$sMsg = " Version: " & $programVersion & @CRLF
+	$sMsg &= " Created by: " & "WildByDesign" & @CRLF & @CRLF
+	$sMsg &= " This program is free and open source. " & @CRLF
+	MsgBoxEx(BitOR($MB_TOPMOST, $MB_OK), "App Control Program Manager", $sMsg)
+EndFunc
 
 Func CountChecked()
     Local $sReturn = ''
@@ -1338,118 +1100,6 @@ Func EFIPartition()
 	$aContent = _GUIListViewEx_ReadToArray($cListView)
 EndFunc
 
-
-;==============================================
-Func ScrollbarProc($hWnd, $iMsg, $wParam, $lParam) ; Andreik
-
-    If $hWnd = $g_hSizebox And $iMsg = $WM_PAINT Then
-        Local $tPAINTSTRUCT
-        Local $hDC = _WinAPI_BeginPaint($hWnd, $tPAINTSTRUCT)
-        Local $iWidth = DllStructGetData($tPAINTSTRUCT, 'rPaint', 3) - DllStructGetData($tPAINTSTRUCT, 'rPaint', 1)
-        Local $iHeight = DllStructGetData($tPAINTSTRUCT, 'rPaint', 4) - DllStructGetData($tPAINTSTRUCT, 'rPaint', 2)
-        Local $hGraphics = _GDIPlus_GraphicsCreateFromHDC($hDC)
-        _GDIPlus_GraphicsDrawImageRect($hGraphics, $g_hDots, 0, 0, $iWidth, $iHeight)
-        _GDIPlus_GraphicsDispose($hGraphics)
-        _WinAPI_EndPaint($hWnd, $tPAINTSTRUCT)
-        Return 0
-    EndIf
-    Return _WinAPI_CallWindowProc($g_hOldProc, $hWnd, $iMsg, $wParam, $lParam)
-EndFunc   ;==>ScrollbarProc
-
-;==============================================
-Func CreateDots($iWidth, $iHeight, $iBackgroundColor, $iDotsColor) ; Andreik
-
-    Local $iDotSize = Int($iHeight / 10)
-    Local $hBitmap = _GDIPlus_BitmapCreateFromScan0($iWidth, $iHeight)
-    Local $hGraphics = _GDIPlus_ImageGetGraphicsContext($hBitmap)
-    Local $hBrush = _GDIPlus_BrushCreateSolid($iDotsColor)
-    _GDIPlus_GraphicsClear($hGraphics, $iBackgroundColor)
-    Local $a[6][2] = [[2,6], [2,4], [2,2], [4,4], [4,2], [6,2]]
-    For $i = 0 To UBound($a) - 1
-        _GDIPlus_GraphicsFillRect($hGraphics, $iWidth - $iDotSize * $a[$i][0], $iHeight - $iDotSize * $a[$i][1], $iDotSize, $iDotSize, $hBrush)
-    Next
-    _GDIPlus_BrushDispose($hBrush)
-    _GDIPlus_GraphicsDispose($hGraphics)
-    Return $hBitmap
-EndFunc   ;==>CreateDots
-
-;==============================================
-Func _MyGUICtrlStatusBar_SetParts($hWnd, $aPartEdge) ; Pixelsearch
-
-    If Not IsArray($aPartEdge) Then Return False
-    Local $iParts = UBound($aPartEdge)
-    Local $tParts = DllStructCreate("int[" & $iParts & "]")
-    For $i = 0 To $iParts - 1
-        DllStructSetData($tParts, 1, $aPartEdge[$i], $i + 1)
-    Next
-    DllCall("user32.dll", "lresult", "SendMessageW", "hwnd", $hWnd, "uint", $SB_SETPARTS, "wparam", $iParts, "struct*", $tParts)
-    _GUICtrlStatusBar_Resize($hWnd)
-    Return True
-EndFunc   ;==>_MyGUICtrlStatusBar_SetParts
-
-;==============================================
-Func WM_SIZE($hWnd, $iMsg, $wParam, $lParam) ; Pixelsearch
-    #forceref $iMsg, $wParam, $lParam
-
-    If $hWnd = $hGUI Then
-        Local Static $bIsSizeBoxShown = True
-        Local $aSize = WinGetClientSize($hGUI)
-        Local $aGetParts = _GUICtrlStatusBar_GetParts($g_hStatus)
-        Local $aParts[$aGetParts[0]]
-        For $i = 0 To $aGetParts[0] - 1
-            $aParts[$i] = Int($aSize[0] * $g_aRatioW[$i])
-        Next
-        If BitAND(WinGetState($hGUI), $WIN_STATE_MAXIMIZED) Then
-            _GUICtrlStatusBar_SetParts($g_hStatus, $aParts) ; set parts until GUI right border
-            _WinAPI_ShowWindow($g_hSizebox, @SW_HIDE)
-            $bIsSizeBoxShown = False
-        Else
-            _MyGUICtrlStatusBar_SetParts($g_hStatus, $aParts) ; set parts as user scripted them
-            WinMove($g_hSizebox, "", $aSize[0] - $g_iHeight, $aSize[1] - $g_iHeight, $g_iHeight, $g_iHeight)
-            If Not $bIsSizeBoxShown Then
-                _WinAPI_ShowWindow($g_hSizebox, @SW_SHOW)
-                $bIsSizeBoxShown = True
-            EndIf
-        EndIf
-    EndIf
-    Return $GUI_RUNDEFMSG
-EndFunc   ;==>WM_SIZE
-
-;==============================================
-Func WM_MOVE($hWnd, $iMsg, $wParam, $lParam)
-    #forceref $iMsg, $wParam, $lParam
-
-    If $hWnd = $hGUI Then
-        _WinAPI_RedrawWindow($g_hSizebox)
-    EndIf
-    Return $GUI_RUNDEFMSG
-EndFunc   ;==>WM_MOVE
-
-;==============================================
-Func WM_DRAWITEM($hWnd, $iMsg, $wParam, $lParam) ; Kafu
-    #forceref $hWnd, $iMsg, $wParam
-
-    Local Static $tagDRAWITEM = "uint CtlType;uint CtlID;uint itemID;uint itemAction;uint itemState;hwnd hwndItem;handle hDC;long rcItem[4];ulong_ptr itemData"
-    Local $tDRAWITEM = DllStructCreate($tagDRAWITEM, $lParam)
-    If $tDRAWITEM.hwndItem = $g_hStatus Then
-
-		Local $itemID = $tDRAWITEM.itemID ; status bar part number (0, 1, ...)
-		Local $hDC = $tDRAWITEM.hDC
-		Local $tRect = DllStructCreate("long left;long top;long right;long bottom", DllStructGetPtr($tDRAWITEM, "rcItem"))
-		;_WinAPI_FillRect($hDC, DllStructGetPtr($tRect), $g_hBrush) ; backgound color
-		_WinAPI_SetTextColor($hDC, $g_iTextColor) ; text color
-		_WinAPI_SetBkMode($hDC, $TRANSPARENT)
-		DllStructSetData($tRect, "top", $tRect.top + 1)
-		DllStructSetData($tRect, "left", $tRect.left + 1)
-		_WinAPI_DrawText($hDC, $g_aText[$itemID], $tRect, $DT_LEFT)
-
-		Return $GUI_RUNDEFMSG
-	Else
-		_WM_DRAWITEM($hWnd, $iMsg, $wParam, $lParam)
-	EndIf
-EndFunc   ;==>WM_DRAWITEM
-
-
 Func ExportToCSV()
     Local Const $sMessage = "Choose a filename."
     Local $sFileSaveDialog = FileSaveDialog($sMessage, @DesktopDir, "Comma-separated values (*.csv)", $FD_PATHMUSTEXIST + $FD_PROMPTOVERWRITE, "ExportAppControl")
@@ -1481,7 +1131,9 @@ While 1
 			Case $hGUI
 				Switch $aMsg[0]
 					Case $GUI_EVENT_CLOSE
-						ExitLoop
+						_GUICtrlStatusBar_Destroy($hStatus)
+						GUIDelete($hGUI)
+						Exit
 					Case $menuPolicyAddUpdate
 						AddPolicies()
 					Case $menuPolicyConvert
@@ -1575,14 +1227,11 @@ While 1
 						Msinfo32()
 					Case $menuExportCSV
 						ExportToCSV()
+					Case $menuHelpAbout
+						About()
 					Case $menuFileExit
-						_GDIPlus_BitmapDispose($g_hDots)
-						_GUICtrlStatusBar_Destroy($g_hStatus)
-						_WinAPI_DestroyCursor($hCursor)
-						;_WinAPI_DeleteObject($g_hBrush)
-						_WinAPI_SetWindowLong($g_hSizebox, $GWL_WNDPROC, $g_hOldProc)
-						DllCallbackFree($hProc)
-						_GDIPlus_Shutdown()
+						_GUICtrlStatusBar_Destroy($hStatus)
+						GUIDelete($hGUI)
 						Exit
 				EndSwitch
 				;GUIDelete($hGui)
@@ -1594,32 +1243,15 @@ While 1
 					GUIDelete($hGUI2)
 					GUISetState(@SW_SHOW, $hGUI)
 					If $isDarkMode = True Then
-						If $wProcOld Then _WinAPI_SetWindowLong($hListView, $GWL_WNDPROC, $wProcOld)
-					; Delete callback function
-						If $wProcNew Then DllCallbackFree($wProcNew)
-						HeaderFix()
 						ApplyThemeColor()
 					Else
 					ApplyThemeColor()
 					EndIf
-					;HeaderFix()
 					;GUICtrlSetState($g_idButton2, $GUI_ENABLE) ; ... enable button (previously disabled)
 				;Case $g_idButton3
 					;MsgBox($MB_OK, "MsgBox", "Test from GUI 2")
 			EndSwitch
 		EndSwitch
-
-;_GUIListViewEx_EventMonitor()
-
-	;If $wProcOld Then _WinAPI_SetWindowLong($hListView, $GWL_WNDPROC, $wProcOld)
-	; Delete callback function
-	;If $wProcNew Then DllCallbackFree($wProcNew)
 WEnd
 
-_GDIPlus_BitmapDispose($g_hDots)
-_GUICtrlStatusBar_Destroy($g_hStatus)
-_WinAPI_DestroyCursor($hCursor)
-;_WinAPI_DeleteObject($g_hBrush)
-_WinAPI_SetWindowLong($g_hSizebox, $GWL_WNDPROC, $g_hOldProc)
-DllCallbackFree($hProc)
-_GDIPlus_Shutdown()
+_GUICtrlStatusBar_Destroy($hStatus)
