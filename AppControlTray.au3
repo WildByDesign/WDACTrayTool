@@ -1,51 +1,38 @@
+DllCall("user32.dll", "bool", "SetProcessDpiAwarenessContext", @AutoItX64 ? "int64" : "int", -2)
+
+#include <TrayConstants.au3>
+#include <Misc.au3>
+#include "includes\ExtMsgBox.au3"
+#include "includes\TaskScheduler.au3"
+#include "includes\MsgBoxEx.au3"
+
+#include <GUIConstantsEx.au3>
+
 #NoTrayIcon
 
-#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=AppControl.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Tray Tool
-#AutoIt3Wrapper_Res_Fileversion=6.0.3
-#AutoIt3Wrapper_Res_ProductVersion=6.0.3
+#AutoIt3Wrapper_Res_Fileversion=6.1.0
+#AutoIt3Wrapper_Res_ProductVersion=6.1.0
 #AutoIt3Wrapper_Res_ProductName=AppControlTrayTool
 #AutoIt3Wrapper_Outfile_x64=AppControlTray.exe
-#AutoIt3Wrapper_Res_LegalCopyright=@ 2025 WildByDesign
+#AutoIt3Wrapper_Res_LegalCopyright=@ 2026 WildByDesign
 #AutoIt3Wrapper_Res_Language=1033
-#AutoIt3Wrapper_Res_HiDpi=P
+#AutoIt3Wrapper_Res_HiDpi=N
 #AutoIt3Wrapper_Res_Icon_Add=AppControl.ico
 #AutoIt3Wrapper_Res_Icon_Add=AppControl-Audit.ico
 #AutoIt3Wrapper_Res_Icon_Add=AppControl-Disabled.ico
 #AutoIt3Wrapper_Res_Icon_Add=AppControl-Blocked.ico
 #AutoIt3Wrapper_UseUpx=N
 #AutoIt3Wrapper_Compression=0
-#EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
-#Region
-
-#include <MsgBoxConstants.au3>
-#include <TrayConstants.au3>
-#include <Array.au3>
-#include <Misc.au3>
-#include <FileConstants.au3>
-#include <File.au3>
-#include <String.au3>
-#include <StringConstants.au3>
-#EndRegion
-
-#include "includes\GUIDarkMode_v0.02mod.au3"
-#include "includes\ExtMsgBox.au3"
-#include "includes\TaskScheduler.au3"
-
-If @Compiled = 0 Then
-	; System aware DPI awareness
-	;DllCall("User32.dll", "bool", "SetProcessDPIAware")
-	; Per-monitor V2 DPI awareness
-	DllCall("User32.dll", "bool", "SetProcessDpiAwarenessContext" , "HWND", "DPI_AWARENESS_CONTEXT" -4)
-EndIf
+#AutoIt3Wrapper_Run_Au3Stripper=y
 
 Opt("TrayMenuMode", 3)
 Opt("TrayAutoPause", 0)
 Opt("TrayOnEventMode", 1)
 
-Global $programVersion = "6.0.3"
+Global $programVersion = "6.1.0"
 ;Global $softName = "App Control Tray Tool"
 Global $trayIcon = "AppControl.ico"
 Global $idRegTitleKey = "App Control Tray Tool"
@@ -55,6 +42,17 @@ Global $LastTheme = ""
 Global $tasksExist = ""
 
 Global $WDACWizardExists, $MainFont
+
+Global $hTrayHandle = WinGetHandle(_GetHwndFromPID(@AutoItPID))
+
+; #GLOBAL CONSTANTS# ============================================================================================================
+Global Const $APPMODE_DEFAULT = 0
+Global Const $APPMODE_ALLOWDARK = 1
+Global Const $APPMODE_FORCEDARK = 2
+Global Const $APPMODE_FORCELIGHT = 3
+Global Const $APPMODE_MAX = 4
+
+_WinAPI_SetPreferredAppMode($PAM_AllowDark)
 
 ;$softName = 'App Control Tray Tool' & @CRLF & @CRLF
 ;$softName &= 'App Control policy' & @TAB & @TAB
@@ -99,20 +97,19 @@ initial_set_theme()
 
 Func initial_set_theme()
     ;$isDarkMode = regread('HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize', 'AppsUseLightTheme') == 0 ? True : False
-	Local $isDarkMode = _WinAPI_ShouldAppsUseDarkMode()
+	Local $isDarkMode = __WinAPI_ShouldAppsUseDarkMode()
 If $isDarkMode = True Then
 	;_ExtMsgBoxSet(Default)
 	;_ExtMsgBoxSet(1, 4, 0x202020, 0xFFFFFF, 10, $MainFont, 800)
 	$LastTheme = "Dark"
-	Local $hGUI = GUICreate("Tray Tool", 100, 100)
-    GuiDarkmodeApply($hGUI)
+	__WinAPI_FlushMenuThemes()
+    __WinAPI_SetPreferredAppMode($APPMODE_FORCEDARK)
 Else
 	;_ExtMsgBoxSet(Default)
 	;_ExtMsgBoxSet(1, 4, -1, -1, 10, $MainFont, 800)
 	$LastTheme = "Light"
-	Local $hGUI = GUICreate("Tray Tool", 100, 100)
-	;Local $bEnableDarkTheme = False
-    GuiLightmodeApply($hGUI)
+	__WinAPI_FlushMenuThemes()
+    __WinAPI_SetPreferredAppMode($APPMODE_FORCELIGHT)
 EndIf
 Endfunc
 
@@ -121,21 +118,21 @@ ThemeChanges()
 
 Func ThemeChanges()
         ; Check for theme changes every 10 seconds
-		AdlibRegister("query_theme_changes", 10000)
+		;AdlibRegister("query_theme_changes", 10000)
 EndFunc
 
 PolicyChanges()
 
 Func PolicyChanges()
         ; Check for theme changes every 7 seconds
-		AdlibRegister("policy_changes", 7000)
+		;AdlibRegister("policy_changes", 7000)
 EndFunc
 
 
 BlockEvents()
 Func BlockEvents()
 	; Check for theme changes every 3 seconds
-	AdlibRegister("block_events", 3000)
+	;AdlibRegister("block_events", 3000)
 EndFunc
 
 ;query_theme_changes()
@@ -143,20 +140,19 @@ EndFunc
 Func query_theme_changes()
     $isDarkMode = regread('HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize', 'AppsUseLightTheme') == 0 ? True : False
 	;Local $isDarkMode = _WinAPI_ShouldAppsUseDarkMode() ; can't get this method working for subsequent theme changes
-If $isDarkMode = True And $LastTheme = "Light" Then
-	;_ExtMsgBoxSet(Default)
-	;_ExtMsgBoxSet(1, 4, 0x202020, 0xFFFFFF, 10, "Cascadia Mono", 800)
-	$LastTheme = "Dark"
-	Local $hGUI = GUICreate("Tray Tool", 100, 100)
-    GuiDarkmodeApply($hGUI)
-ElseIf $isDarkMode <> True And $LastTheme = "Dark" Then
-	;_ExtMsgBoxSet(Default)
-	;_ExtMsgBoxSet(1, 4, -1, -1, 10, "Cascadia Mono", 800)
-	$LastTheme = "Light"
-	Local $hGUI = GUICreate("Tray Tool", 100, 100)
-	;Local $bEnableDarkTheme = False
-    GuiLightmodeApply($hGUI)
-EndIf
+	If $isDarkMode = True And $LastTheme = "Light" Then
+		;_ExtMsgBoxSet(Default)
+		;_ExtMsgBoxSet(1, 4, 0x202020, 0xFFFFFF, 10, "Cascadia Mono", 800)
+		$LastTheme = "Dark"
+		__WinAPI_FlushMenuThemes()
+		__WinAPI_SetPreferredAppMode($APPMODE_FORCEDARK)
+	ElseIf $isDarkMode <> True And $LastTheme = "Dark" Then
+		;_ExtMsgBoxSet(Default)
+		;_ExtMsgBoxSet(1, 4, -1, -1, 10, "Cascadia Mono", 800)
+		$LastTheme = "Light"
+		__WinAPI_FlushMenuThemes()
+		__WinAPI_SetPreferredAppMode($APPMODE_FORCELIGHT)
+	EndIf
 Endfunc
 
 policy_changes()
@@ -203,6 +199,7 @@ Func policy_changes()
 			TraySetIcon(@ScriptFullPath, 203)
 		EndIf
 	EndIf
+	RegWrite("HKEY_CURRENT_USER\Software\AppControlTray", "Refresh", "REG_DWORD", "0")
 Endfunc
 
 
@@ -404,15 +401,15 @@ Func ProcessWaitCloseEx($iPID)
 	WEnd
 EndFunc
 
-
 TraySetOnEvent($TRAY_EVENT_PRIMARYUP, "TrayEvent")
 TraySetOnEvent($TRAY_EVENT_SECONDARYUP, "TrayEvent")
 
-
 While 1
-	Sleep(100)
+	If RegRead("HKEY_CURRENT_USER\Software\AppControlTray", "Refresh") = 1 Then policy_changes()
+	If RegRead("HKEY_CURRENT_USER\Software\AppControlTray", "Blocked") = 1 Then TraySetIcon(@ScriptFullPath, 204)
+	query_theme_changes()
+	Sleep(3000)
 WEnd
-
 
 Func TrayEvent()
 	Switch @TRAY_ID
@@ -438,7 +435,53 @@ EndFunc
 
 
 Func About()
-	_ExtMsgBox (0 & ";" & @ScriptDir & "\AppControlTray.exe", 0, "About App Control Tray Tool", " Version: " & $programVersion & @CRLF & _
-                            " Created by: " & $createdBy & @CRLF & @CRLF & _
-                            " This program is free and open source. " & @CRLF)
+	Local $sMsg
+	;_ExtMsgBox (0 & ";" & @ScriptDir & "\AppControlTray.exe", 0, "About App Control Tray Tool", " Version: " & $programVersion & @CRLF & _
+    ;                        " Created by: " & $createdBy & @CRLF & @CRLF & _
+    ;                        " This program is free and open source. " & @CRLF)
+	$sMsg = " Version: " & $programVersion & @CRLF
+	$sMsg &= " Created by: " & $createdBy & @CRLF & @CRLF
+	$sMsg &= " This program is free and open source. " & @CRLF
+	MsgBoxEx(BitOR($MB_TOPMOST, $MB_OK), "App Control Tray Tool", $sMsg)
 EndFunc
+
+Func _GetHwndFromPID($PID)
+	$hWnd = 0
+	$winlist = WinList()
+	Do
+		For $i = 1 To $winlist[0][0]
+			If $winlist[$i][0] <> "" Then
+				$iPID2 = WinGetProcess($winlist[$i][1])
+				If $iPID2 = $PID Then
+					$hWnd = $winlist[$i][1]
+					ExitLoop
+				EndIf
+			EndIf
+		Next
+	Until $hWnd <> 0
+	Return $hWnd
+EndFunc;==>_GetHwndFromPID
+
+Func __WinAPI_FlushMenuThemes()
+	If @OSBuild < 17763 Then Return SetError(-1, 0, False)
+	Local $fnFlushMenuThemes = 136
+	DllCall('uxtheme.dll', 'none', $fnFlushMenuThemes)
+	If @error Then Return SetError(@error, @extended, False)
+	Return True
+EndFunc   ;==>__WinAPI_FlushMenuThemes
+
+Func __WinAPI_ShouldAppsUseDarkMode()
+	If @OSBuild < 17763 Then Return SetError(-1, 0, False)
+	Local $fnShouldAppsUseDarkMode = 132
+	Local $aResult = DllCall('uxtheme.dll', 'bool', $fnShouldAppsUseDarkMode)
+	If @error Then Return SetError(@error, @extended, False)
+	Return $aResult[0]
+EndFunc   ;==>__WinAPI_ShouldAppsUseDarkMode
+
+Func __WinAPI_SetPreferredAppMode($PREFERREDAPPMODE)
+	If @OSBuild < 18362 Then Return SetError(-1, 0, False)
+	Local $fnSetPreferredAppMode = 135
+	Local $aResult = DllCall('uxtheme.dll', 'int', $fnSetPreferredAppMode, 'int', $PREFERREDAPPMODE)
+	If @error Then Return SetError(@error, @extended, '')
+	Return $aResult[0]
+EndFunc   ;==>__WinAPI_SetPreferredAppMode

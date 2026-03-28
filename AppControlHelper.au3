@@ -1,41 +1,30 @@
-#Region
-#include <AutoItConstants.au3>
+DllCall("user32.dll", "bool", "SetProcessDpiAwarenessContext", @AutoItX64 ? "int64" : "int", -2)
+
 #include <File.au3>
 #include <MsgBoxConstants.au3>
-#include <Array.au3>
-#include <FileConstants.au3>
 #include <String.au3>
-#include <StringConstants.au3>
-#EndRegion
-
 #include "includes\XML.au3"
 
 #NoTrayIcon
 #RequireAdmin
-#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
+
 #AutoIt3Wrapper_Icon=AppControl.ico
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=App Control Tray Helper
 #AutoIt3Wrapper_res_requestedExecutionLevel=requireAdministrator
-#AutoIt3Wrapper_Res_Fileversion=6.0.3
-#AutoIt3Wrapper_Res_ProductVersion=6.0.3
+#AutoIt3Wrapper_Res_Fileversion=6.1.0
+#AutoIt3Wrapper_Res_ProductVersion=6.1.0
 #AutoIt3Wrapper_Res_ProductName=AppControlTrayHelper
 #AutoIt3Wrapper_Outfile_x64=AppControlHelper.exe
-#AutoIt3Wrapper_Res_LegalCopyright=@ 2025 WildByDesign
+#AutoIt3Wrapper_Res_LegalCopyright=@ 2026 WildByDesign
 #AutoIt3Wrapper_Res_Language=1033
-#AutoIt3Wrapper_Res_HiDpi=P
+#AutoIt3Wrapper_Res_HiDpi=N
 #AutoIt3Wrapper_Res_Icon_Add=AppControl.ico
 #AutoIt3Wrapper_UseUpx=N
 #AutoIt3Wrapper_Compression=0
-#EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
-$sTitle = "AppControlTrayHelper"
+#AutoIt3Wrapper_Run_Au3Stripper=y
 
-If @Compiled = 0 Then
-	; System aware DPI awareness
-	;DllCall("User32.dll", "bool", "SetProcessDPIAware")
-	; Per-monitor V2 DPI awareness
-	DllCall("User32.dll", "bool", "SetProcessDpiAwarenessContext" , "HWND", "DPI_AWARENESS_CONTEXT" -4)
-EndIf
+$sTitle = "AppControlTrayHelper"
 
 Global $isDarkMode = is_app_dark_theme()
 

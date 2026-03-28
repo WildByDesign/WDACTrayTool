@@ -28,6 +28,7 @@
 #include <GuiListView.au3>
 #include <GUIImageList.au3>
 #include <WinAPISys.au3>
+#include <WinAPISysWin.au3>
 
 ; #GLOBAL VARIABLES# =================================================================================================
 ; Array to hold registered ListView data
